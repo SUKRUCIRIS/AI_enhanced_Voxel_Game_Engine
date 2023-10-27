@@ -165,7 +165,7 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 	{
 		objects = create_DA(sizeof(object *));
 	}
-	pushback_DA(objects, obj);
+	pushback_DA(objects, &obj);
 	return obj;
 }
 
@@ -186,11 +186,11 @@ void delete_object(object *obj)
 	{
 		remove_DA(objects, get_index_DA(objects, &obj));
 		delete_physic(obj->phy);
-		glDeleteVertexArrays(1, &(obj->VAO));
-		glDeleteBuffers(1, &(obj->VBO));
-		glDeleteBuffers(1, &(obj->EBO));
 		if (obj->copy == 0)
 		{
+			glDeleteVertexArrays(1, &(obj->VAO));
+			glDeleteBuffers(1, &(obj->VBO));
+			glDeleteBuffers(1, &(obj->EBO));
 			delete_DA(obj->programs);
 			delete_DA(obj->uniforms);
 		}
@@ -250,6 +250,6 @@ object *create_object_copy(object *obj, unsigned char has_physics)
 	{
 		objects = create_DA(sizeof(object *));
 	}
-	pushback_DA(objects, obj_new);
+	pushback_DA(objects, &obj_new);
 	return obj_new;
 }

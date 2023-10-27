@@ -1,6 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "../third_party/stb/stb_image.h"
-#include "../third_party/opengl/include/glad/glad.h"
+#include "../../third_party/stb/stb_image.h"
+#include "../../third_party/opengl/include/glad/glad.h"
 #include "texture.h"
 
 struct texture

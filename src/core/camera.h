@@ -1,6 +1,6 @@
 #pragma once
-#include "../third_party/cglm/include/cglm/cglm.h"
-#include "../third_party/glfw/include/GLFW/glfw3.h"
+#include "../../third_party/cglm/include/cglm/cglm.h"
+#include "../../third_party/glfw/include/GLFW/glfw3.h"
 
 typedef struct camera
 {

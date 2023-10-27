@@ -1,9 +1,9 @@
-#include "window.h"
-#include "shaders.h"
-#include "object.h"
-#include "texture.h"
-#include "camera.h"
-#include "physics.h"
+#include "./core/window.h"
+#include "./core/shaders.h"
+#include "./core/object.h"
+#include "./core/texture.h"
+#include "./core/camera.h"
+#include "./core/physics.h"
 #include <time.h>
 #include "../third_party/cglm/include/cglm/cglm.h"
 
@@ -72,6 +72,9 @@ int main(void)
 	delete_object(cube);
 	delete_object(cube2);
 	delete_texture(text);
+
+	delete_all_physic();
+	delete_all_object();
 	destroy_programs();
 	delete_window(window);
 
