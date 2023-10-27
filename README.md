@@ -17,5 +17,5 @@ make -j`nproc`
 compile msvc:
 
 ```
-msbuild opengl_voxel_gsu.sln
+msbuild opengl_voxel_gsu.sln /p:Configuration=Release /p:Platform=x64
 ```

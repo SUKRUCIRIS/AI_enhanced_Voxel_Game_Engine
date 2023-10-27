@@ -1,5 +1,5 @@
 #pragma once
-#include "third_party/cglm/include/cglm/cglm.h"
+#include "../third_party/cglm/include/cglm/cglm.h"
 typedef struct object object;
 // no rotate aabb 3d physics :(
 // friction, drag, bounce must be in [0,1]

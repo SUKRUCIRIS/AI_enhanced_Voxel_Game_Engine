@@ -1,5 +1,5 @@
 #pragma once
-#include "third_party/opengl/include/glad/glad.h"
+#include "../third_party/opengl/include/glad/glad.h"
 #include "camera.h"
 #include "dynamic.h"
 typedef struct physic physic;
