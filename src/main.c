@@ -48,7 +48,7 @@ int main(void)
 	cube2->phy->priority = 3;
 	scale_object(cube2, (vec3){6, 1.5f, 6}, 1);
 	translate_object(cube2, (vec3){0, -10, 0}, 1);
-	texture *text = load_texture("../textures/brick.jpg", GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_NEAREST, GL_NEAREST);
+	texture *text = load_texture("./textures/brick.jpg", GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_NEAREST, GL_NEAREST);
 
 	camera *cam = create_camera(1920, 1080, (vec3){0.0f, -5.0f, 15.0f}, 60, 0.1f, 100, 1, 100, -15, (vec3){1, 0, 0});
 

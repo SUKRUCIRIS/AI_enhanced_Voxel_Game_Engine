@@ -14,7 +14,7 @@ compile gnu:
 make -j`nproc`
 ```
 
-compile msvc:
+compile msvc(make sure that you use native tools command prompt for vs):
 
 ```
 msbuild opengl_voxel_gsu.sln /p:Configuration=Release /p:Platform=x64

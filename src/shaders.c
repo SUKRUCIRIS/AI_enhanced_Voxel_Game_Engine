@@ -48,8 +48,8 @@ GLuint compile_program(const char *frag_shader_file, const char *vert_shader_fil
 
 void init_programs(void)
 {
-	def_program = compile_program("../shaders/def.fs", "../shaders/def.vs");
-	def_tex_program = compile_program("../shaders/def_tex.fs", "../shaders/def_tex.vs");
+	def_program = compile_program("./shaders/def.fs", "./shaders/def.vs");
+	def_tex_program = compile_program("./shaders/def_tex.fs", "./shaders/def_tex.vs");
 }
 
 void destroy_programs(void)

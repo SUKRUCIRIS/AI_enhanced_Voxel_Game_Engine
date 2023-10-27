@@ -98,5 +98,5 @@ unsigned int get_index_DA(DA *da, void *item)
 			return i;
 		}
 	}
-	return -1;
+	return UINT_MAX;
 }
