@@ -239,10 +239,8 @@ void delete_object(object *obj)
 	{
 		remove_DA(objects, get_index_DA(objects, &obj));
 		delete_physic(obj->phy);
-		printf("%d\n", obj->copy);
 		if (obj->copy == 0)
 		{
-			printf("entered\n");
 			glDeleteVertexArrays(1, &(obj->VAO));
 			glDeleteBuffers(1, &(obj->VBO));
 			glDeleteBuffers(1, &(obj->EBO));

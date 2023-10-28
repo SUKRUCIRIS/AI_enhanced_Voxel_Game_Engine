@@ -23,14 +23,13 @@ int main(void)
 	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 100, 1, 100, -15, (vec3){1, 0, 0});
 	lighting *light = create_lighting();
 	light->ambient = 0.2f;
-	light->specularLight = 0.5f;
-	light->lightColor[0] = 1;
-	light->lightColor[1] = 1;
-	light->lightColor[2] = 1;
+	light->lightColor[0] = 0.5294f;
+	light->lightColor[1] = 0.8078f;
+	light->lightColor[2] = 0.9216f;
 	light->lightColor[3] = 1;
-	light->lightPos[0] = 20;
-	light->lightPos[1] = 20;
-	light->lightPos[2] = 20;
+	light->lightDir[0] = -1;
+	light->lightDir[1] = -1;
+	light->lightDir[2] = 0;
 
 	srand((unsigned int)time(0));
 	int **hm = create_heightmap(20, 20, 3, rand(), rand());
@@ -44,7 +43,7 @@ int main(void)
 		run_input_free_camera(cam, window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(get_def_tex_light_program());
-		use_lighting(light, get_def_tex_light_program(), cam);
+		use_lighting(light, get_def_tex_light_program());
 		use_world(world_cubes, get_def_tex_light_program(), cam);
 		glfwSwapBuffers(window);
 		simulate_physic((vec3){0, -9.8f, 0}, 0.01f);

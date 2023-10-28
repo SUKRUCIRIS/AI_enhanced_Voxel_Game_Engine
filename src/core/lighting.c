@@ -8,28 +8,22 @@ lighting *create_lighting(void)
 	return l;
 }
 
-void use_lighting(lighting *l, GLuint program, camera *cam)
+void use_lighting(lighting *l, GLuint program)
 {
 	if (get_index_DA(l->programs, &program) == UINT_MAX)
 	{
 		pushback_DA(l->programs, &program);
 		GLint uniform = glGetUniformLocation(program, "lightColor");
 		pushback_DA(l->uniforms, &uniform);
-		uniform = glGetUniformLocation(program, "lightPos");
-		pushback_DA(l->uniforms, &uniform);
-		uniform = glGetUniformLocation(program, "camPos");
+		uniform = glGetUniformLocation(program, "lightDir");
 		pushback_DA(l->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "ambient");
 		pushback_DA(l->uniforms, &uniform);
-		uniform = glGetUniformLocation(program, "specularLight");
-		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
-	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 5], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 5 + 1], l->lightPos[0], l->lightPos[1], l->lightPos[2]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 5 + 2], cam->position[0], cam->position[1], cam->position[2]);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 5 + 3], l->ambient);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 5 + 4], l->specularLight);
+	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 3], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 3 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 3 + 2], l->ambient);
 }
 
 void delete_lighting(lighting *l)

@@ -7,15 +7,14 @@
 typedef struct lighting
 {
 	vec4 lightColor;
-	vec3 lightPos;
+	vec3 lightDir;
 	float ambient;
-	float specularLight;
 	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
 	DA *uniforms;
 } lighting;
 
 lighting *create_lighting(void); // set variables from struct directly, dont touch DAs
 
-void use_lighting(lighting *l, GLuint program, camera *cam);
+void use_lighting(lighting *l, GLuint program);
 
 void delete_lighting(lighting *l);
