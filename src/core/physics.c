@@ -41,6 +41,7 @@ void delete_all_physic(void)
 		delete_physic(x[0]);
 	}
 	delete_DA(physic_objects);
+	physic_objects = 0;
 }
 
 void apply_force(physic *ph, vec3 force)

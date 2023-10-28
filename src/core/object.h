@@ -16,7 +16,7 @@ typedef struct object
 } object;
 
 object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usage, GLuint *indices,
-					  unsigned int indice_number, unsigned char is_tex_vertex, unsigned char has_physics,
+					  unsigned int indice_number, unsigned char is_tex_vertex, unsigned char is_norm_vertex, unsigned char has_physics,
 					  unsigned char priority, float mass, float friction, float bounce);
 void delete_object(object *obj);
 void delete_all_object(void);

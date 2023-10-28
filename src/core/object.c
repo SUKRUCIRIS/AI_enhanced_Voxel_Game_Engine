@@ -50,7 +50,7 @@ void translate_object(object *obj, vec3 v, unsigned char effect_physic)
 }
 
 object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usage, GLuint *indices,
-					  unsigned int indice_number, unsigned char is_tex_vertex, unsigned char has_physics,
+					  unsigned int indice_number, unsigned char is_tex_vertex, unsigned char is_norm_vertex, unsigned char has_physics,
 					  unsigned char priority, float mass, float friction, float bounce)
 {
 	if (vertices == 0 || vertex_number == 0)
@@ -74,25 +74,63 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 	glBindBuffer(GL_ARRAY_BUFFER, obj->VBO);
 	if (!is_tex_vertex)
 	{
-		glBufferData(GL_ARRAY_BUFFER, vertex_number * sizeof(GLfloat) * 7, vertices, usage);
+		if (!is_norm_vertex)
+		{
+			glBufferData(GL_ARRAY_BUFFER, vertex_number * sizeof(GLfloat) * 7, vertices, usage);
+		}
+		else
+		{
+			glBufferData(GL_ARRAY_BUFFER, vertex_number * sizeof(GLfloat) * 10, vertices, usage);
+		}
 	}
 	else
 	{
-		glBufferData(GL_ARRAY_BUFFER, vertex_number * sizeof(GLfloat) * 5, vertices, usage);
+		if (!is_norm_vertex)
+		{
+			glBufferData(GL_ARRAY_BUFFER, vertex_number * sizeof(GLfloat) * 5, vertices, usage);
+		}
+		else
+		{
+			glBufferData(GL_ARRAY_BUFFER, vertex_number * sizeof(GLfloat) * 8, vertices, usage);
+		}
 	}
 	if (!is_tex_vertex)
 	{
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(1);
+		if (!is_norm_vertex)
+		{
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(1);
+		}
+		else
+		{
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(GLfloat), (void *)(7 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(2);
+		}
 	}
 	else
 	{
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(1);
+		if (!is_norm_vertex)
+		{
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(1);
+		}
+		else
+		{
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
+			glEnableVertexAttribArray(2);
+		}
 	}
 	if (indices != 0 && indice_number != 0)
 	{
@@ -113,11 +151,25 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 		int x = 0;
 		if (is_tex_vertex)
 		{
-			x = 5;
+			if (!is_norm_vertex)
+			{
+				x = 5;
+			}
+			else
+			{
+				x = 8;
+			}
 		}
 		else
 		{
-			x = 7;
+			if (!is_norm_vertex)
+			{
+				x = 7;
+			}
+			else
+			{
+				x = 10;
+			}
 		}
 		vec3 minaabb, maxaabb;
 		for (unsigned int i = 0; i < vertex_number; i++)
@@ -178,6 +230,7 @@ void delete_all_object(void)
 		delete_object(x[0]);
 	}
 	delete_DA(objects);
+	objects = 0;
 }
 
 void delete_object(object *obj)
@@ -186,8 +239,10 @@ void delete_object(object *obj)
 	{
 		remove_DA(objects, get_index_DA(objects, &obj));
 		delete_physic(obj->phy);
+		printf("%d\n", obj->copy);
 		if (obj->copy == 0)
 		{
+			printf("entered\n");
 			glDeleteVertexArrays(1, &(obj->VAO));
 			glDeleteBuffers(1, &(obj->VBO));
 			glDeleteBuffers(1, &(obj->EBO));
@@ -200,7 +255,6 @@ void delete_object(object *obj)
 
 void use_object(object *obj, GLuint program, camera *cam)
 {
-	glUseProgram(program);
 	float *camera_mat = calculate_camera(cam);
 	if (get_index_DA(obj->programs, &program) == UINT_MAX)
 	{
@@ -212,7 +266,7 @@ void use_object(object *obj, GLuint program, camera *cam)
 	}
 	GLint *uniforms = get_data_DA(obj->uniforms);
 	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2], 1, GL_FALSE, camera_mat);
-	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2] + 1, 1, GL_FALSE, obj->model[0]);
+	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2 + 1], 1, GL_FALSE, obj->model[0]);
 	glBindVertexArray(obj->VAO);
 	if (obj->indice_number == 0)
 	{
@@ -238,7 +292,7 @@ object *create_object_copy(object *obj, unsigned char has_physics)
 	obj_new->vertex_number = obj->vertex_number;
 	obj_new->indice_number = obj->indice_number;
 	glm_mat4_copy(GLM_MAT4_IDENTITY, obj_new->model);
-	obj->copy = 1;
+	obj_new->copy = 1;
 	obj_new->programs = obj->programs;
 	obj_new->uniforms = obj->uniforms;
 	if (has_physics)

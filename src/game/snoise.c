@@ -40,8 +40,8 @@ float grad2(int hash, float x, float y)
 float snoise2(float x, float y)
 {
 
-#define F2 0.366025403 // F2 = 0.5*(sqrt(3.0)-1.0)
-#define G2 0.211324865 // G2 = (3.0-Math.sqrt(3.0))/6.0
+#define F2 0.366025403f // F2 = 0.5*(sqrt(3.0)-1.0)
+#define G2 0.211324865f // G2 = (3.0-Math.sqrt(3.0))/6.0
 
 	float n0, n1, n2; // Noise contributions from the three corners
 
