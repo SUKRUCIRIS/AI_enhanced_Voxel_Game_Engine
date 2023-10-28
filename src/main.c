@@ -30,6 +30,7 @@ int main(void)
 	light->lightDir[0] = 1;
 	light->lightDir[1] = 1;
 	light->lightDir[2] = 0;
+	light->specularStrength = 0.5f;
 
 	srand((unsigned int)time(0));
 	int **hm = create_heightmap(30, 30, 3, rand(), rand());

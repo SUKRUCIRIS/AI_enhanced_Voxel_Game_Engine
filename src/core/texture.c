@@ -1,15 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../third_party/stb/stb_image.h"
-#include "../../third_party/opengl/include/glad/glad.h"
 #include "texture.h"
 
-struct texture
-{
-	GLuint id;
-	GLenum type;
-};
-
-texture *load_texture(const char *path, GLenum texType, GLenum pixelType, GLint min_filter, GLint mag_filter)
+texture *load_texture(const char *path, GLenum texType, GLenum pixelType, GLint min_filter, GLint mag_filter, float shininess)
 {
 	glBindTexture(texType, 0);
 	texture *tex = calloc(1, sizeof(texture));
@@ -45,16 +38,29 @@ texture *load_texture(const char *path, GLenum texType, GLenum pixelType, GLint 
 	stbi_image_free(bytes);
 	glBindTexture(texType, 0);
 	tex->type = texType;
+	tex->programs = create_DA(sizeof(GLuint));
+	tex->uniforms = create_DA(sizeof(GLint));
+	tex->shininess = shininess;
 	return tex;
 }
 
-void use_texture(texture *tex)
+void use_texture(texture *tex, GLuint program)
 {
+	if (get_index_DA(tex->programs, &program) == UINT_MAX)
+	{
+		pushback_DA(tex->programs, &program);
+		GLint uniform = glGetUniformLocation(program, "shininess");
+		pushback_DA(tex->uniforms, &uniform);
+	}
+	GLint *uniforms = get_data_DA(tex->uniforms);
+	glUniform1f(uniforms[get_index_DA(tex->programs, &program)], tex->shininess);
 	glBindTexture(tex->type, tex->id);
 }
 
 void delete_texture(texture *tex)
 {
+	delete_DA(tex->programs);
+	delete_DA(tex->uniforms);
 	glDeleteTextures(1, &(tex->id));
 	free(tex);
 }

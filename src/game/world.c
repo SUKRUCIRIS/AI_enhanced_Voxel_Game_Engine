@@ -132,7 +132,7 @@ DA *create_world_cubes(int **hm, int dimensionx, int dimensionz)
 
 void use_world(DA *world_cubes, GLuint program)
 {
-	use_texture(text);
+	use_texture(text, program);
 	object **tmp = get_data_DA(world_cubes);
 	for (unsigned int i = 0; i < get_size_DA(world_cubes); i++)
 	{
@@ -144,7 +144,7 @@ void init_world_textures(void)
 {
 	if (text == 0)
 	{
-		text = load_texture("./textures/grass.jpg", GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_NEAREST, GL_NEAREST);
+		text = load_texture("./textures/grass.jpg", GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_NEAREST, GL_NEAREST, 4);
 	}
 }
 

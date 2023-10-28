@@ -19,11 +19,14 @@ void use_lighting(lighting *l, GLuint program)
 		pushback_DA(l->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "ambient");
 		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "specularStrength");
+		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
-	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 3], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 3 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 3 + 2], l->ambient);
+	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 4], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 4 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 4 + 2], l->ambient);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 4 + 3], l->specularStrength);
 }
 
 void delete_lighting(lighting *l)

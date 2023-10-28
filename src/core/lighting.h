@@ -9,6 +9,7 @@ typedef struct lighting
 	vec4 lightColor;
 	vec3 lightDir;
 	float ambient;
+	float specularStrength;
 	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
 	DA *uniforms;
 } lighting;

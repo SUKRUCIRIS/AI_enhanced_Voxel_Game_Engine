@@ -142,7 +142,10 @@ void use_camera(camera *cam, GLuint program)
 		pushback_DA(cam->programs, &program);
 		GLint uniform = glGetUniformLocation(program, "camera");
 		pushback_DA(cam->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "camPos");
+		pushback_DA(cam->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(cam->uniforms);
-	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program)], 1, GL_FALSE, cam->result[0]);
+	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 2], 1, GL_FALSE, cam->result[0]);
+	glUniform3f(uniforms[get_index_DA(cam->programs, &program) * 2 + 1], cam->position[0], cam->position[1], cam->position[2]);
 }
