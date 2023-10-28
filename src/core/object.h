@@ -13,6 +13,7 @@ typedef struct object
 	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
 	DA *uniforms;
 	physic *phy;
+	mat4 normal;
 } object;
 
 object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usage, GLuint *indices,
@@ -20,7 +21,7 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 					  unsigned char priority, float mass, float friction, float bounce);
 void delete_object(object *obj);
 void delete_all_object(void);
-void use_object(object *obj, GLuint program, camera *cam);
+void use_object(object *obj, GLuint program);
 void scale_object(object *obj, vec3 v, unsigned char effect_physic);
 void rotate_object(object *obj, float angle, vec3 axis, unsigned char effect_physic);
 void translate_object(object *obj, vec3 v, unsigned char effect_physic);

@@ -130,13 +130,13 @@ DA *create_world_cubes(int **hm, int dimensionx, int dimensionz)
 	return world_cubes;
 }
 
-void use_world(DA *world_cubes, GLuint program, camera *cam)
+void use_world(DA *world_cubes, GLuint program)
 {
 	use_texture(text);
 	object **tmp = get_data_DA(world_cubes);
 	for (unsigned int i = 0; i < get_size_DA(world_cubes); i++)
 	{
-		use_object(tmp[i], program, cam);
+		use_object(tmp[i], program);
 	}
 }
 

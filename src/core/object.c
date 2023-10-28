@@ -143,6 +143,7 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 	obj->vertex_number = vertex_number;
 	obj->indice_number = indice_number;
 	glm_mat4_copy(GLM_MAT4_IDENTITY, obj->model);
+	glm_mat4_copy(GLM_MAT4_IDENTITY, obj->normal);
 	obj->copy = 0;
 	obj->programs = create_DA(sizeof(GLuint));
 	obj->uniforms = create_DA(sizeof(GLint));
@@ -251,20 +252,21 @@ void delete_object(object *obj)
 	}
 }
 
-void use_object(object *obj, GLuint program, camera *cam)
+void use_object(object *obj, GLuint program)
 {
-	float *camera_mat = calculate_camera(cam);
 	if (get_index_DA(obj->programs, &program) == UINT_MAX)
 	{
 		pushback_DA(obj->programs, &program);
-		GLint uniform = glGetUniformLocation(program, "camera");
+		GLint uniform = glGetUniformLocation(program, "model");
 		pushback_DA(obj->uniforms, &uniform);
-		uniform = glGetUniformLocation(program, "model");
+		uniform = glGetUniformLocation(program, "normalMatrix");
 		pushback_DA(obj->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(obj->uniforms);
-	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2], 1, GL_FALSE, camera_mat);
-	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2 + 1], 1, GL_FALSE, obj->model[0]);
+	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2], 1, GL_FALSE, obj->model[0]);
+	glm_mat4_inv(obj->model, obj->normal);
+	glm_mat4_transpose(obj->normal);
+	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2 + 1], 1, GL_FALSE, obj->normal[0]);
 	glBindVertexArray(obj->VAO);
 	if (obj->indice_number == 0)
 	{

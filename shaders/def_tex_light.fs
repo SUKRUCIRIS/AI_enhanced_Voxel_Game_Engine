@@ -12,7 +12,7 @@ void main(){
 	vec3 lightDirection = normalize(lightDir);
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 
-	FragColor = texture(tex0, texCoord) * lightColor * (diffuse + ambient);
+	FragColor = texture(tex0, texCoord) * (lightColor * diffuse + ambient);
 
 	FragColor.a = 1.0f;
 }

@@ -22,11 +22,17 @@ camera *create_camera(int width, int height, vec3 position, float FOVdeg, float 
 	cam->nearPlane = nearPlane;
 	cam->farPlane = farPlane;
 	glm_vec3_rotate(cam->orientation, glm_rad(angle), angle_axis);
+	glm_mat4_identity(cam->view);
+	glm_mat4_identity(cam->projection);
+	cam->programs = create_DA(sizeof(GLuint));
+	cam->uniforms = create_DA(sizeof(GLint));
 	return cam;
 }
 
 void delete_camera(camera *cam)
 {
+	delete_DA(cam->programs);
+	delete_DA(cam->uniforms);
 	free(cam);
 }
 
@@ -119,14 +125,24 @@ void run_input_free_camera(camera *cam, GLFWwindow *window)
 	}
 }
 
-float *calculate_camera(camera *cam)
+void calculate_camera(camera *cam)
 {
-	mat4 view = GLM_MAT4_IDENTITY_INIT;
-	mat4 projection = GLM_MAT4_IDENTITY_INIT;
 	vec3 sum;
 	glm_vec3_add(cam->position, cam->orientation, sum);
-	glm_lookat(cam->position, sum, cam->up, view);
-	glm_perspective(glm_rad(cam->FOVdeg), (float)cam->width / cam->height, cam->nearPlane, cam->farPlane, projection);
-	glm_mat4_mul(projection, view, cam->result);
-	return cam->result[0];
+	glm_lookat(cam->position, sum, cam->up, cam->view);
+	glm_perspective(glm_rad(cam->FOVdeg), (float)cam->width / cam->height, cam->nearPlane, cam->farPlane, cam->projection);
+	glm_mat4_mul(cam->projection, cam->view, cam->result);
+}
+
+void use_camera(camera *cam, GLuint program)
+{
+	calculate_camera(cam);
+	if (get_index_DA(cam->programs, &program) == UINT_MAX)
+	{
+		pushback_DA(cam->programs, &program);
+		GLint uniform = glGetUniformLocation(program, "camera");
+		pushback_DA(cam->uniforms, &uniform);
+	}
+	GLint *uniforms = get_data_DA(cam->uniforms);
+	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program)], 1, GL_FALSE, cam->result[0]);
 }

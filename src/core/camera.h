@@ -1,6 +1,8 @@
 #pragma once
 #include "../../third_party/cglm/include/cglm/cglm.h"
+#include "../../third_party/opengl/include/glad/glad.h"
 #include "../../third_party/glfw/include/GLFW/glfw3.h"
+#include "dynamic.h"
 
 typedef struct camera
 {
@@ -16,6 +18,10 @@ typedef struct camera
 	float FOVdeg;
 	float nearPlane;
 	float farPlane;
+	mat4 view;
+	mat4 projection;
+	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
+	DA *uniforms;
 } camera;
 
 camera *create_camera(int width, int height, vec3 position, float FOVdeg, float nearPlane, float farPlane, float speed,
@@ -25,4 +31,6 @@ void delete_camera(camera *cam);
 
 void run_input_free_camera(camera *cam, GLFWwindow *window);
 
-float *calculate_camera(camera *cam);
+void calculate_camera(camera *cam);
+
+void use_camera(camera *cam, GLuint program);
