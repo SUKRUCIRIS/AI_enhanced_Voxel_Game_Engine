@@ -2,6 +2,7 @@
 #include "../../third_party/opengl/include/glad/glad.h"
 #include "camera.h"
 #include "dynamic.h"
+#include "physics.h"
 typedef struct physic physic;
 typedef struct object
 {

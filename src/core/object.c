@@ -1,6 +1,5 @@
 #include "object.h"
 #include <stdlib.h>
-#include "physics.h"
 
 DA *objects = 0;
 

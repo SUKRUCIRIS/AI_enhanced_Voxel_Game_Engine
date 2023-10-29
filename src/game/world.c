@@ -130,13 +130,19 @@ DA *create_world_cubes(int **hm, int dimensionx, int dimensionz)
 	return world_cubes;
 }
 
-void use_world(DA *world_cubes, GLuint program)
+void use_world(DA *world_cubes, GLuint program, unsigned char shadowpass)
 {
-	use_texture(text, program);
+	if (!shadowpass)
+	{
+		use_texture(text, program);
+	}
 	object **tmp = get_data_DA(world_cubes);
 	for (unsigned int i = 0; i < get_size_DA(world_cubes); i++)
 	{
-		use_object(tmp[i], program);
+		if (!shadowpass || tmp[i]->phy->minaabb[1] > 0)
+		{
+			use_object(tmp[i], program);
+		}
 	}
 }
 

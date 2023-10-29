@@ -5,6 +5,7 @@
 GLuint def_program = 0;
 GLuint def_tex_program = 0;
 GLuint def_tex_light_program = 0;
+GLuint def_shadowmap_program = 0;
 
 char *get_shader_content(const char *fileName)
 {
@@ -52,6 +53,7 @@ void init_programs(void)
 	def_program = compile_program("./shaders/def.fs", "./shaders/def.vs");
 	def_tex_program = compile_program("./shaders/def_tex.fs", "./shaders/def_tex.vs");
 	def_tex_light_program = compile_program("./shaders/def_tex_light.fs", "./shaders/def_tex_light.vs");
+	def_shadowmap_program = compile_program("./shaders/def_shadowmap.fs", "./shaders/def_shadowmap.vs");
 }
 
 void destroy_programs(void)
@@ -59,6 +61,7 @@ void destroy_programs(void)
 	glDeleteProgram(def_program);
 	glDeleteProgram(def_tex_program);
 	glDeleteProgram(def_tex_light_program);
+	glDeleteProgram(def_shadowmap_program);
 }
 
 GLuint get_def_program(void)
@@ -74,4 +77,9 @@ GLuint get_def_tex_program(void)
 GLuint get_def_tex_light_program(void)
 {
 	return def_tex_light_program;
+}
+
+GLuint get_def_shadowmap_program(void)
+{
+	return def_shadowmap_program;
 }
