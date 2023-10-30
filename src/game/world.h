@@ -1,7 +1,5 @@
 #pragma once
-#include "./core/object.h"
-#include "./core/texture.h"
-#include "./core/camera.h"
+#include "./core/core.h"
 
 int **create_heightmap(int dimensionx, int dimensionz, int maxy, int seedx, int seedy);
 

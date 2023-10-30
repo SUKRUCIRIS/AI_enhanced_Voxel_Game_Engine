@@ -1,14 +1,6 @@
-#include "./core/window.h"
-#include "./core/shaders.h"
-#include "./core/object.h"
-#include "./core/texture.h"
-#include "./core/camera.h"
-#include "./core/physics.h"
-#include "./core/lighting.h"
+#include "./core/core.h"
 #include <time.h>
-#include "../third_party/cglm/include/cglm/cglm.h"
 #include "./game/world.h"
-#include <stdlib.h>
 
 int main(void)
 {
