@@ -16,8 +16,8 @@ int main(void)
 	lighting *light = create_lighting(window, cam);
 
 	srand((unsigned int)time(0));
-	int **hm = create_heightmap(30, 30, 3, rand(), rand());
-	DA *world_cubes = create_world_cubes(hm, 30, 30);
+	int **hm = create_heightmap(50, 50, 4, rand(), rand());
+	DA *world_cubes = create_world_cubes(hm, 50, 50);
 	free(hm);
 	clock_t timer = 0;
 	while (!glfwWindowShouldClose(window))
