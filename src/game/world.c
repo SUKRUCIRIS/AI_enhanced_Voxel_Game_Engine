@@ -139,7 +139,7 @@ void use_world(DA *world_cubes, GLuint program, unsigned char shadowpass)
 	object **tmp = get_data_DA(world_cubes);
 	for (unsigned int i = 0; i < get_size_DA(world_cubes); i++)
 	{
-		if (!shadowpass || tmp[i]->phy->minaabb[1] > 0)
+		if (!shadowpass || tmp[i]->phy->minaabb[1] > -0.25f)
 		{
 			use_object(tmp[i], program);
 		}

@@ -125,18 +125,18 @@ void run_input_free_camera(camera *cam, GLFWwindow *window)
 	}
 }
 
-void calculate_camera(camera *cam)
+void calculate_camera(camera *cam, float range)
 {
 	vec3 sum;
 	glm_vec3_add(cam->position, cam->orientation, sum);
 	glm_lookat(cam->position, sum, cam->up, cam->view);
-	glm_perspective(glm_rad(cam->FOVdeg), (float)cam->width / cam->height, cam->nearPlane, cam->farPlane, cam->projection);
+	glm_perspective(glm_rad(cam->FOVdeg), (float)cam->width / cam->height, cam->nearPlane, cam->farPlane * range, cam->projection);
 	glm_mat4_mul(cam->projection, cam->view, cam->result);
 }
 
 void use_camera(camera *cam, GLuint program)
 {
-	calculate_camera(cam);
+	calculate_camera(cam, 1);
 	if (get_index_DA(cam->programs, &program) == UINT_MAX)
 	{
 		pushback_DA(cam->programs, &program);

@@ -13,7 +13,7 @@ int main(void)
 	init_world_textures();
 
 	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 100, 1, 100, -15, (vec3){1, 0, 0});
-	lighting *light = create_lighting(window);
+	lighting *light = create_lighting(window, cam);
 
 	srand((unsigned int)time(0));
 	int **hm = create_heightmap(30, 30, 3, rand(), rand());

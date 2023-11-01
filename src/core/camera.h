@@ -31,6 +31,6 @@ void delete_camera(camera *cam);
 
 void run_input_free_camera(camera *cam, GLFWwindow *window);
 
-void calculate_camera(camera *cam);
+void calculate_camera(camera *cam, float range);
 
 void use_camera(camera *cam, GLuint program);

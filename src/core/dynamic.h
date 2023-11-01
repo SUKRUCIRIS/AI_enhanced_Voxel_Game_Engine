@@ -2,7 +2,7 @@
 // my own vector library
 
 #ifndef UINT_MAX
-#define UINT_MAX 4294967295U
+#define UINT_MAX 0xffffffff
 #endif
 
 typedef struct DA DA;

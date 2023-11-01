@@ -34,7 +34,12 @@ void main(){
 	{
 		lightCoords = (lightCoords + 1.0f) / 2.0f;
 		float currentDepth = lightCoords.z;
-		float bias = max(0.025f * (1.0f - dot(normal, lightDirection)), 0.0005f);
+
+		float bias = max(0.025f * (1.0f - dot(normal, lightDirection)), 0.00028f);
+
+		if(normal.y > 0.97){
+			bias=0;
+		}
 
 		int sampleRadius = 5;
 		vec2 pixelSize = 1.0 / textureSize(shadowMap, 0);
