@@ -35,6 +35,21 @@ void pushback_DA(DA *da, void *item)
 	da->size++;
 }
 
+void pushback_many_DA(DA *da, void *items, unsigned int count)
+{
+	void *tmp = realloc(da->items, (da->size + count) * da->itemsize);
+	if (tmp != 0)
+	{
+		da->items = tmp;
+	}
+	else
+	{
+		return;
+	}
+	memcpy((char *)(da->items) + da->size * da->itemsize, items, da->itemsize * count);
+	da->size += count;
+}
+
 void delete_DA(DA *da)
 {
 	if (da)
@@ -84,11 +99,39 @@ void remove_DA(DA *da, unsigned int index)
 	da->size--;
 }
 
+void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
+{
+	if (start_index >= da->size || end_index >= da->size || start_index > end_index)
+	{
+		return;
+	}
+	char *newitems = calloc(da->size - (end_index - start_index + 1), da->itemsize);
+	if (newitems == 0)
+	{
+		return;
+	}
+	if (start_index == 0)
+	{
+		memcpy(newitems, (char *)(da->items) + da->itemsize * (end_index - start_index + 1),
+			   da->itemsize * (da->size - (end_index - start_index + 1)));
+	}
+	else
+	{
+		memcpy(newitems, da->items, da->itemsize * start_index);
+		memcpy(newitems + (da->itemsize * start_index), (char *)(da->items) + (da->itemsize * (end_index + 1)),
+			   da->itemsize * (da->size - 1 - end_index));
+	}
+	free(da->items);
+	da->items = newitems;
+	da->size -= (end_index - start_index + 1);
+}
+
 void clear_DA(DA *da)
 {
 	if (da)
 	{
 		free(da->items);
+		da->items = 0;
 		da->size = 0;
 	}
 }

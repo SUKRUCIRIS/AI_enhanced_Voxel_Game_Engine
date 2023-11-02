@@ -1,6 +1,6 @@
 #pragma once
 #include "../../third_party/cglm/include/cglm/cglm.h"
-typedef struct object object;
+
 // no rotate aabb 3d physics :(
 // friction, drag, bounce must be in [0,1]
 typedef struct physic
@@ -22,10 +22,12 @@ typedef struct physic
 	// things below will be set to 0 in every start of step, values will be set according to the collision solution
 	unsigned char onfloor; // bool
 	float bottom_surface_friction;
-	object *obj;
+	void *obj;
+	unsigned char is_br_object;
 } physic;
 
-physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float mass, float friction, float bounce, object *obj);
+physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float mass,
+					  float friction, float bounce, void *obj, unsigned char is_br_object);
 void delete_all_physic(void);
 void delete_physic(physic *ph);
 unsigned char detect_collision_physic(physic *x, physic *y);

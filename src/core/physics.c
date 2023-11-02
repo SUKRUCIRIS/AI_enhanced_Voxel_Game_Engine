@@ -1,10 +1,12 @@
 #include "physics.h"
 #include "dynamic.h"
 #include "object.h"
+#include "br_object.h"
 
 DA *physic_objects = 0;
 
-physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float mass, float friction, float bounce, object *obj)
+physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float mass,
+					  float friction, float bounce, void *obj, unsigned char is_br_object)
 {
 	physic *ph = calloc(1, sizeof(physic));
 	ph->priority = priority;
@@ -28,6 +30,7 @@ physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float 
 		physic_objects = create_DA(sizeof(physic *));
 	}
 	ph->bounce = bounce;
+	ph->is_br_object = is_br_object;
 	pushback_DA(physic_objects, &ph);
 	return ph;
 }
@@ -111,7 +114,14 @@ void simulate_physic(vec3 gravity, float drag)
 		{
 			if (x[i]->obj)
 			{
-				translate_object(x[i]->obj, x[i]->shouldmove_2, 1);
+				if (x[i]->is_br_object)
+				{
+					translate_br_object(x[i]->obj, x[i]->shouldmove_2, 1);
+				}
+				else
+				{
+					translate_object(x[i]->obj, x[i]->shouldmove_2, 1);
+				}
 			}
 			else
 			{
@@ -239,7 +249,14 @@ void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
 		}
 		if (x->obj)
 		{
-			translate_object(x->obj, x->shouldmove, 1);
+			if (x->is_br_object)
+			{
+				translate_br_object(x->obj, x->shouldmove, 1);
+			}
+			else
+			{
+				translate_object(x->obj, x->shouldmove, 1);
+			}
 		}
 		else
 		{
@@ -248,7 +265,14 @@ void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
 		}
 		if (y->obj)
 		{
-			translate_object(y->obj, y->shouldmove, 1);
+			if (y->is_br_object)
+			{
+				translate_br_object(y->obj, y->shouldmove, 1);
+			}
+			else
+			{
+				translate_object(y->obj, y->shouldmove, 1);
+			}
 		}
 		else
 		{
@@ -317,7 +341,14 @@ void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
 		}
 		if (y->obj)
 		{
-			translate_object(y->obj, y->shouldmove, 1);
+			if (y->is_br_object)
+			{
+				translate_br_object(y->obj, y->shouldmove, 1);
+			}
+			else
+			{
+				translate_object(y->obj, y->shouldmove, 1);
+			}
 		}
 		else
 		{
@@ -361,7 +392,14 @@ void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
 		}
 		if (x->obj)
 		{
-			translate_object(x->obj, x->shouldmove, 1);
+			if (x->is_br_object)
+			{
+				translate_br_object(x->obj, x->shouldmove, 1);
+			}
+			else
+			{
+				translate_object(x->obj, x->shouldmove, 1);
+			}
 		}
 		else
 		{

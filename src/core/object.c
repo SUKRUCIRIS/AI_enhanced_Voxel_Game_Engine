@@ -211,7 +211,11 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 				}
 			}
 		}
-		obj->phy = create_physic(minaabb, maxaabb, priority, mass, friction, bounce, obj);
+		obj->phy = create_physic(minaabb, maxaabb, priority, mass, friction, bounce, obj, 0);
+	}
+	else
+	{
+		obj->phy = 0;
 	}
 	if (objects == 0)
 	{
@@ -297,7 +301,7 @@ object *create_object_copy(object *obj, unsigned char has_physics)
 	if (has_physics)
 	{
 		obj_new->phy = create_physic(obj->phy->first_minaabb, obj->phy->first_maxaabb, obj->phy->priority,
-									 obj->phy->mass, obj->phy->friction, obj->phy->bounce, obj_new);
+									 obj->phy->mass, obj->phy->friction, obj->phy->bounce, obj_new, 0);
 	}
 	if (objects == 0)
 	{
