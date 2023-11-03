@@ -1,4 +1,4 @@
-#version 330 core
+#version 400 core
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec4 color;
 out vec4 vs_color;
