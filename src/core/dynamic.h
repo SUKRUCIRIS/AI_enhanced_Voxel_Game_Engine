@@ -9,6 +9,8 @@ typedef struct DA DA;
 
 DA *create_DA(unsigned int itemsize);
 
+DA *create_DA_HIGH_MEMORY(unsigned int itemsize);
+
 void pushback_DA(DA *da, void *item);
 
 void pushback_many_DA(DA *da, void *items, unsigned int count);

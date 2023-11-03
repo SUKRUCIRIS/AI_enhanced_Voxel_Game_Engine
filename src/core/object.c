@@ -227,6 +227,10 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 
 void delete_all_object(void)
 {
+	if (objects == 0)
+	{
+		return;
+	}
 	object **x = 0;
 	while (get_size_DA(objects) > 0)
 	{

@@ -3,7 +3,7 @@
 
 void calculate_lighting_projection(lighting *l)
 {
-	calculate_camera(l->cam, 1);
+	calculate_camera(l->cam, l->shadowrange);
 	glm_mat4_inv(l->cam->result, l->camresultinv);
 	glm_frustum_corners(l->camresultinv, l->frustumcorners);
 	glm_frustum_center(l->frustumcorners, l->frustumcenter);
@@ -31,9 +31,10 @@ void calculate_lighting_projection(lighting *l)
 	glm_mat4_mul(l->orthgonalProjection, l->lightView, l->lightProjection);
 }
 
-lighting *create_lighting(GLFWwindow *window, camera *cam)
+lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float shadowrange)
 {
 	lighting *l = malloc(sizeof(lighting));
+	l->shadowrange = shadowrange;
 	l->programs = create_DA(sizeof(GLuint));
 	l->uniforms = create_DA(sizeof(GLint));
 
@@ -59,8 +60,8 @@ lighting *create_lighting(GLFWwindow *window, camera *cam)
 
 	glfwGetWindowSize(window, &(l->windowwidth), &(l->windowheight));
 
-	l->shadowMapWidth = 16384;
-	l->shadowMapHeight = 16384;
+	l->shadowMapWidth = shadowMapWidth;
+	l->shadowMapHeight = shadowMapHeight;
 
 	glGenFramebuffers(1, &l->shadowMapFBO);
 

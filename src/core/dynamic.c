@@ -4,8 +4,10 @@
 
 struct DA
 {
+	unsigned int memory_size;
 	unsigned int size;
 	unsigned int itemsize;
+	unsigned char high_memory;
 	void *items;
 };
 
@@ -20,9 +22,40 @@ DA *create_DA(unsigned int itemsize)
 	return da;
 }
 
+DA *create_DA_HIGH_MEMORY(unsigned int itemsize)
+{
+	DA *da = calloc(1, sizeof(DA));
+	if (da == 0)
+	{
+		return 0;
+	}
+	da->itemsize = itemsize;
+	da->high_memory = 1;
+	return da;
+}
+
 void pushback_DA(DA *da, void *item)
 {
-	void *tmp = realloc(da->items, (da->size + 1) * da->itemsize);
+	void *tmp = da->items;
+	if (da->high_memory == 0 || da->size == 0)
+	{
+		tmp = realloc(da->items, (da->size + 1) * da->itemsize);
+		if (tmp != 0)
+		{
+			da->memory_size++;
+		}
+	}
+	else
+	{
+		if (da->size + 1 > da->memory_size)
+		{
+			tmp = realloc(da->items, (da->memory_size * 2) * da->itemsize);
+			if (tmp != 0)
+			{
+				da->memory_size *= 2;
+			}
+		}
+	}
 	if (tmp != 0)
 	{
 		da->items = tmp;
@@ -37,7 +70,26 @@ void pushback_DA(DA *da, void *item)
 
 void pushback_many_DA(DA *da, void *items, unsigned int count)
 {
-	void *tmp = realloc(da->items, (da->size + count) * da->itemsize);
+	void *tmp = da->items;
+	if (da->high_memory == 0 || da->size == 0)
+	{
+		tmp = realloc(da->items, (da->size + count) * da->itemsize);
+		if (tmp != 0)
+		{
+			da->memory_size += count;
+		}
+	}
+	else
+	{
+		while (da->size + count > da->memory_size)
+		{
+			tmp = realloc(da->items, (da->memory_size * 2) * da->itemsize);
+			if (tmp != 0)
+			{
+				da->memory_size *= 2;
+			}
+		}
+	}
 	if (tmp != 0)
 	{
 		da->items = tmp;
@@ -97,6 +149,7 @@ void remove_DA(DA *da, unsigned int index)
 	free(da->items);
 	da->items = newitems;
 	da->size--;
+	da->memory_size = da->size;
 }
 
 void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
@@ -124,6 +177,7 @@ void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
 	free(da->items);
 	da->items = newitems;
 	da->size -= (end_index - start_index + 1);
+	da->memory_size = da->size;
 }
 
 void clear_DA(DA *da)
@@ -133,6 +187,7 @@ void clear_DA(DA *da)
 		free(da->items);
 		da->items = 0;
 		da->size = 0;
+		da->memory_size = 0;
 	}
 }
 

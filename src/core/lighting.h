@@ -13,6 +13,7 @@ typedef struct lighting
 	float ambient;
 	float specularStrength;
 	GLuint shadowMapFBO, shadowMapWidth, shadowMapHeight, shadowMap;
+	float shadowrange;
 	int windowwidth, windowheight;
 	mat4 orthgonalProjection;
 	mat4 lightView;
@@ -35,7 +36,7 @@ typedef struct lighting
 
 void calculate_lighting_projection(lighting *l);
 
-lighting *create_lighting(GLFWwindow *window, camera *cam);
+lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float shadowrange);
 
 void use_lighting(lighting *l, GLuint program, unsigned char shadowpass);
 

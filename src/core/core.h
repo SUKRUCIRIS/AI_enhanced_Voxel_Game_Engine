@@ -15,3 +15,5 @@
 #include "shaders.h"
 #include "texture.h"
 #include "window.h"
+#include "br_object.h"
+#include "br_texture.h"
