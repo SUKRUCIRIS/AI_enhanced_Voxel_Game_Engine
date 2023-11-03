@@ -162,7 +162,7 @@ void delete_br_object(br_object *obj)
 	free(obj);
 }
 
-void update_physic(br_object *obj)
+void update_br_physic(br_object *obj)
 {
 	vec4 result;
 	glm_mat4_mulv(obj->model, (vec4){obj->phy->first_minaabb[0], obj->phy->first_minaabb[1], obj->phy->first_minaabb[2], 1}, result);
@@ -211,7 +211,7 @@ void scale_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 	glm_scale(obj->model, v);
 	if (effect_physic && obj->phy)
 	{
-		update_physic(obj);
+		update_br_physic(obj);
 	}
 
 	apply_model_matrix(obj);
@@ -222,7 +222,7 @@ void rotate_br_object(br_object *obj, float angle, vec3 axis, unsigned char effe
 	glm_rotate(obj->model, glm_rad(angle), axis);
 	if (effect_physic && obj->phy)
 	{
-		update_physic(obj);
+		update_br_physic(obj);
 	}
 
 	apply_model_matrix(obj);
@@ -233,7 +233,7 @@ void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 	glm_translate(obj->model, v);
 	if (effect_physic && obj->phy)
 	{
-		update_physic(obj);
+		update_br_physic(obj);
 	}
 
 	apply_model_matrix(obj);
