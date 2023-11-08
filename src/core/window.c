@@ -1,7 +1,9 @@
 #include "window.h"
+#include <locale.h>
 
 GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned char vsync)
 {
+	setlocale(LC_ALL, "Turkish"); // for turkish characters
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -12,11 +14,11 @@ GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned
 	GLFWwindow *window = 0;
 	if (is_full)
 	{
-		window = glfwCreateWindow(width, height, "Red Crescent Engine", glfwGetPrimaryMonitor(), 0);
+		window = glfwCreateWindow(width, height, "Şükrü Çiriş Engine", glfwGetPrimaryMonitor(), 0);
 	}
 	else
 	{
-		window = glfwCreateWindow(width, height, "Red Crescent Engine", 0, 0);
+		window = glfwCreateWindow(width, height, "Şükrü Çiriş Engine", 0, 0);
 	}
 	if (window == 0)
 	{
