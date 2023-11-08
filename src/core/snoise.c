@@ -1,4 +1,5 @@
 #include "snoise.h"
+#include <stdlib.h>
 
 #define FASTFLOOR(x) (((int)(x) <= (x)) ? ((int)x) : (((int)x) - 1))
 
@@ -116,4 +117,19 @@ float snoise2(float x, float y)
 	// Add contributions from each corner to get the final noise value.
 	// The result is scaled to return values in the interval [-1,1].
 	return 40.0f * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
+}
+
+int **create_heightmap(int dimensionx, int dimensionz, int maxy, int seedx, int seedz, float precision)
+{
+	int **hm = malloc(sizeof(int *) * dimensionx);
+	for (int i = 0; i < dimensionx; i++)
+	{
+		hm[i] = malloc(sizeof(int) * dimensionz);
+		for (int i2 = 0; i2 < dimensionz; i2++)
+		{
+			hm[i][i2] = (int)floorf(((snoise2((float)(seedx + i) / precision, (float)(seedz + i2) / precision) + 1) / 2.0f) * maxy);
+		}
+	}
+
+	return hm;
 }

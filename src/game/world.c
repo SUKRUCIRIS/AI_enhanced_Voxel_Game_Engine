@@ -1,5 +1,4 @@
 #include "world.h"
-#include "snoise.h"
 
 GLfloat cube_vertices[] = {
 	-1, -1, -1, 0, 0, 0, 0, 1, 0, // A 0
@@ -47,25 +46,6 @@ GLuint cube_indices[] = {
 	22, 21, 20,
 	20, 23, 22};
 
-int **create_heightmap(int dimensionx, int dimensionz, int maxy, int seedx, int seedz)
-{
-	int **hm = malloc(sizeof(int *) * dimensionx);
-	for (int i = 0; i < dimensionx; i++)
-	{
-		hm[i] = malloc(sizeof(int) * dimensionz);
-		for (int i2 = 0; i2 < dimensionz; i2++)
-		{
-			hm[i][i2] = (int)floorf(snoise2((float)(seedx + i), (float)(seedz + i2)) * maxy);
-			if (hm[i][i2] < 0)
-			{
-				hm[i][i2] = 0;
-			}
-		}
-	}
-
-	return hm;
-}
-
 world *create_world(int **hm, int dimensionx, int dimensionz)
 {
 	world *x = malloc(sizeof(world));
@@ -87,8 +67,15 @@ world *create_world(int **hm, int dimensionx, int dimensionz)
 			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))}, 1);
 			if (hm[i][i2] != 0)
 			{
-				for (int i3 = 0; i3 < hm[i][i2]; i3++)
+				for (int i3 = hm[i][i2] - 1; i3 >= 0; i3--)
 				{
+					if ((!(i2 > 0) || hm[i][i2 - 1] >= i3) &&
+						(!(i2 < dimensionz - 1) || hm[i][i2 + 1] >= i3) &&
+						(!(i > 0) || hm[i - 1][i2] >= i3) &&
+						(!(i < dimensionx - 1) || hm[i + 1][i2] >= i3))
+					{
+						break;
+					}
 					tmp = create_br_object(x->obj_manager, cube_vertices, 24, cube_indices, 36, 0, 1, 3, 10, 0.1f, 0.5f);
 					scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 					translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);

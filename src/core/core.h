@@ -17,3 +17,4 @@
 #include "window.h"
 #include "br_object.h"
 #include "br_texture.h"
+#include "snoise.h"
