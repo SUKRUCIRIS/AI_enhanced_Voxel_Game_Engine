@@ -53,14 +53,16 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb)
 
+find_package(OpenGL REQUIRED)
+
 FILE(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 add_executable(opengl_voxel_gsu ${MY_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/src/glad.c)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-	target_link_libraries(opengl_voxel_gsu cglm glfw msvcrt)
+	target_link_libraries(opengl_voxel_gsu cglm glfw msvcrt OpenGL::GL)
 	target_compile_options(opengl_voxel_gsu PUBLIC /MT)
 else()
-	target_link_libraries(opengl_voxel_gsu cglm glfw -static)
+	target_link_libraries(opengl_voxel_gsu cglm glfw OpenGL::GL -static)
 endif()
 
 if (WIN32)

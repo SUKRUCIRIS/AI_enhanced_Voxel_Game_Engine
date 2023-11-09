@@ -11,7 +11,7 @@ int main(void)
 	}
 
 	init_programs();
-	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 500, 1, 100, -15, (vec3){1, 0, 0});
+	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 1000, 1, 100, -15, (vec3){1, 0, 0});
 	lighting *light = create_lighting(window, cam, 8096, 8096, 0.5f);
 
 	srand((unsigned int)time(0));
