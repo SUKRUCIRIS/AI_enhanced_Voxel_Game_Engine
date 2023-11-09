@@ -19,6 +19,7 @@ int main(void)
 	world *world_cubes = create_world(hm, 500, 500);
 	free(hm);
 	clock_t timer = 0;
+	clock_t frame_ms = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		timer = clock();
@@ -37,8 +38,8 @@ int main(void)
 		glfwSwapBuffers(window);
 
 		simulate_physic((vec3){0, -9.8f, 0}, 0.01f);
-		while ((clock() / (CLOCKS_PER_SEC / 1000)) - (timer / (CLOCKS_PER_SEC / 1000)) < 16)
-			;
+
+		frame_ms = (clock() - timer) / (CLOCKS_PER_SEC / 1000);
 	}
 
 	delete_camera(cam);
