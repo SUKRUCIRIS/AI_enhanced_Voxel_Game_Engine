@@ -37,6 +37,10 @@ physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float 
 
 void delete_all_physic(void)
 {
+	if (physic_objects == 0)
+	{
+		return;
+	}
 	physic **x = 0;
 	while (get_size_DA(physic_objects) > 0)
 	{
@@ -54,6 +58,10 @@ void apply_force(physic *ph, vec3 force)
 
 void simulate_physic(vec3 gravity, float drag)
 {
+	if (physic_objects == 0)
+	{
+		return;
+	}
 	float milliseconds = 16;
 	physic **x = get_data_DA(physic_objects);
 	vec3 normal;

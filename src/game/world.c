@@ -61,7 +61,7 @@ world *create_world(int **hm, int dimensionx, int dimensionz)
 	{
 		for (int i2 = 0; i2 < dimensionz; i2++)
 		{
-			tmp = create_br_object(x->obj_manager, cube_vertices, 24, cube_indices, 36, 0, 1, 3, 10, 0.1f, 0.5f);
+			tmp = create_br_object(x->obj_manager, cube_vertices, 24, cube_indices, 36, 0, 0, 3, 10, 0.1f, 0.5f);
 
 			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))}, 1);
@@ -76,7 +76,7 @@ world *create_world(int **hm, int dimensionx, int dimensionz)
 					{
 						break;
 					}
-					tmp = create_br_object(x->obj_manager, cube_vertices, 24, cube_indices, 36, 0, 1, 3, 10, 0.1f, 0.5f);
+					tmp = create_br_object(x->obj_manager, cube_vertices, 24, cube_indices, 36, 0, 0, 3, 10, 0.1f, 0.5f);
 					scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 					translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
 				}

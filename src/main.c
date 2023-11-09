@@ -15,7 +15,7 @@ int main(void)
 	lighting *light = create_lighting(window, cam, 8096, 8096, 0.5f);
 
 	srand((unsigned int)time(0));
-	int **hm = create_heightmap(500, 500, 50, rand(), rand(), 200);
+	int **hm = create_heightmap(500, 500, 100, rand(), rand(), 150);
 	world *world_cubes = create_world(hm, 500, 500);
 	free(hm);
 	clock_t timer = 0;
@@ -36,7 +36,7 @@ int main(void)
 
 		glfwSwapBuffers(window);
 
-		// simulate_physic((vec3){0, -9.8f, 0}, 0.01f);
+		simulate_physic((vec3){0, -9.8f, 0}, 0.01f);
 		while ((clock() / (CLOCKS_PER_SEC / 1000)) - (timer / (CLOCKS_PER_SEC / 1000)) < 16)
 			;
 	}

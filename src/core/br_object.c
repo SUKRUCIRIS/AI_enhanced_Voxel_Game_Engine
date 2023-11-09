@@ -72,7 +72,7 @@ br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsig
 	x->vertex_number = vertex_number;
 	x->indice_number = indice_number;
 	pushback_DA(x->manager->objects, &x);
-	if (has_physics)
+	if (has_physics == 1)
 	{
 		vec3 minaabb, maxaabb;
 		for (unsigned int i = 0; i < vertex_number; i++)
@@ -211,7 +211,7 @@ void apply_model_matrix(br_object *obj)
 void scale_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 {
 	glm_scale(obj->model, v);
-	if (effect_physic && obj->phy)
+	if (effect_physic == 1 && obj->phy != 0)
 	{
 		update_br_physic(obj);
 	}
@@ -222,7 +222,7 @@ void scale_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 void rotate_br_object(br_object *obj, float angle, vec3 axis, unsigned char effect_physic)
 {
 	glm_rotate(obj->model, glm_rad(angle), axis);
-	if (effect_physic && obj->phy)
+	if (effect_physic == 1 && obj->phy != 0)
 	{
 		update_br_physic(obj);
 	}
@@ -233,7 +233,7 @@ void rotate_br_object(br_object *obj, float angle, vec3 axis, unsigned char effe
 void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 {
 	glm_translate(obj->model, v);
-	if (effect_physic && obj->phy)
+	if (effect_physic == 1 && obj->phy != 0)
 	{
 		update_br_physic(obj);
 	}
@@ -243,7 +243,7 @@ void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 
 void use_br_object_manager(br_object_manager *manager)
 {
-	if (manager->subdata)
+	if (manager->subdata == 1)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, get_size_DA(manager->vertices) * sizeof(GLfloat), get_data_DA(manager->vertices));

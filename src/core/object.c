@@ -24,7 +24,7 @@ void update_physic(object *obj)
 void scale_object(object *obj, vec3 v, unsigned char effect_physic)
 {
 	glm_scale(obj->model, v);
-	if (effect_physic && obj->phy)
+	if (effect_physic == 1 && obj->phy != 0)
 	{
 		update_physic(obj);
 	}
@@ -33,7 +33,7 @@ void scale_object(object *obj, vec3 v, unsigned char effect_physic)
 void rotate_object(object *obj, float angle, vec3 axis, unsigned char effect_physic)
 {
 	glm_rotate(obj->model, glm_rad(angle), axis);
-	if (effect_physic && obj->phy)
+	if (effect_physic == 1 && obj->phy != 0)
 	{
 		update_physic(obj);
 	}
@@ -42,7 +42,7 @@ void rotate_object(object *obj, float angle, vec3 axis, unsigned char effect_phy
 void translate_object(object *obj, vec3 v, unsigned char effect_physic)
 {
 	glm_translate(obj->model, v);
-	if (effect_physic && obj->phy)
+	if (effect_physic == 1 && obj->phy != 0)
 	{
 		update_physic(obj);
 	}

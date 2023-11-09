@@ -1,5 +1,6 @@
 #include "snoise.h"
 #include <stdlib.h>
+#include <math.h>
 
 #define FASTFLOOR(x) (((int)(x) <= (x)) ? ((int)x) : (((int)x) - 1))
 
