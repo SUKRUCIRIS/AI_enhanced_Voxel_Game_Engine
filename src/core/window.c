@@ -1,6 +1,10 @@
 #include "window.h"
 #include <locale.h>
 
+// make the computer use best gpu
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+
 GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned char vsync)
 {
 	setlocale(LC_ALL, "Turkish"); // for turkish characters
