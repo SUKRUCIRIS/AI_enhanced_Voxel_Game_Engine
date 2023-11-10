@@ -29,35 +29,56 @@ char *get_shader_content(const char *fileName)
 	return shaderContent;
 }
 
-GLuint compile_program(const char *frag_shader_file, const char *vert_shader_file)
+GLuint compile_program(const char *frag_shader_file, const char *vert_shader_file, const char *geo_shader_file)
 {
 	char *vertexShaderSource = get_shader_content(vert_shader_file);
 	char *fragmentShaderSource = get_shader_content(frag_shader_file);
+	char *geoshadersource = 0;
+	if (geo_shader_file != 0)
+	{
+		geoshadersource = get_shader_content(geo_shader_file);
+	}
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, (const char *const *)&vertexShaderSource, 0);
 	glCompileShader(vertexShader);
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, (const char *const *)&fragmentShaderSource, 0);
 	glCompileShader(fragmentShader);
+	GLuint geoshader = 0;
+	if (geo_shader_file != 0)
+	{
+		geoshader = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geoshader, 1, (const char *const *)&geoshadersource, 0);
+		glCompileShader(geoshader);
+	}
 	GLuint shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
+	if (geo_shader_file != 0)
+	{
+		glAttachShader(shaderProgram, geoshader);
+	}
 	glLinkProgram(shaderProgram);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+	if (geo_shader_file != 0)
+	{
+		glDeleteShader(geoshader);
+	}
 	free(vertexShaderSource);
 	free(fragmentShaderSource);
+	free(geoshadersource);
 	return shaderProgram;
 }
 
 void init_programs(void)
 {
-	def_program = compile_program("./shaders/def.fs", "./shaders/def.vs");
-	def_tex_program = compile_program("./shaders/def_tex.fs", "./shaders/def_tex.vs");
-	def_tex_light_program = compile_program("./shaders/def_tex_light.fs", "./shaders/def_tex_light.vs");
-	def_shadowmap_program = compile_program("./shaders/def_shadowmap.fs", "./shaders/def_shadowmap.vs");
-	def_tex_light_br_program = compile_program("./shaders/def_tex_light_br.fs", "./shaders/def_tex_light_br.vs");
-	def_shadowmap_br_program = compile_program("./shaders/def_shadowmap_br.fs", "./shaders/def_shadowmap_br.vs");
+	def_program = compile_program("./shaders/def.fs", "./shaders/def.vs", 0);
+	def_tex_program = compile_program("./shaders/def_tex.fs", "./shaders/def_tex.vs", 0);
+	def_tex_light_program = compile_program("./shaders/def_tex_light.fs", "./shaders/def_tex_light.vs", 0);
+	def_shadowmap_program = compile_program("./shaders/def_shadowmap.fs", "./shaders/def_shadowmap.vs", "./shaders/def_shadowmap.gs");
+	def_tex_light_br_program = compile_program("./shaders/def_tex_light_br.fs", "./shaders/def_tex_light_br.vs", 0);
+	def_shadowmap_br_program = compile_program("./shaders/def_shadowmap.fs", "./shaders/def_shadowmap_br.vs", "./shaders/def_shadowmap.gs");
 }
 
 void destroy_programs(void)

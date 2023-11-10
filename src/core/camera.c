@@ -125,18 +125,18 @@ void run_input_free_camera(camera *cam, GLFWwindow *window)
 	}
 }
 
-void calculate_camera(camera *cam, float range)
+void calculate_camera(camera *cam, float near_plane, float far_plane)
 {
 	vec3 sum;
 	glm_vec3_add(cam->position, cam->orientation, sum);
 	glm_lookat(cam->position, sum, cam->up, cam->view);
-	glm_perspective(glm_rad(cam->FOVdeg), (float)cam->width / cam->height, cam->nearPlane, cam->farPlane * range, cam->projection);
+	glm_perspective(glm_rad(cam->FOVdeg), (float)cam->width / cam->height, near_plane, far_plane, cam->projection);
 	glm_mat4_mul(cam->projection, cam->view, cam->result);
 }
 
 void use_camera(camera *cam, GLuint program)
 {
-	calculate_camera(cam, 1);
+	calculate_camera(cam, cam->nearPlane, cam->farPlane);
 	if (get_index_DA(cam->programs, &program) == UINT_MAX)
 	{
 		pushback_DA(cam->programs, &program);
@@ -144,8 +144,11 @@ void use_camera(camera *cam, GLuint program)
 		pushback_DA(cam->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "camPos");
 		pushback_DA(cam->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "view");
+		pushback_DA(cam->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(cam->uniforms);
-	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 2], 1, GL_FALSE, cam->result[0]);
-	glUniform3f(uniforms[get_index_DA(cam->programs, &program) * 2 + 1], cam->position[0], cam->position[1], cam->position[2]);
+	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 3], 1, GL_FALSE, cam->result[0]);
+	glUniform3f(uniforms[get_index_DA(cam->programs, &program) * 3 + 1], cam->position[0], cam->position[1], cam->position[2]);
+	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 3 + 2], 1, GL_FALSE, cam->view[0]);
 }

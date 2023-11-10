@@ -11,11 +11,11 @@ int main(void)
 	}
 
 	init_programs();
-	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 1000, 1, 100, -15, (vec3){1, 0, 0});
-	lighting *light = create_lighting(window, cam, 8096, 8096, 0.5f);
+	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 500, 1, 100, -15, (vec3){1, 0, 0});
+	lighting *light = create_lighting(window, cam, 4096, 4096, 40, 100, 200, 500);
 
 	srand((unsigned int)time(0));
-	int **hm = create_heightmap(500, 500, 100, rand(), rand(), 150);
+	int **hm = create_heightmap(500, 500, 100, rand(), rand(), 175);
 	world *world_cubes = create_world(hm, 500, 500);
 	free(hm);
 	clock_t timer = 0;

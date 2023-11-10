@@ -1,9 +1,24 @@
 #include "lighting.h"
 #include "float.h"
 
-void calculate_lighting_projection(lighting *l)
+void calculate_lighting_projection(lighting *l, int step)
 {
-	calculate_camera(l->cam, l->shadowrange);
+	if (step == 0)
+	{
+		calculate_camera(l->cam, l->cam->nearPlane, l->cascade0range);
+	}
+	else if (step == 1)
+	{
+		calculate_camera(l->cam, l->cascade0range, l->cascade1range);
+	}
+	else if (step == 2)
+	{
+		calculate_camera(l->cam, l->cascade1range, l->cascade2range);
+	}
+	else if (step == 3)
+	{
+		calculate_camera(l->cam, l->cascade2range, l->cascade3range);
+	}
 	glm_mat4_inv(l->cam->result, l->camresultinv);
 	glm_frustum_corners(l->camresultinv, l->frustumcorners);
 	glm_frustum_center(l->frustumcorners, l->frustumcenter);
@@ -28,15 +43,20 @@ void calculate_lighting_projection(lighting *l)
 		l->maxZ = max(l->maxZ, l->tmp[2]);
 	}
 	glm_ortho(l->minX, l->maxX, l->minY, l->maxY, l->minZ, l->maxZ, l->orthgonalProjection);
-	glm_mat4_mul(l->orthgonalProjection, l->lightView, l->lightProjection);
+	glm_mat4_mul(l->orthgonalProjection, l->lightView, l->lightProjection[step]);
 }
 
-lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float shadowrange)
+lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
+						  float cascade1range, float cascade2range, float cascade3range)
 {
 	lighting *l = malloc(sizeof(lighting));
-	l->shadowrange = shadowrange;
 	l->programs = create_DA(sizeof(GLuint));
 	l->uniforms = create_DA(sizeof(GLint));
+
+	l->cascade0range = cascade0range;
+	l->cascade1range = cascade1range;
+	l->cascade2range = cascade2range;
+	l->cascade3range = cascade3range;
 
 	l->ambient = 0.5f;
 	l->lightColor[0] = 0.5294f;
@@ -66,18 +86,18 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	glGenFramebuffers(1, &l->shadowMapFBO);
 
 	glGenTextures(1, &l->shadowMap);
-	glBindTexture(GL_TEXTURE_2D, l->shadowMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, l->shadowMapWidth, l->shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, l->shadowMap);
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, l->shadowMapWidth, l->shadowMapHeight, 4, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 	float clampColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, clampColor);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, l->shadowMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, l->shadowMap, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, l->shadowMap, 0);
 
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
@@ -90,7 +110,10 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 {
 	if (shadowpass)
 	{
-		calculate_lighting_projection(l);
+		calculate_lighting_projection(l, 0);
+		calculate_lighting_projection(l, 1);
+		calculate_lighting_projection(l, 2);
+		calculate_lighting_projection(l, 3);
 	}
 
 	if (get_index_DA(l->programs, &program) == UINT_MAX)
@@ -108,15 +131,27 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 		pushback_DA(l->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "shadowMap");
 		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "cascade0range");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "cascade1range");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "cascade2range");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "cascade3range");
+		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
 	l->lightDir[2] = -l->lightDir[2];
-	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 6], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 6 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 6 + 2], l->ambient);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 6 + 3], l->specularStrength);
-	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 6 + 4], 1, GL_FALSE, l->lightProjection[0]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 6 + 5], 1);
+	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 10], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 10 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 2], l->ambient);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 3], l->specularStrength);
+	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 10 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 10 + 5], 1);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 6], l->cascade0range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 7], l->cascade1range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 8], l->cascade2range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 9], l->cascade3range);
 	l->lightDir[2] = -l->lightDir[2];
 	if (shadowpass)
 	{
@@ -132,7 +167,7 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 		glViewport(0, 0, l->windowwidth, l->windowheight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, l->shadowMap);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, l->shadowMap);
 	}
 }
 

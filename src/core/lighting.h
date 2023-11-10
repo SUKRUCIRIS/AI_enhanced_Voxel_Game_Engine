@@ -6,6 +6,10 @@
 
 typedef struct lighting
 {
+	float cascade0range;
+	float cascade1range;
+	float cascade2range;
+	float cascade3range;
 	vec4 lightColor;
 	vec3 lightDir;
 	vec3 center;
@@ -13,11 +17,10 @@ typedef struct lighting
 	float ambient;
 	float specularStrength;
 	GLuint shadowMapFBO, shadowMapWidth, shadowMapHeight, shadowMap;
-	float shadowrange;
 	int windowwidth, windowheight;
 	mat4 orthgonalProjection;
 	mat4 lightView;
-	mat4 lightProjection;
+	mat4 lightProjection[4];
 	camera *cam;
 	vec3 lookatinput1;
 	vec4 frustumcorners[8];
@@ -34,9 +37,10 @@ typedef struct lighting
 	DA *uniforms;
 } lighting;
 
-void calculate_lighting_projection(lighting *l);
+void calculate_lighting_projection(lighting *l, int step);
 
-lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float shadowrange);
+lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
+						  float cascade1range, float cascade2range, float cascade3range);
 
 void use_lighting(lighting *l, GLuint program, unsigned char shadowpass);
 
