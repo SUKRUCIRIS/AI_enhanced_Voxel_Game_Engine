@@ -172,6 +172,7 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 	if (shadowpass)
 	{
 		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
 		glBindFramebuffer(GL_FRAMEBUFFER, l->shadowMapFBO);
 		glViewport(0, 0, l->shadowMapWidth, l->shadowMapHeight);
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -179,6 +180,7 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 	else
 	{
 		glCullFace(GL_FRONT);
+		glFrontFace(GL_CCW);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, l->windowwidth, l->windowheight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

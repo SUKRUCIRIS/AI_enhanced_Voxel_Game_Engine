@@ -60,30 +60,14 @@ void main(){
 		{
 			lightCoords = (lightCoords + 1.0f) / 2.0f;
 			float currentDepth = lightCoords.z;
-
-			float bias = max(0.005f * (1.0f - dot(normal, lightDirection)), 0.00028f);
-			const float biasModifier = 0.2f;
-			if(layer==0){
-				bias *= 1 / (cascade0range * biasModifier);
-			}
-			else if(layer==1){
-				bias *= 1 / (cascade1range * biasModifier);
-			}
-			else if(layer==2){
-				bias *= 1 / (cascade2range * biasModifier);
-			}
-			else if(layer==3){
-				bias *= 1 / (cascade3range * biasModifier);
-			}
-
-			int sampleRadius = 2;
+			int sampleRadius = 3;
 			vec2 pixelSize = 1.0 / vec2(textureSize(shadowMap, 0));
 			for(int y = -sampleRadius; y <= sampleRadius; y++)
 			{
 				for(int x = -sampleRadius; x <= sampleRadius; x++)
 				{
 					float closestDepth = texture(shadowMap, vec3(lightCoords.xy + vec2(x, y) * pixelSize, layer)).r;
-					if (currentDepth > closestDepth + bias)
+					if (currentDepth > closestDepth)
 						shadow += 1.0f;     
 				}    
 			}

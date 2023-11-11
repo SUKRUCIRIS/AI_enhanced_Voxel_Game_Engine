@@ -12,7 +12,7 @@ int main(void)
 
 	init_programs();
 	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 1000, 1, 100, -15, (vec3){1, 0, 0});
-	lighting *light = create_lighting(window, cam, 4096, 4096, 10, 50, 250, 1000);
+	lighting *light = create_lighting(window, cam, 4096, 4096, 20, 100, 300, 1000);
 
 	srand((unsigned int)time(0));
 	int **hm = create_heightmap(500, 500, 100, rand(), rand(), 175);
