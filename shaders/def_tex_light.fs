@@ -61,8 +61,8 @@ void main(){
 			lightCoords = (lightCoords + 1.0f) / 2.0f;
 			float currentDepth = lightCoords.z;
 
-			float bias = max(0.05 * (1.0f - dot(normal, lightDirection)), 0.005);
-			const float biasModifier = 0.5f;
+			float bias = max(0.0002f * (1.0f - dot(normal, lightDirection)), 0.00028f);
+			const float biasModifier = 0.2f;
 			if(layer==0){
 				bias *= 1 / (cascade0range * biasModifier);
 			}
@@ -76,7 +76,7 @@ void main(){
 				bias *= 1 / (cascade3range * biasModifier);
 			}
 
-			int sampleRadius = 5;
+			int sampleRadius = 2;
 			vec2 pixelSize = 1.0 / vec2(textureSize(shadowMap, 0));
 			for(int y = -sampleRadius; y <= sampleRadius; y++)
 			{

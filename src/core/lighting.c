@@ -42,6 +42,22 @@ void calculate_lighting_projection(lighting *l, int step)
 		l->minZ = min(l->minZ, l->tmp[2]);
 		l->maxZ = max(l->maxZ, l->tmp[2]);
 	}
+	if (l->minZ < 0)
+	{
+		l->minZ *= l->zMult;
+	}
+	else
+	{
+		l->minZ /= l->zMult;
+	}
+	if (l->maxZ < 0)
+	{
+		l->maxZ /= l->zMult;
+	}
+	else
+	{
+		l->maxZ *= l->zMult;
+	}
 	glm_ortho(l->minX, l->maxX, l->minY, l->maxY, l->minZ, l->maxZ, l->orthgonalProjection);
 	glm_mat4_mul(l->orthgonalProjection, l->lightView, l->lightProjection[step]);
 }
@@ -74,7 +90,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	l->up[0] = 0;
 	l->up[1] = 1;
 	l->up[2] = 0;
-
+	l->zMult = 4.0f;
 	l->cam = cam;
 	glm_normalize(l->lightDir);
 

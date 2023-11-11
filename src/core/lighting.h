@@ -6,6 +6,7 @@
 
 typedef struct lighting
 {
+	float zMult;
 	float cascade0range;
 	float cascade1range;
 	float cascade2range;
