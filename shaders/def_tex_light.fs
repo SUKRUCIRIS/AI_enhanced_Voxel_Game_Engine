@@ -61,7 +61,7 @@ void main(){
 			lightCoords = (lightCoords + 1.0f) / 2.0f;
 			float currentDepth = lightCoords.z;
 
-			float bias = max(0.0002f * (1.0f - dot(normal, lightDirection)), 0.00028f);
+			float bias = max(0.005f * (1.0f - dot(normal, lightDirection)), 0.00028f);
 			const float biasModifier = 0.2f;
 			if(layer==0){
 				bias *= 1 / (cascade0range * biasModifier);
