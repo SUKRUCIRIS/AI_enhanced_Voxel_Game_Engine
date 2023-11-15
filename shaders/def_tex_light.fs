@@ -5,7 +5,7 @@ in vec3 normal;
 in vec3 crntPos;
 
 uniform sampler2D tex0;
-uniform sampler2DArray shadowMap;
+uniform sampler2DArrayShadow shadowMap;
 
 uniform vec4 lightColor;
 uniform vec3 lightDir;
@@ -66,7 +66,7 @@ void main(){
 			{
 				for(int x = -sampleRadius; x <= sampleRadius; x++)
 				{
-					float closestDepth = texture(shadowMap, vec3(lightCoords.xy + vec2(x, y) * pixelSize,layer)).r;
+					float closestDepth = texture(shadowMap, vec4(lightCoords.xy + vec2(x, y) * pixelSize, layer, 0));
 					if (currentDepth > closestDepth)
 						shadow += 1.0f;     
 				}    

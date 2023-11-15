@@ -4,15 +4,16 @@
 
 int main(void)
 {
-	GLFWwindow *window = create_window(1920, 1080, 1, 1);
+	GLFWwindow *window = create_window(1920, 1080, 1, 1, 4);
 	if (window == 0)
 	{
 		return -1;
 	}
 
 	init_programs();
-	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, 1000, 1, 100, -15, (vec3){1, 0, 0});
-	lighting *light = create_lighting(window, cam, 4096, 4096, 20, 100, 300, 1000);
+	float render_distance = 500;
+	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
+	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 25, render_distance / 10, render_distance / 5, render_distance);
 
 	srand((unsigned int)time(0));
 	int **hm = create_heightmap(500, 500, 100, rand(), rand(), 175);
@@ -28,6 +29,7 @@ int main(void)
 
 		glUseProgram(get_def_shadowmap_br_program());
 		use_lighting(light, get_def_shadowmap_br_program(), 1);
+		use_world(world_cubes, get_def_shadowmap_br_program());
 		use_world(world_cubes, get_def_shadowmap_br_program());
 
 		glUseProgram(get_def_tex_light_br_program());

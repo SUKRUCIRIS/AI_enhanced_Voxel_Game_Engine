@@ -5,7 +5,7 @@
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 
-GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned char vsync)
+GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned char vsync, int msaa)
 {
 	setlocale(LC_ALL, "Turkish"); // for turkish characters
 	glfwInit();
@@ -14,7 +14,7 @@ GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_SAMPLES, msaa);
 	GLFWwindow *window = 0;
 	if (is_full)
 	{
