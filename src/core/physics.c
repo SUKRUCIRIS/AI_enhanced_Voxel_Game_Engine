@@ -2,6 +2,12 @@
 #include "dynamic.h"
 #include "object.h"
 #include "br_object.h"
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 DA *physic_objects = 0;
 
@@ -194,7 +200,7 @@ void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
 	vec3 collision_speed_mul;
 	vec3 collision_overlap_mul;
 	int axis = 0;
-	if (__min(__min(overlap[0], overlap[1]), overlap[2]) == overlap[0])
+	if (min(min(overlap[0], overlap[1]), overlap[2]) == overlap[0])
 	{
 		collision_speed_mul[0] = -(x->bounce + y->bounce) / 2;
 		collision_speed_mul[1] = 1;
@@ -205,7 +211,7 @@ void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
 		collision_overlap_mul[2] = 0;
 		axis = 0;
 	}
-	else if (__min(__min(overlap[0], overlap[1]), overlap[2]) == overlap[1])
+	else if (min(min(overlap[0], overlap[1]), overlap[2]) == overlap[1])
 	{
 		collision_speed_mul[0] = 1;
 		collision_speed_mul[1] = -(x->bounce + y->bounce) / 2;

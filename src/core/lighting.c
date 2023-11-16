@@ -1,5 +1,11 @@
 #include "lighting.h"
 #include "float.h"
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 void calculate_lighting_projection(lighting *l, int step)
 {
