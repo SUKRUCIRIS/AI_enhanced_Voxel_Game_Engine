@@ -1,4 +1,5 @@
 # ŞÜKRÜ ÇİRİŞ 18401785
+
 # HOW TO BUILD?
 
 ## Build project files:
@@ -16,17 +17,19 @@ make -j`nproc`
 ```
 
 You need to install pthread if you don't have. I run this command on ubuntu:
+
 ```
 sudo apt-get install libpthread-stubs0-dev
 ```
 
 You need to install your platform's windowing system dev package to compile glfw if you don't have.
 For example I run this command on ubuntu x11:
+
 ```
 sudo apt-get install xorg-dev
 ```
 
-# Compile with msvc on windows:
+## Compile with msvc on windows:
 
 Make sure that you use native tools command prompt for vs.
 
