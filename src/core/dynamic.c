@@ -45,15 +45,12 @@ void pushback_DA(DA *da, void *item)
 			da->memory_size++;
 		}
 	}
-	else
+	else if (da->size + 1 > da->memory_size)
 	{
-		if (da->size + 1 > da->memory_size)
+		tmp = realloc(da->items, (da->memory_size * 2) * da->itemsize);
+		if (tmp != 0)
 		{
-			tmp = realloc(da->items, (da->memory_size * 2) * da->itemsize);
-			if (tmp != 0)
-			{
-				da->memory_size *= 2;
-			}
+			da->memory_size *= 2;
 		}
 	}
 	if (tmp != 0)
@@ -193,11 +190,19 @@ void clear_DA(DA *da)
 
 unsigned int get_index_DA(DA *da, void *item)
 {
-	for (unsigned int i = 0; i < da->size; i++)
+	if (da->size == 0)
+	{
+		return UINT_MAX;
+	}
+	for (unsigned int i = da->size - 1; i >= 0; i--)
 	{
 		if (memcmp((char *)(da->items) + i * da->itemsize, item, da->itemsize) == 0)
 		{
 			return i;
+		}
+		if (i == 0)
+		{
+			break;
 		}
 	}
 	return UINT_MAX;

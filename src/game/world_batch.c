@@ -1,4 +1,4 @@
-#include "world.h"
+#include "world_batch.h"
 
 GLfloat cube_vertices[] = {
 	-1, -1, -1, 0, 0, 0, 0, 1, 0, // A 0
@@ -116,9 +116,9 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 	}
 }
 
-world *create_world(int **hm, int dimensionx, int dimensionz)
+world_batch *create_world_batch(int **hm, int dimensionx, int dimensionz)
 {
-	world *x = malloc(sizeof(world));
+	world_batch *x = malloc(sizeof(world_batch));
 	x->obj_manager = create_br_object_manager();
 	x->tex_manager = create_br_texture_manager();
 
@@ -151,13 +151,13 @@ world *create_world(int **hm, int dimensionx, int dimensionz)
 	return x;
 }
 
-void use_world(world *w, GLuint program)
+void use_world_batch(world_batch *w, GLuint program)
 {
 	use_br_texture_manager(w->tex_manager, program);
 	use_br_object_manager(w->obj_manager);
 }
 
-void delete_world(world *w)
+void delete_world_batch(world_batch *w)
 {
 	delete_br_object_manager(w->obj_manager);
 	delete_br_texture_manager(w->tex_manager);

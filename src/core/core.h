@@ -18,3 +18,4 @@
 #include "br_object.h"
 #include "br_texture.h"
 #include "snoise.h"
+#include "ins_object.h"

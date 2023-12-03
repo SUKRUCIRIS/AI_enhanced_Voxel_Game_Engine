@@ -88,29 +88,29 @@ br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsig
 			}
 			else
 			{
-				if (vertices[i * 8] > maxaabb[0])
+				if (vertices[i * 9] > maxaabb[0])
 				{
-					maxaabb[0] = vertices[i * 8];
+					maxaabb[0] = vertices[i * 9];
 				}
-				if (vertices[i * 8 + 1] > maxaabb[1])
+				if (vertices[i * 9 + 1] > maxaabb[1])
 				{
-					maxaabb[1] = vertices[i * 8 + 1];
+					maxaabb[1] = vertices[i * 9 + 1];
 				}
-				if (vertices[i * 8 + 2] > maxaabb[2])
+				if (vertices[i * 9 + 2] > maxaabb[2])
 				{
-					maxaabb[2] = vertices[i * 8 + 2];
+					maxaabb[2] = vertices[i * 9 + 2];
 				}
-				if (vertices[i * 8] < minaabb[0])
+				if (vertices[i * 9] < minaabb[0])
 				{
-					minaabb[0] = vertices[i * 8];
+					minaabb[0] = vertices[i * 9];
 				}
-				if (vertices[i * 8 + 1] < minaabb[1])
+				if (vertices[i * 9 + 1] < minaabb[1])
 				{
-					minaabb[1] = vertices[i * 8 + 1];
+					minaabb[1] = vertices[i * 9 + 1];
 				}
-				if (vertices[i * 8 + 2] < minaabb[2])
+				if (vertices[i * 9 + 2] < minaabb[2])
 				{
-					minaabb[2] = vertices[i * 8 + 2];
+					minaabb[2] = vertices[i * 9 + 2];
 				}
 			}
 		}
