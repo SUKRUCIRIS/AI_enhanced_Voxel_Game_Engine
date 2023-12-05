@@ -204,79 +204,85 @@ void prepare_render_ins_object_manager(ins_object_manager *manager)
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	// generate buffers
-	glGenVertexArrays(1, &(manager->VAO));
-	glGenBuffers(1, &(manager->VBO_geometry));
-	glGenBuffers(1, &(manager->VBO_model_matrix));
-	glGenBuffers(1, &(manager->VBO_normal_matrix));
-	glGenBuffers(1, &(manager->VBO_texture));
-	glGenBuffers(1, &(manager->EBO));
-
-	// start assigning data
-	glBindVertexArray(manager->VAO);
-
-	// assigning index buffer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, manager->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, get_size_DA(manager->indices) * sizeof(GLuint), get_data_DA(manager->indices), GL_STATIC_DRAW);
-
-	// assigning vertex buffer
-	glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_geometry);
-	glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->vertices) * sizeof(GLfloat), get_data_DA(manager->vertices), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-
-	// assigning model matrix
-	glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_model_matrix);
-	glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->models) * sizeof(mat4), get_data_DA(manager->models), GL_STATIC_DRAW);
-	for (unsigned int i = 0; i < 4; ++i)
+	if (get_size_DA(manager->objects) > 0)
 	{
-		glEnableVertexAttribArray(3 + i);
-		glVertexAttribPointer(3 + i, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void *)(sizeof(float) * i * 4));
-		glVertexAttribDivisor(3 + i, 1); // This attribute is instanced
+		// generate buffers
+		glGenVertexArrays(1, &(manager->VAO));
+		glGenBuffers(1, &(manager->VBO_geometry));
+		glGenBuffers(1, &(manager->VBO_model_matrix));
+		glGenBuffers(1, &(manager->VBO_normal_matrix));
+		glGenBuffers(1, &(manager->VBO_texture));
+		glGenBuffers(1, &(manager->EBO));
+
+		// start assigning data
+		glBindVertexArray(manager->VAO);
+
+		// assigning index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, manager->EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, get_size_DA(manager->indices) * sizeof(GLuint), get_data_DA(manager->indices), GL_STATIC_DRAW);
+
+		// assigning vertex buffer
+		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_geometry);
+		glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->vertices) * sizeof(GLfloat), get_data_DA(manager->vertices), GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+
+		// assigning model matrix
+		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_model_matrix);
+		glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->models) * sizeof(mat4), get_data_DA(manager->models), GL_STATIC_DRAW);
+		for (unsigned int i = 0; i < 4; ++i)
+		{
+			glEnableVertexAttribArray(3 + i);
+			glVertexAttribPointer(3 + i, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void *)(sizeof(float) * i * 4));
+			glVertexAttribDivisor(3 + i, 1); // This attribute is instanced
+		}
+
+		// assigning normal matrix
+		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_normal_matrix);
+		glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->normals) * sizeof(mat4), get_data_DA(manager->normals), GL_STATIC_DRAW);
+		for (unsigned int i = 0; i < 4; ++i)
+		{
+			glEnableVertexAttribArray(7 + i);
+			glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void *)(sizeof(float) * i * 4));
+			glVertexAttribDivisor(7 + i, 1); // This attribute is instanced
+		}
+
+		// assigning texture index
+		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_texture);
+		glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->textures) * sizeof(GLfloat), get_data_DA(manager->textures), GL_STATIC_DRAW);
+		glEnableVertexAttribArray(11);
+		glVertexAttribPointer(11, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
+		glVertexAttribDivisor(11, 1); // This attribute is instanced
+
+		// end assigning data
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
-
-	// assigning normal matrix
-	glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_normal_matrix);
-	glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->normals) * sizeof(mat4), get_data_DA(manager->normals), GL_STATIC_DRAW);
-	for (unsigned int i = 0; i < 4; ++i)
-	{
-		glEnableVertexAttribArray(7 + i);
-		glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void *)(sizeof(float) * i * 4));
-		glVertexAttribDivisor(7 + i, 1); // This attribute is instanced
-	}
-
-	// assigning texture index
-	glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_texture);
-	glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->textures) * sizeof(GLfloat), get_data_DA(manager->textures), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(11);
-	glVertexAttribPointer(11, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), 0);
-	glVertexAttribDivisor(11, 1); // This attribute is instanced
-
-	// end assigning data
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void use_ins_object_manager(ins_object_manager *manager)
 {
-	if (manager->subdata == 1)
+	if (get_size_DA(manager->objects) > 0)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_model_matrix);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, get_size_DA(manager->models) * sizeof(mat4), get_data_DA(manager->models));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		if (manager->subdata == 1)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_model_matrix);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, get_size_DA(manager->models) * sizeof(mat4), get_data_DA(manager->models));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_normal_matrix);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, get_size_DA(manager->normals) * sizeof(mat4), get_data_DA(manager->normals));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, manager->VBO_normal_matrix);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, get_size_DA(manager->normals) * sizeof(mat4), get_data_DA(manager->normals));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		manager->subdata = 0;
+			manager->subdata = 0;
+		}
+		glBindVertexArray(manager->VAO);
+		glDrawElementsInstanced(GL_TRIANGLES, get_size_DA(manager->indices), GL_UNSIGNED_INT, 0, get_size_DA(manager->objects));
+		glBindVertexArray(0);
 	}
-	glBindVertexArray(manager->VAO);
-	glDrawElementsInstanced(GL_TRIANGLES, get_size_DA(manager->indices), GL_UNSIGNED_INT, 0, get_size_DA(manager->objects));
-	glBindVertexArray(0);
 }

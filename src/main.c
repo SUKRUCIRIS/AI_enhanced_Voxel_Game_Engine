@@ -14,16 +14,17 @@ int main(void)
 	}
 
 	init_programs();
-	float render_distance = 500;
+	float render_distance = 1000;
+	int world_size = 1000;
 	camera *cam = create_camera(1920, 1080, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
 	lighting *light = create_lighting(window, cam, 8192, 8192, render_distance / 50, render_distance / 25, render_distance / 10, render_distance / 2);
 
 	srand((unsigned int)time(0));
-	int **hm = create_heightmap(500, 500, 100, rand(), rand(), 175);
+	int **hm = create_heightmap(world_size, world_size, 100, rand(), rand(), 175);
 #if USE_INSTANCED == 0
-	world_batch *world_cubes = create_world_batch(hm, 500, 500);
+	world_batch *world_cubes = create_world_batch(hm, world_size, world_size);
 #elif USE_INSTANCED == 1
-	world_instanced *world_cubes = create_world_instanced(hm, 500, 500);
+	world_instanced *world_cubes = create_world_instanced(hm, world_size, world_size);
 #endif
 	free(hm);
 	clock_t timer = 0;

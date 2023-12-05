@@ -6,25 +6,28 @@ void prepare_render_br_object_manager(br_object_manager *manager)
 	glDeleteBuffers(1, &(manager->VBO));
 	glDeleteBuffers(1, &(manager->EBO));
 	glBindVertexArray(0);
-	glGenVertexArrays(1, &(manager->VAO));
-	glGenBuffers(1, &(manager->VBO));
-	glGenBuffers(1, &(manager->EBO));
-	glBindVertexArray(manager->VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, manager->VBO);
-	glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->vertices) * sizeof(GLfloat), get_data_DA(manager->vertices), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), 0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void *)(8 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(3);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, manager->EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, get_size_DA(manager->indices) * sizeof(GLuint), get_data_DA(manager->indices), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	if (get_size_DA(manager->objects) > 0)
+	{
+		glGenVertexArrays(1, &(manager->VAO));
+		glGenBuffers(1, &(manager->VBO));
+		glGenBuffers(1, &(manager->EBO));
+		glBindVertexArray(manager->VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO);
+		glBufferData(GL_ARRAY_BUFFER, get_size_DA(manager->vertices) * sizeof(GLfloat), get_data_DA(manager->vertices), GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void *)(5 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void *)(8 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(3);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, manager->EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, get_size_DA(manager->indices) * sizeof(GLuint), get_data_DA(manager->indices), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
 }
 
 br_object_manager *create_br_object_manager(void)
@@ -243,15 +246,18 @@ void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 
 void use_br_object_manager(br_object_manager *manager)
 {
-	if (manager->subdata == 1)
+	if (get_size_DA(manager->objects) > 0)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, manager->VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, get_size_DA(manager->vertices) * sizeof(GLfloat), get_data_DA(manager->vertices));
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		manager->subdata = 0;
-	}
+		if (manager->subdata == 1)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, manager->VBO);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, get_size_DA(manager->vertices) * sizeof(GLfloat), get_data_DA(manager->vertices));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			manager->subdata = 0;
+		}
 
-	glBindVertexArray(manager->VAO);
-	glDrawElements(GL_TRIANGLES, get_size_DA(manager->indices), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+		glBindVertexArray(manager->VAO);
+		glDrawElements(GL_TRIANGLES, get_size_DA(manager->indices), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+	}
 }

@@ -3,7 +3,11 @@
 
 typedef struct world_instanced
 {
-	ins_object_manager *obj_manager;
+	ins_object_manager *obj_manager_left;
+	ins_object_manager *obj_manager_right;
+	ins_object_manager *obj_manager_front;
+	ins_object_manager *obj_manager_back;
+	ins_object_manager *obj_manager_top;
 	br_texture_manager *tex_manager;
 } world_instanced;
 
