@@ -22,6 +22,10 @@ set(CGLM_STATIC ON CACHE BOOL "" FORCE)
 set(CGLM_USE_C99 ON CACHE BOOL "" FORCE)
 set(CGLM_USE_TEST OFF CACHE BOOL "" FORCE)
 
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(USE_STATIC_CRT ON CACHE BOOL "" FORCE)
+
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_C_FLAGS "-O3 -m64 -Wall -lxcb")
     set(CMAKE_EXE_LINKER_FLAGS "-m64 -static")
@@ -41,12 +45,14 @@ endif()
 
 add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/cglm)
+add_subdirectory(third_party/assimp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/cglm/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/assimp/include)
 
 FILE(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 add_executable(opengl_voxel_gsu ${MY_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/src/glad.c)
