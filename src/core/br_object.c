@@ -68,6 +68,17 @@ br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsig
 	{
 		return 0;
 	}
+	GLuint *noindice = 0;
+	if (indices == 0 || indice_number == 0)
+	{
+		indice_number = vertex_number;
+		noindice = (GLuint *)malloc(sizeof(GLuint) * indice_number);
+		for (unsigned int i = 0; i < indice_number; i++)
+		{
+			noindice[i] = i;
+		}
+		indices = noindice;
+	}
 	br_object *x = malloc(sizeof(br_object));
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->model);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->normal);
@@ -144,6 +155,7 @@ br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsig
 	{
 		vertices[9 * i + 8] = oldtext_index;
 	}
+	free(noindice);
 	return x;
 }
 
