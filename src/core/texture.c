@@ -1,4 +1,6 @@
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #include "../../third_party/stb/stb_image.h"
 #include "texture.h"
 

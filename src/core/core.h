@@ -19,3 +19,4 @@
 #include "br_texture.h"
 #include "snoise.h"
 #include "ins_object.h"
+#include "load_object.h"
