@@ -140,7 +140,7 @@ br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsig
 		vertices[9 * i + 8] = texture_index;
 	}
 	x->vertex_start = get_size_DA(x->manager->vertices) / 9;
-	x->indice_start = get_size_DA(x->manager->indices) / 9;
+	x->indice_start = get_size_DA(x->manager->indices);
 	pushback_many_DA(x->manager->vertices, vertices, vertex_number * 9);
 	for (unsigned int i = 0; i < indice_number; i++)
 	{
@@ -165,6 +165,7 @@ void delete_br_object(br_object *obj)
 	remove_many_DA(obj->manager->vertices, obj->vertex_start * 9, obj->vertex_start * 9 - 1 + obj->vertex_number * 9);
 	remove_many_DA(obj->manager->indices, obj->indice_start, obj->indice_start - 1 + obj->indice_number);
 	unsigned int index = get_index_DA(obj->manager->objects, &obj);
+	GLuint *indices = get_data_DA(obj->manager->indices);
 	if (index != get_size_DA(obj->manager->objects) - 1)
 	{
 		br_object **objs = get_data_DA(obj->manager->objects);
@@ -172,6 +173,11 @@ void delete_br_object(br_object *obj)
 		{
 			objs[i]->vertex_start -= obj->vertex_number;
 			objs[i]->indice_start -= obj->indice_number;
+
+			for (unsigned int i2 = objs[i]->indice_start; i2 < objs[i]->indice_start + objs[i]->indice_number; i2++)
+			{
+				indices[i2] -= obj->vertex_number;
+			}
 		}
 	}
 	remove_DA(obj->manager->objects, index);
