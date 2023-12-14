@@ -14,7 +14,7 @@ br_texture_manager *create_br_texture_manager(void)
 	return x;
 }
 
-br_texture *create_br_texture(br_texture_manager *manager, const char *path, GLenum texType, GLenum pixelType,
+br_texture *create_br_texture(br_texture_manager *manager, const char *path, GLenum texType,
 							  GLint min_filter, GLint mag_filter, int index)
 {
 	if (get_size_DA(manager->textures) >= 32)
@@ -50,9 +50,35 @@ br_texture *create_br_texture(br_texture_manager *manager, const char *path, GLe
 	glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, mag_filter);
 	glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexImage2D(texType, 0, GL_RGBA, widthImg, heightImg, 0, format, pixelType, bytes);
+	glTexImage2D(texType, 0, GL_RGBA, widthImg, heightImg, 0, format, GL_UNSIGNED_BYTE, bytes);
 	glGenerateMipmap(texType);
 	stbi_image_free(bytes);
+	glBindTexture(texType, 0);
+	tex->type = texType;
+	tex->manager = manager;
+	pushback_DA(manager->textures, &tex);
+	manager->indices[get_index_DA(manager->textures, &tex)] = index;
+	return tex;
+}
+
+br_texture *create_br_texture_memory(br_texture_manager *manager, unsigned char *data, int width, int height, GLenum texType,
+									 GLint min_filter, GLint mag_filter, int index)
+{
+	if (get_size_DA(manager->textures) >= 32)
+	{
+		return 0;
+	}
+	glBindTexture(texType, 0);
+	br_texture *tex = calloc(1, sizeof(br_texture));
+	glGenTextures(1, &(tex->id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(texType, tex->id);
+	glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, min_filter);
+	glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, mag_filter);
+	glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexImage2D(texType, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(texType);
 	glBindTexture(texType, 0);
 	tex->type = texType;
 	tex->manager = manager;

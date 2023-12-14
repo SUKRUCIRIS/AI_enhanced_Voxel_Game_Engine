@@ -23,8 +23,8 @@ int main(void)
 	int **hm = create_heightmap(world_size, world_size, 100, rand(), rand(), 175);
 #if USE_INSTANCED == 0
 	world_batch *world_cubes = create_world_batch(hm, world_size, world_size);
-	br_scene gsu = load_object_br(world_cubes->obj_manager, world_cubes->tex_manager, "./models/gsu.fbx", 0, 1, 0, 3, 10, 0.1f, 0.5f);
-	for (unsigned int i = 0; i < gsu.count; i++)
+	br_scene gsu = load_object_br(world_cubes->obj_manager, world_cubes->tex_manager, "./models/gsu.fbx", 2, 1, 0, 3, 10, 0.1f, 0.5f);
+	for (unsigned int i = 0; i < gsu.mesh_count; i++)
 	{
 		scale_br_object(gsu.meshes[i], (vec3){0.01f, 0.01f, 0.01f}, 0);
 		translate_br_object(gsu.meshes[i], (vec3){0, 100, 0}, 0);

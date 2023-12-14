@@ -123,7 +123,7 @@ world_batch *create_world_batch(int **hm, int dimensionx, int dimensionz)
 	x->tex_manager = create_br_texture_manager();
 
 	// textures
-	create_br_texture(x->tex_manager, "./textures/grass.jpg", GL_TEXTURE_2D, GL_UNSIGNED_BYTE, GL_NEAREST, GL_NEAREST, 0);
+	create_br_texture(x->tex_manager, "./textures/grass.jpg", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 0);
 
 	// objects
 	for (int i = 0; i < dimensionx; i++)

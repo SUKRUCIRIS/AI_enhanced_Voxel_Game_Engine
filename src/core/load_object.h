@@ -5,7 +5,9 @@
 typedef struct br_scene
 {
 	br_object **meshes;
-	unsigned int count;
+	br_texture **textures;
+	unsigned int mesh_count;
+	unsigned int texture_count;
 } br_scene;
 
 br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text_manager,

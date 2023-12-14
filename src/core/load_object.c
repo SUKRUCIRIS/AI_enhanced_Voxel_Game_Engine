@@ -8,7 +8,6 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 						unsigned char priority, float mass, float friction, float bounce)
 {
 	br_scene res;
-	text_manager;
 	struct aiScene *scene = 0;
 	if (flip_order == 0)
 	{
@@ -20,8 +19,51 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 		scene = (struct aiScene *)aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality |
 														 aiProcess_TransformUVCoords | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder);
 	}
-	res.count = scene->mNumMeshes;
-	res.meshes = (br_object **)malloc(sizeof(br_object *) * res.count);
+	res.mesh_count = scene->mNumMeshes;
+	res.texture_count = scene->mNumMaterials;
+	res.textures = (br_texture **)malloc(sizeof(br_texture *) * res.texture_count);
+	res.meshes = (br_object **)malloc(sizeof(br_object *) * res.mesh_count);
+	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
+	{
+		struct aiString *texturePath = 0;
+		if (aiGetMaterialTexture(scene->mMaterials[i], aiTextureType_DIFFUSE, 0, texturePath, 0, 0, 0, 0, 0, 0) == aiReturn_SUCCESS)
+		{
+			unsigned char embedded = 0;
+			for (unsigned int k = 0; k < scene->mNumTextures; k++)
+			{
+				if (strcmp(scene->mTextures[k]->mFilename.data, texturePath->data) == 0)
+				{
+					embedded = 1;
+					int width, height;
+					unsigned char *data;
+					width = scene->mTextures[k]->mWidth;
+					height = scene->mTextures[k]->mHeight;
+					if (height == 0)
+					{
+						break;
+					}
+					data = malloc(sizeof(unsigned char) * width * height * 4);
+					for (int j = 0; j < width * height; j++)
+					{
+						data[j * 4] = scene->mTextures[k]->pcData[j].r;
+						data[j * 4 + 1] = scene->mTextures[k]->pcData[j].g;
+						data[j * 4 + 2] = scene->mTextures[k]->pcData[j].b;
+						data[j * 4 + 3] = scene->mTextures[k]->pcData[j].a;
+					}
+					res.textures[i] = create_br_texture_memory(text_manager, data, width, height, GL_TEXTURE_2D, GL_NEAREST,
+															   GL_NEAREST, (int)texture_start_index + (int)i);
+					free(data);
+					break;
+				}
+			}
+			if (embedded == 0)
+			{
+				char ext_path[1024] = {0};
+				sprintf(ext_path, "./models/%s", texturePath->data);
+				res.textures[i] = create_br_texture(text_manager, ext_path, GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, (int)texture_start_index + (int)i);
+			}
+		}
+	}
 	for (unsigned int i = 0; i < scene->mNumMeshes; i++)
 	{
 		unsigned int vertex_number = scene->mMeshes[i]->mNumVertices;
@@ -39,7 +81,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			vertices[k * 9 + 6] = scene->mMeshes[i]->mNormals[k].y;
 			vertices[k * 9 + 7] = scene->mMeshes[i]->mNormals[k].z;
 
-			vertices[k * 9 + 8] = 0;
+			vertices[k * 9 + 8] = scene->mMeshes[i]->mMaterialIndex + texture_start_index;
 		}
 		unsigned int indice_number = 0;
 		for (unsigned int k = 0; k < scene->mMeshes[i]->mNumFaces; k++)
@@ -57,7 +99,8 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			}
 		}
 		res.meshes[i] = create_br_object(obj_manager, vertices, vertex_number, indices, indice_number,
-										 texture_start_index, has_physics, priority, mass, friction, bounce);
+										 scene->mMeshes[i]->mMaterialIndex + texture_start_index,
+										 has_physics, priority, mass, friction, bounce);
 		free(vertices);
 		free(indices);
 	}
