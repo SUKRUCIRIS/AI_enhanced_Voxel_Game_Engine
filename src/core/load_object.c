@@ -25,13 +25,14 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 	res.meshes = (br_object **)malloc(sizeof(br_object *) * res.mesh_count);
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 	{
-		struct aiString *texturePath = 0;
-		if (aiGetMaterialTexture(scene->mMaterials[i], aiTextureType_DIFFUSE, 0, texturePath, 0, 0, 0, 0, 0, 0) == aiReturn_SUCCESS)
+		struct aiString texturePath = {0};
+		struct aiColor4D diffuseColor = {0};
+		if (aiGetMaterialTexture(scene->mMaterials[i], aiTextureType_DIFFUSE, 0, &texturePath, 0, 0, 0, 0, 0, 0) == aiReturn_SUCCESS)
 		{
 			unsigned char embedded = 0;
 			for (unsigned int k = 0; k < scene->mNumTextures; k++)
 			{
-				if (strcmp(scene->mTextures[k]->mFilename.data, texturePath->data) == 0)
+				if (strcmp(scene->mTextures[k]->mFilename.data, texturePath.data) == 0)
 				{
 					embedded = 1;
 					int width, height;
@@ -59,9 +60,19 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			if (embedded == 0)
 			{
 				char ext_path[1024] = {0};
-				sprintf(ext_path, "./models/%s", texturePath->data);
+				sprintf(ext_path, "./models/%s", texturePath.data);
 				res.textures[i] = create_br_texture(text_manager, ext_path, GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, (int)texture_start_index + (int)i);
 			}
+		}
+		else if (aiGetMaterialColor(scene->mMaterials[i], AI_MATKEY_COLOR_DIFFUSE, &diffuseColor) == AI_SUCCESS)
+		{
+			unsigned char data[4];
+			data[0] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.r * 256.0)));
+			data[1] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.g * 256.0)));
+			data[2] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.b * 256.0)));
+			data[3] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.a * 256.0)));
+			res.textures[i] = create_br_texture_memory(text_manager, data, 1, 1, GL_TEXTURE_2D, GL_NEAREST,
+													   GL_NEAREST, (int)texture_start_index + (int)i);
 		}
 	}
 	for (unsigned int i = 0; i < scene->mNumMeshes; i++)
@@ -99,7 +110,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			}
 		}
 		res.meshes[i] = create_br_object(obj_manager, vertices, vertex_number, indices, indice_number,
-										 scene->mMeshes[i]->mMaterialIndex + texture_start_index,
+										 scene->mMeshes[i]->mMaterialIndex + texture_start_index - 1,
 										 has_physics, priority, mass, friction, bounce);
 		free(vertices);
 		free(indices);
