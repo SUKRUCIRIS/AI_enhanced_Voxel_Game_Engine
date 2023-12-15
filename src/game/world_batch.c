@@ -116,7 +116,7 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 	}
 }
 
-world_batch *create_world_batch(int **hm, int dimensionx, int dimensionz)
+world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz, int dimensionx, int dimensionz)
 {
 	world_batch *x = malloc(sizeof(world_batch));
 	x->obj_manager = create_br_object_manager();
@@ -126,9 +126,9 @@ world_batch *create_world_batch(int **hm, int dimensionx, int dimensionz)
 	create_br_texture(x->tex_manager, "./textures/grass.jpg", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 0);
 
 	// objects
-	for (int i = 0; i < dimensionx; i++)
+	for (int i = startx; i < startx + widthx; i++)
 	{
-		for (int i2 = 0; i2 < dimensionz; i2++)
+		for (int i2 = startz; i2 < startz + widthz; i2++)
 		{
 			create_surfaces(x->obj_manager, i, i2, hm[i][i2], dimensionx, dimensionz, hm);
 			if (hm[i][i2] != 0)

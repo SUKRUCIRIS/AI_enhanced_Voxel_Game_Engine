@@ -120,7 +120,7 @@ float snoise2(float x, float y)
 	return 40.0f * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
 }
 
-int **create_heightmap(int dimensionx, int dimensionz, int maxy, int seedx, int seedz, float precision)
+int **create_heightmap(int dimensionx, int dimensionz, int maxy, int seedx, int seedz, float precision, int border_add)
 {
 	int **hm = malloc(sizeof(int *) * dimensionx);
 	for (int i = 0; i < dimensionx; i++)
@@ -129,6 +129,10 @@ int **create_heightmap(int dimensionx, int dimensionz, int maxy, int seedx, int 
 		for (int i2 = 0; i2 < dimensionz; i2++)
 		{
 			hm[i][i2] = (int)floorf(((snoise2((float)(seedx + i) / precision, (float)(seedz + i2) / precision) + 1) / 2.0f) * maxy);
+			if (i == 0 || i == dimensionx - 1 || i2 == 0 || i2 == dimensionz - 1)
+			{
+				hm[i][i2] += border_add;
+			}
 		}
 	}
 

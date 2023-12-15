@@ -1,6 +1,7 @@
 #pragma once
 #include "br_object.h"
 #include "br_texture.h"
+#include "../../third_party/assimp/include/assimp/scene.h"
 
 typedef struct br_scene
 {
@@ -11,5 +12,9 @@ typedef struct br_scene
 } br_scene;
 
 br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text_manager,
-						const char *path, float texture_start_index, unsigned char flip_order, unsigned char has_physics,
+						struct aiScene *scene, float texture_start_index, unsigned char has_physics,
 						unsigned char priority, float mass, float friction, float bounce);
+
+struct aiScene *load_model(const char *path, unsigned char flip_order);
+
+void free_model(struct aiScene *scene);

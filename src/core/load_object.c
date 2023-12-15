@@ -1,24 +1,31 @@
 #include "load_object.h"
 #include "../../third_party/assimp/include/assimp/cimport.h"
-#include "../../third_party/assimp/include/assimp/scene.h"
 #include "../../third_party/assimp/include/assimp/postprocess.h"
 
-br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text_manager,
-						const char *path, float texture_start_index, unsigned char flip_order, unsigned char has_physics,
-						unsigned char priority, float mass, float friction, float bounce)
+struct aiScene *load_model(const char *path, unsigned char flip_order)
 {
-	br_scene res;
-	struct aiScene *scene = 0;
 	if (flip_order == 0)
 	{
-		scene = (struct aiScene *)aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality |
-														 aiProcess_TransformUVCoords | aiProcess_PreTransformVertices);
+		return (struct aiScene *)aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality |
+														aiProcess_TransformUVCoords | aiProcess_PreTransformVertices);
 	}
 	else
 	{
-		scene = (struct aiScene *)aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality |
-														 aiProcess_TransformUVCoords | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder);
+		return (struct aiScene *)aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality |
+														aiProcess_TransformUVCoords | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder);
 	}
+}
+
+void free_model(struct aiScene *scene)
+{
+	aiReleaseImport(scene);
+}
+
+br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text_manager,
+						struct aiScene *scene, float texture_start_index, unsigned char has_physics,
+						unsigned char priority, float mass, float friction, float bounce)
+{
+	br_scene res;
 	res.mesh_count = scene->mNumMeshes;
 	res.texture_count = scene->mNumMaterials;
 	res.textures = (br_texture **)malloc(sizeof(br_texture *) * res.texture_count);
@@ -67,10 +74,10 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 		else if (aiGetMaterialColor(scene->mMaterials[i], AI_MATKEY_COLOR_DIFFUSE, &diffuseColor) == AI_SUCCESS)
 		{
 			unsigned char data[4];
-			data[0] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.r * 256.0)));
-			data[1] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.g * 256.0)));
-			data[2] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.b * 256.0)));
-			data[3] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.a * 256.0)));
+			data[0] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.r * 256.0f)));
+			data[1] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.g * 256.0f)));
+			data[2] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.b * 256.0f)));
+			data[3] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.a * 256.0f)));
 			res.textures[i] = create_br_texture_memory(text_manager, data, 1, 1, GL_TEXTURE_2D, GL_NEAREST,
 													   GL_NEAREST, (int)texture_start_index + (int)i);
 		}
@@ -115,6 +122,5 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 		free(vertices);
 		free(indices);
 	}
-	aiReleaseImport(scene);
 	return res;
 }

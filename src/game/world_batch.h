@@ -7,7 +7,7 @@ typedef struct world_batch
 	br_texture_manager *tex_manager;
 } world_batch;
 
-world_batch *create_world_batch(int **hm, int dimensionx, int dimensionz);
+world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz, int dimensionx, int dimensionz);
 
 void use_world_batch(world_batch *w, GLuint program);
 

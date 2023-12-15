@@ -17,6 +17,12 @@ GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
 	glfwWindowHint(GLFW_SAMPLES, msaa);
+	if (width <= 0 || height <= 0)
+	{
+		const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		width = mode->width;
+		height = mode->height;
+	}
 	GLFWwindow *window = 0;
 	if (is_full)
 	{

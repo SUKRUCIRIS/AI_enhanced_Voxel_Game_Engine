@@ -1,6 +1,7 @@
 #include "dynamic.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 struct DA
 {
@@ -74,6 +75,7 @@ void pushback_many_DA(DA *da, void *items, unsigned int count)
 		if (tmp != 0)
 		{
 			da->memory_size += count;
+			da->items = tmp;
 		}
 	}
 	else
@@ -84,14 +86,11 @@ void pushback_many_DA(DA *da, void *items, unsigned int count)
 			if (tmp != 0)
 			{
 				da->memory_size *= 2;
+				da->items = tmp;
 			}
 		}
 	}
-	if (tmp != 0)
-	{
-		da->items = tmp;
-	}
-	else
+	if (tmp == 0)
 	{
 		return;
 	}
