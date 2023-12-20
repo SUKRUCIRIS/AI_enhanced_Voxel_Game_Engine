@@ -10,28 +10,9 @@ cd build
 cmake .. -DCMAKE_VERBOSE_MAKEFILE=1
 ```
 
-## Compile with gnu on linux:
+## Compile with msvc on x64 windows:
 
-```
-make -j`nproc`
-```
-
-You need to install pthread if you don't have. I run this command on ubuntu:
-
-```
-sudo apt-get install libpthread-stubs0-dev
-```
-
-You need to install your platform's windowing system dev package to compile glfw if you don't have.
-For example I run this command on ubuntu x11:
-
-```
-sudo apt-get install xorg-dev
-```
-
-## Compile with msvc on windows:
-
-Make sure that you use native tools command prompt for vs.
+Make sure that you use x64 native tools command prompt for vs.
 
 ```
 msbuild opengl_voxel_gsu.sln /p:Configuration=Release /p:Platform=x64
