@@ -25,9 +25,11 @@ typedef struct camera
 } camera;
 
 camera *create_camera(int width, int height, vec3 position, float FOVdeg, float nearPlane, float farPlane, float speed,
-					  float sensitivity, float angle, vec3 angle_axis);
+											float sensitivity, float angle, vec3 angle_axis);
 
 void delete_camera(camera *cam);
+
+void run_input_fp_camera(camera *cam, GLFWwindow *window);
 
 void run_input_free_camera(camera *cam, GLFWwindow *window);
 

@@ -20,3 +20,4 @@
 #include "snoise.h"
 #include "ins_object.h"
 #include "load_object.h"
+#include "timing.h"
