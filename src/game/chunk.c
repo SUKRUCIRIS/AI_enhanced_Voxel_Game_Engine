@@ -65,32 +65,41 @@ void update_chunk_op(chunk_op *c)
 {
   float *pos = c->p->fp_camera->position;
   chunk_info *y = get_data_DA(c->chunkinfo);
-  if (c->previous_chunkid != -1 && y[c->previous_chunkid].minxy[0] <= pos[0] && y[c->previous_chunkid].minxy[1] <= pos[1] &&
-      y[c->previous_chunkid].maxxy[0] >= pos[0] && y[c->previous_chunkid].maxxy[1] >= pos[1])
+  if (c->previous_chunkid != -1 && y[c->previous_chunkid].minxy[0] <= pos[0] && y[c->previous_chunkid].minxy[1] <= pos[2] &&
+      y[c->previous_chunkid].maxxy[0] >= pos[0] && y[c->previous_chunkid].maxxy[1] >= pos[2])
   {
     return;
   }
 
   int current_id = c->previous_chunkid;
+  char found = 0;
   for (unsigned int i = 0; i < get_size_DA(c->chunkinfo); i++)
   {
-    if (y[i].minxy[0] <= pos[0] && y[i].minxy[1] <= pos[1] &&
-        y[i].maxxy[0] >= pos[0] && y[i].maxxy[1] >= pos[1])
+    if (y[i].minxy[0] <= pos[0] && y[i].minxy[1] <= pos[2] &&
+        y[i].maxxy[0] >= pos[0] && y[i].maxxy[1] >= pos[2])
     {
       current_id = i;
+      found = 1;
       break;
     }
   }
   c->previous_chunkid = current_id;
+  if (found == 0)
+  {
+    c->previous_chunkid = -1;
+    return;
+  }
 
   // find out which ids will be rendered
   int *wanted_ids = malloc(sizeof(int) * c->renderedchunkcount);
+  int index = 0;
   for (unsigned int i = 0; i <= 2 * c->chunk_range; i++)
   {
     for (unsigned int i2 = 0; i2 <= 2 * c->chunk_range; i2++)
     {
-      wanted_ids[i + i2 * i] = current_id - (c->chunk_range - i) -
-                               ((c->chunk_range - i2) * c->chunknumberinrow);
+      wanted_ids[index] = current_id - (c->chunk_range - i) -
+                          ((c->chunk_range - i2) * c->chunknumberinrow);
+      index++;
     }
   }
 
@@ -111,9 +120,12 @@ void update_chunk_op(chunk_op *c)
   {
   add_wanted:
     world_batch **x = get_data_DA(c->batch);
-    char found = 0;
     for (int i = 0; i < c->renderedchunkcount; i++)
     {
+      if (wanted_ids[i] < 0 || wanted_ids[i] >= (int)get_size_DA(c->chunkinfo))
+      {
+        continue;
+      }
       found = 0;
       for (unsigned int i2 = 0; i2 < get_size_DA(c->batch); i2++)
       {
@@ -133,7 +145,6 @@ void update_chunk_op(chunk_op *c)
       }
     }
   }
-
   free(wanted_ids);
 }
 

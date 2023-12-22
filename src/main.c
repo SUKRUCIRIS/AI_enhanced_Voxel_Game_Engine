@@ -11,16 +11,16 @@ int main(void)
 
 	init_programs();
 
-	int world_size = 1000;
+	int world_size = 2000;
 	int chunk_size = 32;
-	int chunk_range = 1;
-	float render_distance = (float)chunk_size * chunk_range;
+	int chunk_range = 5;
+	float render_distance = (float)chunk_size * chunk_range * 2;
 
 	int window_w = 0, window_h = 0;
 	glfwGetWindowSize(window, &window_w, &window_h);
 	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
 
-	lighting *light = create_lighting(window, cam, 8192, 8192, render_distance / 50, render_distance / 25, render_distance / 10, render_distance / 2);
+	lighting *light = create_lighting(window, cam, 8192, 8192, render_distance / 64, render_distance / 16, render_distance / 4, render_distance);
 
 	int **hm = create_heightmap(world_size, world_size, 100, 1453, 1071, 175, 100);
 	// world_batch *world_cubes = create_world_batch(hm, 0, 0, 1000, 1000, world_size, world_size);
