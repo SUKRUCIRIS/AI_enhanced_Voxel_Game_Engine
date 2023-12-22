@@ -34,7 +34,15 @@ int main(void)
 	//}
 	// prepare_render_br_object_manager(world_cubes->obj_manager);
 	player sukru;
+	sukru.speed = 0.001f;
+	sukru.jumping = 0;
 	sukru.fp_camera = cam;
+	sukru.maxaabb[0] = 0.5f;
+	sukru.maxaabb[1] = 0.5f;
+	sukru.maxaabb[2] = 0.5f;
+	sukru.minaabb[0] = -0.5f;
+	sukru.minaabb[1] = -1.5f;
+	sukru.minaabb[2] = -0.5f;
 	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size);
 
 	while (!glfwWindowShouldClose(window))

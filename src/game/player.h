@@ -5,8 +5,9 @@ typedef struct player
 {
   camera *fp_camera;
   float speed;
-  vec2 minxy;
-  vec2 maxxy;
+  vec3 minaabb;
+  vec3 maxaabb;
+  unsigned char jumping;
 } player;
 
 void run_input_player(player *p, GLFWwindow *window, long framems);
