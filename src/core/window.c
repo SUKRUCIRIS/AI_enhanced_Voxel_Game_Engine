@@ -8,7 +8,6 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 #endif
 
 unsigned char pressed[GLFW_KEY_LAST + 1] = {0};
-unsigned char previous[GLFW_KEY_LAST + 1] = {0};
 unsigned char released[GLFW_KEY_LAST + 1] = {0};
 unsigned char up[GLFW_KEY_LAST + 1] = {0};
 unsigned char down[GLFW_KEY_LAST + 1] = {0};
@@ -37,33 +36,31 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 {
 	if (action == GLFW_PRESS)
 	{
-		if (previous[key] == 0)
+		if (down[key] == 0)
 		{
 			pressed[key] = 1;
 		}
-		else if (previous[key] == 1)
+		else if (down[key] == 1)
 		{
 			pressed[key] = 0;
 		}
-		previous[key] = 1;
 		released[key] = 0;
-		up[key] = 1;
-		down[key] = 0;
+		up[key] = 0;
+		down[key] = 1;
 	}
 	else if (action == GLFW_RELEASE)
 	{
-		if (previous[key] == 0)
+		if (down[key] == 0)
 		{
 			released[key] = 0;
 		}
-		else if (previous[key] == 1)
+		else if (down[key] == 1)
 		{
 			released[key] = 1;
 		}
-		previous[key] = 0;
 		pressed[key] = 0;
-		up[key] = 0;
-		down[key] = 1;
+		up[key] = 1;
+		down[key] = 0;
 	}
 }
 

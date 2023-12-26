@@ -26,3 +26,8 @@ long get_frame_timems(void)
 {
   return frame_ms;
 }
+
+long get_timems(void)
+{
+  return clock() / (CLOCKS_PER_SEC / 1000);
+}

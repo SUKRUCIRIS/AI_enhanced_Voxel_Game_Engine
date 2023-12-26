@@ -34,15 +34,16 @@ int main(void)
 	//}
 	// prepare_render_br_object_manager(world_cubes->obj_manager);
 	player sukru;
-	sukru.speed = 0.001f;
+	sukru.speed = 0.005f;
 	sukru.jumping = 0;
+	sukru.onland = 1;
 	sukru.fp_camera = cam;
-	sukru.maxaabb[0] = 0.5f;
-	sukru.maxaabb[1] = 0.5f;
-	sukru.maxaabb[2] = 0.5f;
-	sukru.minaabb[0] = -0.5f;
-	sukru.minaabb[1] = -1.5f;
-	sukru.minaabb[2] = -0.5f;
+	sukru.width = 1;
+	sukru.height = 3;
+	sukru.hm = hm;
+	sukru.dimensionx = world_size;
+	sukru.dimensionz = world_size;
+	sukru.jumpdurationms = 100;
 	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size);
 
 	while (!glfwWindowShouldClose(window))
@@ -64,8 +65,6 @@ int main(void)
 		use_chunk_op(chunks, get_def_tex_light_br_program());
 
 		glfwSwapBuffers(window);
-
-		simulate_physic((vec3){0, -9.8f, 0}, 0.01f);
 
 		end_game_loop();
 	}
