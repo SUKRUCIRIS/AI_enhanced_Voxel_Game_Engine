@@ -13,3 +13,5 @@ unsigned char get_key_released(int key);
 unsigned char get_key_down(int key);
 
 unsigned char get_key_up(int key);
+
+void poll_events(GLFWwindow *window);

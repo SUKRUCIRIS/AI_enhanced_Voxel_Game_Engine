@@ -20,7 +20,7 @@ int main(void)
 	glfwGetWindowSize(window, &window_w, &window_h);
 	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
 
-	lighting *light = create_lighting(window, cam, 8192, 8192, render_distance / 64, render_distance / 16, render_distance / 4, render_distance);
+	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16, render_distance / 4, render_distance);
 
 	int **hm = create_heightmap(world_size, world_size, 100, 1453, 1071, 175, 100);
 
@@ -39,24 +39,44 @@ int main(void)
 	sukru.dimensionz = world_size;
 	sukru.jumpdurationms = 100;
 	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size);
-
+	unsigned char freec = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		start_game_loop();
 
 		glfwPollEvents();
-		update_chunk_op(chunks);
+		poll_events(window);
 
-		run_input_player(&sukru, window, get_frame_timems());
+		update_chunk_op(chunks, light->lightDir);
+
+		if (get_key_pressed(GLFW_KEY_K) == 1)
+		{
+			if (freec == 0)
+			{
+				freec = 1;
+			}
+			else
+			{
+				freec = 0;
+			}
+		}
+		if (freec == 0)
+		{
+			run_input_player(&sukru, window, get_frame_timems());
+		}
+		else
+		{
+			run_input_free_camera(cam, window);
+		}
 
 		glUseProgram(get_def_shadowmap_br_program());
 		use_lighting(light, get_def_shadowmap_br_program(), 1);
-		use_chunk_op(chunks, get_def_shadowmap_br_program());
+		use_chunk_op(chunks, get_def_shadowmap_br_program(), cam);
 
 		glUseProgram(get_def_tex_light_br_program());
 		use_lighting(light, get_def_tex_light_br_program(), 0);
 		use_camera(cam, get_def_tex_light_br_program());
-		use_chunk_op(chunks, get_def_tex_light_br_program());
+		use_chunk_op(chunks, get_def_tex_light_br_program(), cam);
 
 		glfwSwapBuffers(window);
 

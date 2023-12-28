@@ -32,35 +32,32 @@ unsigned char get_key_up(int key)
 	return up[key];
 }
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void poll_events(GLFWwindow *window)
 {
-	if (action == GLFW_PRESS)
+	for (int key = 0; key < GLFW_KEY_LAST + 1; key++)
 	{
-		if (down[key] == 0)
-		{
-			pressed[key] = 1;
-		}
-		else if (down[key] == 1)
+		if (glfwGetKey(window, key) == GLFW_PRESS)
 		{
 			pressed[key] = 0;
+			if (down[key] == 0)
+			{
+				pressed[key] = 1;
+			}
+			released[key] = 0;
+			up[key] = 0;
+			down[key] = 1;
 		}
-		released[key] = 0;
-		up[key] = 0;
-		down[key] = 1;
-	}
-	else if (action == GLFW_RELEASE)
-	{
-		if (down[key] == 0)
+		else
 		{
 			released[key] = 0;
+			if (down[key] == 1)
+			{
+				released[key] = 1;
+			}
+			pressed[key] = 0;
+			up[key] = 1;
+			down[key] = 0;
 		}
-		else if (down[key] == 1)
-		{
-			released[key] = 1;
-		}
-		pressed[key] = 0;
-		up[key] = 1;
-		down[key] = 0;
 	}
 }
 
@@ -73,7 +70,10 @@ GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
-	glfwWindowHint(GLFW_SAMPLES, msaa);
+	if (msaa > 1)
+	{
+		glfwWindowHint(GLFW_SAMPLES, msaa);
+	}
 	if (width <= 0 || height <= 0)
 	{
 		const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -103,14 +103,16 @@ GLFWwindow *create_window(int width, int height, unsigned char is_full, unsigned
 	{
 		glfwSwapInterval(0);
 	}
-	glfwSetKeyCallback(window, key_callback);
 	gladLoadGL();
 	glViewport(0, 0, width, height);
 	glClearColor(0.5294f, 0.8078f, 0.9216f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glClearDepth(1.0);
-	glEnable(GL_MULTISAMPLE);
+	if (msaa > 1)
+	{
+		glEnable(GL_MULTISAMPLE);
+	}
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glFrontFace(GL_CCW);

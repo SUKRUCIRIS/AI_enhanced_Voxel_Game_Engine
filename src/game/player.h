@@ -12,8 +12,8 @@ typedef struct player
   int **hm;
   int dimensionx;
   int dimensionz;
-  long jumpstartms;
-  long jumpdurationms;
+  double jumpstartms;
+  double jumpdurationms;
 } player;
 
-void run_input_player(player *p, GLFWwindow *window, long framems);
+void run_input_player(player *p, GLFWwindow *window, double framems);

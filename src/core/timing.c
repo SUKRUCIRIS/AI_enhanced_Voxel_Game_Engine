@@ -1,33 +1,33 @@
 #include "timing.h"
-#include <time.h>
+#include "../../third_party/glfw/include/GLFW/glfw3.h"
 
-clock_t timer = 0;
-clock_t frame_ms = 0;
+double timer = 0;
+double frame_ms = 0;
 
 void start_game_loop(void)
 {
-  timer = clock();
+  timer = glfwGetTime() * 1000;
 }
 
 void end_game_loop(void)
 {
-  frame_ms = (clock() - timer) / (CLOCKS_PER_SEC / 1000);
+  frame_ms = glfwGetTime() * 1000 - timer;
 }
 
-void end_game_loop_targetms(long targetms)
+void end_game_loop_targetms(double targetms)
 {
   while (frame_ms < targetms)
   {
-    frame_ms = (clock() - timer) / (CLOCKS_PER_SEC / 1000);
+    frame_ms = glfwGetTime() * 1000 - timer;
   }
 }
 
-long get_frame_timems(void)
+double get_frame_timems(void)
 {
   return frame_ms;
 }
 
-long get_timems(void)
+double get_timems(void)
 {
-  return clock() / (CLOCKS_PER_SEC / 1000);
+  return glfwGetTime() * 1000;
 }

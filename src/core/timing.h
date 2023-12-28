@@ -4,8 +4,8 @@ void start_game_loop(void);
 
 void end_game_loop(void);
 
-void end_game_loop_targetms(long targetms);
+void end_game_loop_targetms(double targetms);
 
-long get_frame_timems(void);
+double get_frame_timems(void);
 
-long get_timems(void);
+double get_timems(void);

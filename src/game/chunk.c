@@ -31,6 +31,8 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       chunk_info x = {
           .startx = i * c->chunk_size,
           .startz = i2 * c->chunk_size,
+          .minz = -1,
+          .maxz = 101,
           .minxy = {
               (float)(i * c->chunk_size) - (int)(dimensionx / 2),
               (float)(i2 * c->chunk_size) - (int)(dimensionz / 2)},
@@ -82,7 +84,7 @@ unsigned char inarray(int x, int *array, int size)
   return 0;
 }
 
-void update_chunk_op(chunk_op *c)
+void update_chunk_op(chunk_op *c, vec3 lightdir)
 {
   float *pos = c->p->fp_camera->position;
   chunk_info *y = get_data_DA(c->chunkinfo);
@@ -159,7 +161,7 @@ void update_chunk_op(chunk_op *c)
       if (found == 0)
       {
         world_batch *batch = create_world_batch(c->hm, y[wanted_ids[i]].startx, y[wanted_ids[i]].startz,
-                                                c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz);
+                                                c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz, lightdir);
         batch->chunk_id = wanted_ids[i];
         pushback_DA(c->batch, &batch);
         if (wanted_ids[i] == c->centerchunkid)
@@ -177,7 +179,7 @@ void update_chunk_op(chunk_op *c)
           for (unsigned int i2 = 0; i2 < gsu.mesh_count; i2++)
           {
             scale_br_object(gsu.meshes[i2], (vec3){scalex, scaley, scalez}, 0);
-            translate_br_object(gsu.meshes[i2], (vec3){y[c->centerchunkid].minxy[0] - gsu.box.mMin.x, gsu_y - gsu.box.mMin.y, y[c->centerchunkid].minxy[1] - gsu.box.mMin.z}, 0);
+            translate_br_object(gsu.meshes[i2], (vec3){y[c->centerchunkid].minxy[0] - gsu.box.mMin.x, gsu_y + 0.5f - gsu.box.mMin.y, y[c->centerchunkid].minxy[1] - gsu.box.mMin.z}, 0);
           }
           prepare_render_br_object_manager(batch->obj_manager);
         }
@@ -188,11 +190,28 @@ void update_chunk_op(chunk_op *c)
   free(wanted_ids);
 }
 
-void use_chunk_op(chunk_op *c, GLuint program)
+void use_chunk_op(chunk_op *c, GLuint program, camera *cam)
 {
+  calculate_camera(cam, cam->nearPlane, cam->farPlane);
   world_batch **x = get_data_DA(c->batch);
+  chunk_info *y = get_data_DA(c->chunkinfo);
+  vec3 box2[2];
+  vec4 planes[6] = {0};
+  glm_frustum_planes(cam->result, planes);
+  vec3 center;
   for (unsigned int i = 0; i < get_size_DA(c->batch); i++)
   {
-    use_world_batch(x[i], program);
+    box2[0][0] = y[x[i]->chunk_id].minxy[0];
+    box2[0][1] = y[x[i]->chunk_id].minz;
+    box2[0][2] = y[x[i]->chunk_id].minxy[1];
+    box2[1][0] = y[x[i]->chunk_id].maxxy[0];
+    box2[1][1] = y[x[i]->chunk_id].maxz;
+    box2[1][2] = y[x[i]->chunk_id].maxxy[1];
+    glm_aabb_center(box2, center);
+    if (glm_aabb_frustum(box2, planes) ||
+        glm_vec3_distance(cam->position, center) <= (float)c->chunk_size)
+    {
+      use_world_batch(x[i], program);
+    }
   }
 }

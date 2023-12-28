@@ -7,7 +7,7 @@ typedef struct world_batch
 	int chunk_id;
 } world_batch;
 
-world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz, int dimensionx, int dimensionz);
+world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz, int dimensionx, int dimensionz, vec3 lightdir);
 
 void use_world_batch(world_batch *w, GLuint program);
 

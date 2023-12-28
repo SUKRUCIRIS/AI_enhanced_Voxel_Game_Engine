@@ -1,6 +1,6 @@
 #include "player.h"
 
-void run_input_player(player *p, GLFWwindow *window, long framems)
+void run_input_player(player *p, GLFWwindow *window, double framems)
 {
   run_input_fp_camera(p->fp_camera, window);
   vec3 move = {0, 0, 0};
@@ -45,7 +45,7 @@ void run_input_player(player *p, GLFWwindow *window, long framems)
   {
     p->jumping = 0;
   }
-  glm_vec3_scale(move, p->speed * framems, move);
+  glm_vec3_scale(move, p->speed * (float)framems, move);
   glm_vec3_add(move, p->fp_camera->position, p->fp_camera->position);
   int indexx = (int)(p->fp_camera->position[0] + p->dimensionx / 2.0f);
   int indexz = (int)(p->fp_camera->position[2] + p->dimensionz / 2.0f);

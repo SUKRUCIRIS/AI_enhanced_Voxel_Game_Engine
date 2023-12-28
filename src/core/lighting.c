@@ -96,7 +96,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	l->up[0] = 0;
 	l->up[1] = 1;
 	l->up[2] = 0;
-	l->zMult = 6.0f;
+	l->zMult = 10.0f;
 	l->cam = cam;
 	glm_normalize(l->lightDir);
 

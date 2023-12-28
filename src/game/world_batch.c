@@ -78,15 +78,17 @@ br_object *create_front_surface(br_object_manager *x)
 	return create_br_object(x, cube_vertices, 4, cube_indices, 6, 0, 0, 3, 10, 0.1f, 0.5f);
 }
 
-void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx, int dimensionz, int **hm)
+void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx, int dimensionz, int **hm, vec3 lightdir)
 {
 	br_object *tmp = 0;
+	unsigned char top = 0, front = 0, back = 0, left = 0, right = 0;
 	if (hm[i][i2] == i3)
 	{
 		tmp = create_top_surface(x);
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		top = 1;
 	}
 	if (i2 > 0 && hm[i][i2 - 1] < i3)
 	{
@@ -94,6 +96,7 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		front = 1;
 	}
 	if (i2 < dimensionz - 1 && hm[i][i2 + 1] < i3)
 	{
@@ -101,6 +104,7 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		back = 1;
 	}
 	if (i > 0 && hm[i - 1][i2] < i3)
 	{
@@ -108,6 +112,7 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		left = 1;
 	}
 	if (i < dimensionx - 1 && hm[i + 1][i2] < i3)
 	{
@@ -115,10 +120,52 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		right = 1;
+	}
+	if (lightdir != 0)
+	{
+		if ((i2 > 0 && hm[i][i2 - 1] == i3 - 1) ||
+				(i2 < dimensionz - 1 && hm[i][i2 + 1] == i3 - 1) ||
+				(i > 0 && hm[i - 1][i2] == i3 - 1) ||
+				(i < dimensionx - 1 && hm[i + 1][i2] == i3 - 1))
+		{
+			tmp = create_bottom_surface(x);
+
+			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
+			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		}
+		if (lightdir[0] > 0 && front == 0)
+		{
+			tmp = create_front_surface(x);
+
+			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
+			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		}
+		else if (lightdir[0] < 0 && back == 0)
+		{
+			tmp = create_back_surface(x);
+
+			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
+			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		}
+		if (lightdir[2] > 0 && left == 0)
+		{
+			tmp = create_left_surface(x);
+
+			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
+			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		}
+		else if (lightdir[2] < 0 && right == 0)
+		{
+			tmp = create_right_surface(x);
+
+			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
+			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
+		}
 	}
 }
 
-world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz, int dimensionx, int dimensionz)
+world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz, int dimensionx, int dimensionz, vec3 lightdir)
 {
 	if (startx >= dimensionx || startz >= dimensionz)
 	{
@@ -148,7 +195,7 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 	{
 		for (int i2 = startz; i2 < startz + widthz; i2++)
 		{
-			create_surfaces(x->obj_manager, i, i2, hm[i][i2], dimensionx, dimensionz, hm);
+			create_surfaces(x->obj_manager, i, i2, hm[i][i2], dimensionx, dimensionz, hm, lightdir);
 			if (hm[i][i2] != 0)
 			{
 				for (int i3 = hm[i][i2] - 1; i3 >= 0; i3--)
@@ -160,7 +207,7 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 					{
 						break;
 					}
-					create_surfaces(x->obj_manager, i, i2, i3, dimensionx, dimensionz, hm);
+					create_surfaces(x->obj_manager, i, i2, i3, dimensionx, dimensionz, hm, lightdir);
 				}
 			}
 		}
