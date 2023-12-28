@@ -13,7 +13,9 @@ typedef struct chunk_op
   int dimensionx, dimensionz;
   int previous_chunkid;
   int chunknumberinrow;
+  int chunknumberincolumn;
   int renderedchunkcount;
+  int centerchunkid;
 } chunk_op;
 
 typedef struct chunk_info
@@ -29,3 +31,5 @@ void delete_chunk_op(chunk_op *c);
 void update_chunk_op(chunk_op *c);
 
 void use_chunk_op(chunk_op *c, GLuint program);
+
+void set_gsu_model(struct aiScene *model);

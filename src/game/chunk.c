@@ -1,6 +1,14 @@
 #include "chunk.h"
 #include "world_batch.h"
 
+struct aiScene *gsu_model = 0;
+int gsu_x = 64, gsu_z = 32, gsu_y = 50, gsu_h = 16;
+
+void set_gsu_model(struct aiScene *model)
+{
+  gsu_model = model;
+}
+
 chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm, int dimensionx, int dimensionz)
 {
   chunk_op *c = malloc(sizeof(chunk_op));
@@ -14,10 +22,11 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
   c->dimensionz = dimensionz;
   c->previous_chunkid = -1;
   c->chunknumberinrow = (int)ceilf((float)c->dimensionx / c->chunk_size);
+  c->chunknumberincolumn = (int)ceilf((float)c->dimensionz / c->chunk_size);
   c->renderedchunkcount = (c->chunk_range * 2 + 1) * (c->chunk_range * 2 + 1);
-  for (int i = 0; i < (int)ceilf((float)c->dimensionx / c->chunk_size); i++)
+  for (int i = 0; i < c->chunknumberinrow; i++)
   {
-    for (int i2 = 0; i2 < (int)ceilf((float)c->dimensionz / c->chunk_size); i2++)
+    for (int i2 = 0; i2 < c->chunknumberincolumn; i2++)
     {
       chunk_info x = {
           .startx = i * c->chunk_size,
@@ -31,6 +40,18 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       x.maxxy[0] += 1;
       x.maxxy[1] += 1;
       pushback_DA(c->chunkinfo, &x);
+      if (i == c->chunknumberinrow / 2 && i2 == c->chunknumberincolumn / 2)
+      {
+        c->centerchunkid = get_size_DA(c->chunkinfo) - 1;
+        // setting gsu terrain
+        for (int ix = -gsu_x; ix < 2 * gsu_x; ix++)
+        {
+          for (int iz = -gsu_z; iz < 2 * gsu_z; iz++)
+          {
+            hm[x.startx + ix][x.startz + iz] = gsu_y;
+          }
+        }
+      }
     }
   }
   return c;
@@ -141,6 +162,25 @@ void update_chunk_op(chunk_op *c)
                                                 c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz);
         batch->chunk_id = wanted_ids[i];
         pushback_DA(c->batch, &batch);
+        if (wanted_ids[i] == c->centerchunkid)
+        {
+          br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 2, 0, 3, 10, 0.1f, 0.5f);
+          float scalex = gsu_x / (gsu.box.mMax.x - gsu.box.mMin.x),
+                scaley = gsu_h / (gsu.box.mMax.y - gsu.box.mMin.y),
+                scalez = gsu_z / (gsu.box.mMax.z - gsu.box.mMin.z);
+          gsu.box.mMin.y *= scaley;
+          gsu.box.mMax.y *= scaley;
+          gsu.box.mMin.x *= scalex;
+          gsu.box.mMax.x *= scalex;
+          gsu.box.mMin.z *= scalez;
+          gsu.box.mMax.z *= scalez;
+          for (unsigned int i2 = 0; i2 < gsu.mesh_count; i2++)
+          {
+            scale_br_object(gsu.meshes[i2], (vec3){scalex, scaley, scalez}, 0);
+            translate_br_object(gsu.meshes[i2], (vec3){y[c->centerchunkid].minxy[0] - gsu.box.mMin.x, gsu_y - gsu.box.mMin.y, y[c->centerchunkid].minxy[1] - gsu.box.mMin.z}, 0);
+          }
+          prepare_render_br_object_manager(batch->obj_manager);
+        }
         goto add_wanted;
       }
     }

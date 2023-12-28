@@ -1,10 +1,10 @@
 #include "lighting.h"
 #include "float.h"
 #ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
+#define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 #ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
 void calculate_lighting_projection(lighting *l, int step)
@@ -69,7 +69,7 @@ void calculate_lighting_projection(lighting *l, int step)
 }
 
 lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
-						  float cascade1range, float cascade2range, float cascade3range)
+													float cascade1range, float cascade2range, float cascade3range)
 {
 	lighting *l = malloc(sizeof(lighting));
 	l->programs = create_DA(sizeof(GLuint));
@@ -96,7 +96,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	l->up[0] = 0;
 	l->up[1] = 1;
 	l->up[2] = 0;
-	l->zMult = 4.0f;
+	l->zMult = 6.0f;
 	l->cam = cam;
 	glm_normalize(l->lightDir);
 

@@ -11,28 +11,22 @@ int main(void)
 
 	init_programs();
 
-	int world_size = 2000;
-	int chunk_size = 32;
-	int chunk_range = 5;
+	int world_size = 2048;
+	int chunk_size = 64;
+	int chunk_range = 4;
 	float render_distance = (float)chunk_size * chunk_range * 2;
 
 	int window_w = 0, window_h = 0;
 	glfwGetWindowSize(window, &window_w, &window_h);
-	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 0.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
+	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
 
 	lighting *light = create_lighting(window, cam, 8192, 8192, render_distance / 64, render_distance / 16, render_distance / 4, render_distance);
 
 	int **hm = create_heightmap(world_size, world_size, 100, 1453, 1071, 175, 100);
-	// world_batch *world_cubes = create_world_batch(hm, 0, 0, 1000, 1000, world_size, world_size);
-	// struct aiScene *gsu_model = load_model("./models/gsu.fbx", 1);
-	// br_scene gsu = load_object_br(world_cubes->obj_manager, get_world_texture_manager(), gsu_model, 2, 0, 3, 10, 0.1f, 0.5f);
-	// free_model(gsu_model);
-	// for (unsigned int i = 0; i < gsu.mesh_count; i++)
-	//{
-	// scale_br_object(gsu.meshes[i], (vec3){0.01f, 0.01f, 0.01f}, 0);
-	// translate_br_object(gsu.meshes[i], (vec3){0, 100, 0}, 0);
-	//}
-	// prepare_render_br_object_manager(world_cubes->obj_manager);
+
+	struct aiScene *gsu_model = load_model("./models/gsu.fbx", 1);
+	set_gsu_model(gsu_model);
+
 	player sukru;
 	sukru.speed = 0.005f;
 	sukru.jumping = 0;
@@ -79,6 +73,7 @@ int main(void)
 	delete_window(window);
 
 	free(hm);
+	free_model(gsu_model);
 
 	return 0;
 }

@@ -7,12 +7,13 @@ struct aiScene *load_model(const char *path, unsigned char flip_order)
 	if (flip_order == 0)
 	{
 		return (struct aiScene *)aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality |
-														aiProcess_TransformUVCoords | aiProcess_PreTransformVertices);
+																										aiProcess_TransformUVCoords | aiProcess_PreTransformVertices | aiProcess_GenBoundingBoxes);
 	}
 	else
 	{
 		return (struct aiScene *)aiImportFile(path, aiProcessPreset_TargetRealtime_MaxQuality |
-														aiProcess_TransformUVCoords | aiProcess_PreTransformVertices | aiProcess_FlipWindingOrder);
+																										aiProcess_TransformUVCoords | aiProcess_PreTransformVertices | aiProcess_GenBoundingBoxes |
+																										aiProcess_FlipWindingOrder);
 	}
 }
 
@@ -22,10 +23,16 @@ void free_model(struct aiScene *scene)
 }
 
 br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text_manager,
-						struct aiScene *scene, float texture_start_index, unsigned char has_physics,
-						unsigned char priority, float mass, float friction, float bounce)
+												struct aiScene *scene, float texture_start_index, unsigned char has_physics,
+												unsigned char priority, float mass, float friction, float bounce)
 {
 	br_scene res;
+	res.box.mMax.x = -1000000;
+	res.box.mMax.y = -1000000;
+	res.box.mMax.z = -1000000;
+	res.box.mMin.x = 1000000;
+	res.box.mMin.y = 1000000;
+	res.box.mMin.z = 1000000;
 	res.mesh_count = scene->mNumMeshes;
 	res.texture_count = scene->mNumMaterials;
 	res.textures = (br_texture **)malloc(sizeof(br_texture *) * res.texture_count);
@@ -59,7 +66,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 						data[j * 4 + 3] = scene->mTextures[k]->pcData[j].a;
 					}
 					res.textures[i] = create_br_texture_memory(text_manager, data, width, height, GL_TEXTURE_2D, GL_NEAREST,
-															   GL_NEAREST, (int)texture_start_index + (int)i);
+																										 GL_NEAREST, (int)texture_start_index + (int)i);
 					free(data);
 					break;
 				}
@@ -79,7 +86,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			data[2] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.b * 256.0f)));
 			data[3] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.a * 256.0f)));
 			res.textures[i] = create_br_texture_memory(text_manager, data, 1, 1, GL_TEXTURE_2D, GL_NEAREST,
-													   GL_NEAREST, (int)texture_start_index + (int)i);
+																								 GL_NEAREST, (int)texture_start_index + (int)i);
 		}
 	}
 	for (unsigned int i = 0; i < scene->mNumMeshes; i++)
@@ -117,10 +124,34 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			}
 		}
 		res.meshes[i] = create_br_object(obj_manager, vertices, vertex_number, indices, indice_number,
-										 scene->mMeshes[i]->mMaterialIndex + texture_start_index - 1,
-										 has_physics, priority, mass, friction, bounce);
+																		 scene->mMeshes[i]->mMaterialIndex + texture_start_index - 1,
+																		 has_physics, priority, mass, friction, bounce);
 		free(vertices);
 		free(indices);
+		if (res.box.mMax.x < scene->mMeshes[i]->mAABB.mMax.x)
+		{
+			res.box.mMax.x = scene->mMeshes[i]->mAABB.mMax.x;
+		}
+		if (res.box.mMax.y < scene->mMeshes[i]->mAABB.mMax.y)
+		{
+			res.box.mMax.y = scene->mMeshes[i]->mAABB.mMax.y;
+		}
+		if (res.box.mMax.z < scene->mMeshes[i]->mAABB.mMax.z)
+		{
+			res.box.mMax.z = scene->mMeshes[i]->mAABB.mMax.z;
+		}
+		if (res.box.mMin.x > scene->mMeshes[i]->mAABB.mMin.x)
+		{
+			res.box.mMin.x = scene->mMeshes[i]->mAABB.mMin.x;
+		}
+		if (res.box.mMin.y > scene->mMeshes[i]->mAABB.mMin.y)
+		{
+			res.box.mMin.y = scene->mMeshes[i]->mAABB.mMin.y;
+		}
+		if (res.box.mMin.z > scene->mMeshes[i]->mAABB.mMin.z)
+		{
+			res.box.mMin.z = scene->mMeshes[i]->mAABB.mMin.z;
+		}
 	}
 	return res;
 }
