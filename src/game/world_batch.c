@@ -10,14 +10,14 @@ GLfloat cube_vertices[] = {
 		1, 1, 1, 1, 1, 0, 0, -1, 0,		// G 6
 		-1, 1, 1, 0, 1, 0, 0, -1, 0,	// H 7
 
-		-1, 1, -1, 0, 0, -1, 0, 0, 0,	 // D 8
-		-1, -1, -1, 1, 0, -1, 0, 0, 0, // A 9
-		-1, -1, 1, 1, 1, -1, 0, 0, 0,	 // E 10
-		-1, 1, 1, 0, 1, -1, 0, 0, 0,	 // H 11
+		-1, 1, -1, 0, 1, -1, 0, 0, 0,	 // D 8
+		-1, -1, -1, 0, 0, -1, 0, 0, 0, // A 9
+		-1, -1, 1, 1, 0, -1, 0, 0, 0,	 // E 10
+		-1, 1, 1, 1, 1, -1, 0, 0, 0,	 // H 11
 		1, -1, -1, 0, 0, 1, 0, 0, 0,	 // B 12
-		1, 1, -1, 1, 0, 1, 0, 0, 0,		 // C 13
+		1, 1, -1, 0, 1, 1, 0, 0, 0,		 // C 13
 		1, 1, 1, 1, 1, 1, 0, 0, 0,		 // G 14
-		1, -1, 1, 0, 1, 1, 0, 0, 0,		 // F 15
+		1, -1, 1, 1, 0, 1, 0, 0, 0,		 // F 15
 
 		-1, -1, -1, 0, 0, 0, -1, 0, 0, // A 16
 		1, -1, -1, 1, 0, 0, -1, 0, 0,	 // B 17
@@ -46,53 +46,85 @@ GLuint cube_indices[] = {
 		22, 21, 20,
 		20, 23, 22};
 
+int grass_border = 30;
+int snow_border = 80;
+
 br_texture_manager *tex_manager = 0;
 
-br_object *create_top_surface(br_object_manager *x)
+br_object *create_top_surface(br_object_manager *x, GLfloat texture_i)
 {
-	return create_br_object(x, &(cube_vertices[180]), 4, cube_indices, 6, 0, 0, 3, 10, 0.1f, 0.5f);
+	return create_br_object(x, &(cube_vertices[180]), 4, cube_indices, 6, texture_i, 0, 3, 10, 0.1f, 0.5f);
 }
 
-br_object *create_bottom_surface(br_object_manager *x)
+br_object *create_bottom_surface(br_object_manager *x, GLfloat texture_i)
 {
-	return create_br_object(x, &(cube_vertices[144]), 4, cube_indices, 6, 0, 0, 3, 10, 0.1f, 0.5f);
+	return create_br_object(x, &(cube_vertices[144]), 4, cube_indices, 6, texture_i, 0, 3, 10, 0.1f, 0.5f);
 }
 
-br_object *create_right_surface(br_object_manager *x)
+br_object *create_right_surface(br_object_manager *x, GLfloat texture_i)
 {
-	return create_br_object(x, &(cube_vertices[108]), 4, cube_indices, 6, 0, 0, 3, 10, 0.1f, 0.5f);
+	return create_br_object(x, &(cube_vertices[108]), 4, cube_indices, 6, texture_i, 0, 3, 10, 0.1f, 0.5f);
 }
 
-br_object *create_left_surface(br_object_manager *x)
+br_object *create_left_surface(br_object_manager *x, GLfloat texture_i)
 {
-	return create_br_object(x, &(cube_vertices[72]), 4, cube_indices, 6, 0, 0, 3, 10, 0.1f, 0.5f);
+	return create_br_object(x, &(cube_vertices[72]), 4, cube_indices, 6, texture_i, 0, 3, 10, 0.1f, 0.5f);
 }
 
-br_object *create_back_surface(br_object_manager *x)
+br_object *create_back_surface(br_object_manager *x, GLfloat texture_i)
 {
-	return create_br_object(x, &(cube_vertices[36]), 4, cube_indices, 6, 0, 0, 3, 10, 0.1f, 0.5f);
+	return create_br_object(x, &(cube_vertices[36]), 4, cube_indices, 6, texture_i, 0, 3, 10, 0.1f, 0.5f);
 }
 
-br_object *create_front_surface(br_object_manager *x)
+br_object *create_front_surface(br_object_manager *x, GLfloat texture_i)
 {
-	return create_br_object(x, cube_vertices, 4, cube_indices, 6, 0, 0, 3, 10, 0.1f, 0.5f);
+	return create_br_object(x, cube_vertices, 4, cube_indices, 6, texture_i, 0, 3, 10, 0.1f, 0.5f);
 }
 
 void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx, int dimensionz, int **hm, vec3 lightdir)
 {
 	br_object *tmp = 0;
 	unsigned char top = 0, front = 0, back = 0, left = 0, right = 0;
+	float texture_i = 0;
 	if (hm[i][i2] == i3)
 	{
-		tmp = create_top_surface(x);
+		if (i3 < grass_border)
+		{
+			texture_i = 2;
+		}
+		else if (i3 < snow_border)
+		{
+			texture_i = 4;
+		}
+		else
+		{
+			texture_i = 6;
+		}
+		tmp = create_top_surface(x, texture_i);
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
 		top = 1;
 	}
+	if (i3 != hm[i][i2])
+	{
+		texture_i = 0;
+	}
+	else if (i3 < grass_border)
+	{
+		texture_i = 1;
+	}
+	else if (i3 < snow_border)
+	{
+		texture_i = 3;
+	}
+	else
+	{
+		texture_i = 5;
+	}
 	if (i2 > 0 && hm[i][i2 - 1] < i3)
 	{
-		tmp = create_front_surface(x);
+		tmp = create_front_surface(x, texture_i);
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
@@ -100,7 +132,7 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 	}
 	if (i2 < dimensionz - 1 && hm[i][i2 + 1] < i3)
 	{
-		tmp = create_back_surface(x);
+		tmp = create_back_surface(x, texture_i);
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
@@ -108,7 +140,7 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 	}
 	if (i > 0 && hm[i - 1][i2] < i3)
 	{
-		tmp = create_left_surface(x);
+		tmp = create_left_surface(x, texture_i);
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
@@ -116,12 +148,13 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 	}
 	if (i < dimensionx - 1 && hm[i + 1][i2] < i3)
 	{
-		tmp = create_right_surface(x);
+		tmp = create_right_surface(x, texture_i);
 
 		scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 		translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
 		right = 1;
 	}
+	texture_i = 0;
 	if (lightdir != 0)
 	{
 		if ((i2 > 0 && hm[i][i2 - 1] == i3 - 1) ||
@@ -129,35 +162,35 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 				(i > 0 && hm[i - 1][i2] == i3 - 1) ||
 				(i < dimensionx - 1 && hm[i + 1][i2] == i3 - 1))
 		{
-			tmp = create_bottom_surface(x);
+			tmp = create_bottom_surface(x, texture_i);
 
 			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
 		}
 		if (lightdir[0] > 0 && front == 0)
 		{
-			tmp = create_front_surface(x);
+			tmp = create_front_surface(x, texture_i);
 
 			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
 		}
 		else if (lightdir[0] < 0 && back == 0)
 		{
-			tmp = create_back_surface(x);
+			tmp = create_back_surface(x, texture_i);
 
 			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
 		}
 		if (lightdir[2] > 0 && left == 0)
 		{
-			tmp = create_left_surface(x);
+			tmp = create_left_surface(x, texture_i);
 
 			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
 		}
 		else if (lightdir[2] < 0 && right == 0)
 		{
-			tmp = create_right_surface(x);
+			tmp = create_right_surface(x, texture_i);
 
 			scale_br_object(tmp, (vec3){0.5f, 0.5f, 0.5f}, 1);
 			translate_br_object(tmp, (vec3){(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))}, 1);
@@ -187,7 +220,13 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 	if (tex_manager == 0)
 	{
 		tex_manager = create_br_texture_manager();
-		create_br_texture(tex_manager, "./textures/grass.jpg", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 0);
+		create_br_texture(tex_manager, "./textures/side.png", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 0);
+		create_br_texture(tex_manager, "./textures/dirt_side.png", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 2);
+		create_br_texture(tex_manager, "./textures/dirt.png", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 3);
+		create_br_texture(tex_manager, "./textures/grass_side.png", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 4);
+		create_br_texture(tex_manager, "./textures/grass.png", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 5);
+		create_br_texture(tex_manager, "./textures/snow_side.png", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 6);
+		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, 7);
 	}
 
 	// objects

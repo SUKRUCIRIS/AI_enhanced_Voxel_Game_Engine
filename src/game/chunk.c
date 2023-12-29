@@ -46,9 +46,9 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       {
         c->centerchunkid = get_size_DA(c->chunkinfo) - 1;
         // setting gsu terrain
-        for (int ix = -gsu_x; ix < 2 * gsu_x; ix++)
+        for (int ix = -gsu_x / 2; ix < (int)(1.5f * gsu_x); ix++)
         {
-          for (int iz = -gsu_z; iz < 2 * gsu_z; iz++)
+          for (int iz = -gsu_z / 2; iz < (int)(1.5f * gsu_z); iz++)
           {
             hm[x.startx + ix][x.startz + iz] = gsu_y;
           }
@@ -166,7 +166,7 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
         pushback_DA(c->batch, &batch);
         if (wanted_ids[i] == c->centerchunkid)
         {
-          br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 2, 0, 3, 10, 0.1f, 0.5f);
+          br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 8, 0, 3, 10, 0.1f, 0.5f);
           float scalex = gsu_x / (gsu.box.mMax.x - gsu.box.mMin.x),
                 scaley = gsu_h / (gsu.box.mMax.y - gsu.box.mMin.y),
                 scalez = gsu_z / (gsu.box.mMax.z - gsu.box.mMin.z);
