@@ -40,6 +40,7 @@ int main(void)
 	sukru.jumpdurationms = 100;
 	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size);
 	unsigned char freec = 0;
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	while (!glfwWindowShouldClose(window))
 	{
 		start_game_loop();
@@ -57,6 +58,7 @@ int main(void)
 			}
 			else
 			{
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 				freec = 0;
 			}
 		}
