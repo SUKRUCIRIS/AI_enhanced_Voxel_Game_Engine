@@ -12,8 +12,8 @@ int main(void)
 	init_programs();
 
 	int world_size = 2048;
-	int chunk_size = 64;
-	int chunk_range = 4;
+	int chunk_size = 16;
+	int chunk_range = 16;
 	float render_distance = (float)chunk_size * chunk_range * 2;
 
 	int window_w = 0, window_h = 0;

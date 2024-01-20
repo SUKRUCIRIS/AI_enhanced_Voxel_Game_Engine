@@ -96,22 +96,32 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
 
   int current_id = c->previous_chunkid;
   char found = 0;
-  for (unsigned int i = 0; i < get_size_DA(c->chunkinfo); i++)
+  int columnnumber = 0; // first find column then find chunk for performance
+  for (int i = 0; i < c->chunknumberinrow; i++)
   {
-    if (y[i].minxy[0] <= pos[0] && y[i].minxy[1] <= pos[2] &&
-        y[i].maxxy[0] >= pos[0] && y[i].maxxy[1] >= pos[2])
+    if (y[i * c->chunknumberincolumn].minxy[0] <= pos[0] && y[i * c->chunknumberincolumn].minxy[1] <= pos[2] &&
+        y[(i + 1) * c->chunknumberincolumn - 1].maxxy[0] >= pos[0] && y[(i + 1) * c->chunknumberincolumn - 1].maxxy[1] >= pos[2])
     {
-      current_id = i;
+      columnnumber = i;
       found = 1;
       break;
     }
   }
-  c->previous_chunkid = current_id;
   if (found == 0)
   {
     c->previous_chunkid = -1;
     return;
   }
+  for (int i = 0; i < c->chunknumberincolumn; i++)
+  {
+    if (y[columnnumber * c->chunknumberincolumn + i].minxy[0] <= pos[0] && y[columnnumber * c->chunknumberincolumn + i].minxy[1] <= pos[2] &&
+        y[columnnumber * c->chunknumberincolumn + i].maxxy[0] >= pos[0] && y[columnnumber * c->chunknumberincolumn + i].maxxy[1] >= pos[2])
+    {
+      current_id = columnnumber * c->chunknumberincolumn + i;
+      break;
+    }
+  }
+  c->previous_chunkid = current_id;
 
   // find out which ids will be rendered
   int *wanted_ids = malloc(sizeof(int) * c->renderedchunkcount);
