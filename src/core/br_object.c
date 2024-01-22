@@ -61,8 +61,8 @@ void delete_br_object_manager(br_object_manager *manager)
 }
 
 br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsigned int vertex_number, GLuint *indices,
-							unsigned int indice_number, GLfloat texture_index, unsigned char has_physics,
-							unsigned char priority, float mass, float friction, float bounce)
+														unsigned int indice_number, GLfloat texture_index, unsigned char has_physics,
+														unsigned char priority, float mass, float friction, float bounce)
 {
 	if (manager == 0 || vertices == 0 || vertex_number == 0)
 	{
@@ -211,15 +211,15 @@ void apply_model_matrix(br_object *obj)
 	for (unsigned int i = 0; i < obj->vertex_number; i++)
 	{
 		glm_mat4_mulv(obj->model,
-					  (vec4){vertices[(obj->vertex_start + i) * 9], vertices[(obj->vertex_start + i) * 9 + 1], vertices[(obj->vertex_start + i) * 9 + 2], 1},
-					  tmp);
+									(vec4){vertices[(obj->vertex_start + i) * 9], vertices[(obj->vertex_start + i) * 9 + 1], vertices[(obj->vertex_start + i) * 9 + 2], 1},
+									tmp);
 		vertices[(obj->vertex_start + i) * 9] = tmp[0];
 		vertices[(obj->vertex_start + i) * 9 + 1] = tmp[1];
 		vertices[(obj->vertex_start + i) * 9 + 2] = tmp[2];
 
 		glm_mat4_mulv(obj->normal,
-					  (vec4){vertices[(obj->vertex_start + i) * 9 + 5], vertices[(obj->vertex_start + i) * 9 + 6], vertices[(obj->vertex_start + i) * 9 + 7], 1},
-					  tmp);
+									(vec4){vertices[(obj->vertex_start + i) * 9 + 5], vertices[(obj->vertex_start + i) * 9 + 6], vertices[(obj->vertex_start + i) * 9 + 7], 1},
+									tmp);
 		vertices[(obj->vertex_start + i) * 9 + 5] = tmp[0];
 		vertices[(obj->vertex_start + i) * 9 + 6] = tmp[1];
 		vertices[(obj->vertex_start + i) * 9 + 7] = tmp[2];
@@ -260,6 +260,33 @@ void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 	}
 
 	apply_model_matrix(obj);
+}
+
+void scale_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic)
+{
+	br_object **objs = get_data_DA(manager->objects);
+	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
+	{
+		scale_br_object(objs[i], v, effect_physic);
+	}
+}
+
+void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis, unsigned char effect_physic)
+{
+	br_object **objs = get_data_DA(manager->objects);
+	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
+	{
+		rotate_br_object(objs[i], angle, axis, effect_physic);
+	}
+}
+
+void translate_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic)
+{
+	br_object **objs = get_data_DA(manager->objects);
+	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
+	{
+		translate_br_object(objs[i], v, effect_physic);
+	}
 }
 
 void use_br_object_manager(br_object_manager *manager)

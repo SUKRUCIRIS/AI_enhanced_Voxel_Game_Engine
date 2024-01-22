@@ -31,8 +31,8 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       chunk_info x = {
           .startx = i * c->chunk_size,
           .startz = i2 * c->chunk_size,
-          .minz = -1,
-          .maxz = 101,
+          .minz = -200,
+          .maxz = 200,
           .minxy = {
               (float)(i * c->chunk_size) - (int)(dimensionx / 2),
               (float)(i2 * c->chunk_size) - (int)(dimensionz / 2)},
@@ -121,7 +121,6 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
       break;
     }
   }
-  c->previous_chunkid = current_id;
 
   // find out which ids will be rendered
   int *wanted_ids = malloc(sizeof(int) * c->renderedchunkcount);
@@ -193,10 +192,16 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
           }
           prepare_render_br_object_manager(batch->obj_manager);
         }
+        if (c->previous_chunkid != -1)
+        {
+          translate_br_object_all(batch->obj_manager, (vec3){0.0f, -100, 0.0f}, 0);
+          add_animation_translate_br_manager(batch->obj_manager, (vec3){0.0f, 100, 0.0f}, 0, 1000);
+        }
         goto add_wanted;
       }
     }
   }
+  c->previous_chunkid = current_id;
   free(wanted_ids);
 }
 
@@ -219,7 +224,7 @@ void use_chunk_op(chunk_op *c, GLuint program, camera *cam)
     box2[1][2] = y[x[i]->chunk_id].maxxy[1];
     glm_aabb_center(box2, center);
     if (glm_aabb_frustum(box2, planes) ||
-        glm_vec3_distance(cam->position, center) <= (float)c->chunk_size)
+        glm_vec3_distance(cam->position, center) <= (float)c->chunk_size * 4.0f)
     {
       use_world_batch(x[i], program);
     }

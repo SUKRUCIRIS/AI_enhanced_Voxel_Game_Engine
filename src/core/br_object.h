@@ -29,8 +29,8 @@ br_object_manager *create_br_object_manager(void);
 void delete_br_object_manager(br_object_manager *manager);
 
 br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsigned int vertex_number, GLuint *indices,
-							unsigned int indice_number, GLfloat texture_index, unsigned char has_physics,
-							unsigned char priority, float mass, float friction, float bounce);
+														unsigned int indice_number, GLfloat texture_index, unsigned char has_physics,
+														unsigned char priority, float mass, float friction, float bounce);
 
 void delete_br_object(br_object *obj);
 
@@ -39,6 +39,12 @@ void scale_br_object(br_object *obj, vec3 v, unsigned char effect_physic);
 void rotate_br_object(br_object *obj, float angle, vec3 axis, unsigned char effect_physic);
 
 void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic);
+
+void scale_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic);
+
+void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis, unsigned char effect_physic);
+
+void translate_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic);
 
 // after deleting or creating new objects use this before rendering
 void prepare_render_br_object_manager(br_object_manager *manager);

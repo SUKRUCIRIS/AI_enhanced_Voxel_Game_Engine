@@ -10,6 +10,7 @@ int main(void)
 	}
 
 	init_programs();
+	init_animations();
 
 	int world_size = 2048;
 	int chunk_size = 16;
@@ -48,7 +49,8 @@ int main(void)
 		glfwPollEvents();
 		poll_events(window);
 
-		update_chunk_op(chunks, light->lightDir);
+		update_chunk_op(chunks, 0);
+		play_animations();
 
 		if (get_key_pressed(GLFW_KEY_K) == 1)
 		{
@@ -93,6 +95,7 @@ int main(void)
 	delete_all_physic();
 	destroy_programs();
 	delete_window(window);
+	delete_animations();
 
 	free(hm);
 	free_model(gsu_model);
