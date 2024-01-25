@@ -15,7 +15,7 @@ uniform mat4 camera;
 
 void main(){
 	crntPos = vec3(model * vec4(pos, 1.0f));
-    gl_Position = camera * vec4(crntPos, 1.0f);
+  gl_Position = camera * vec4(crntPos, 1.0f);
 	normal = normalize(norm * mat3(normalMatrix));
 	texCoord = tex;
 	texture_id = int(text_id);

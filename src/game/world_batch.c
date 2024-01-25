@@ -258,7 +258,7 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 void use_world_batch(world_batch *w, GLuint program)
 {
 	use_br_texture_manager(tex_manager, program);
-	use_br_object_manager(w->obj_manager);
+	use_br_object_manager(w->obj_manager, program);
 }
 
 void delete_world_batch(world_batch *w)

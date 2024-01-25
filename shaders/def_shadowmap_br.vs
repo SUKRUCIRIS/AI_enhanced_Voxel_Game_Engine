@@ -4,7 +4,9 @@ layout(location = 1) in vec2 tex;
 layout(location = 2) in vec3 norm;
 layout(location = 3) in float text_id;
 
+uniform mat4 model;
+
 void main()
 {
-    gl_Position = vec4(pos, 1.0);
+    gl_Position = model * vec4(pos, 1.0);
 }

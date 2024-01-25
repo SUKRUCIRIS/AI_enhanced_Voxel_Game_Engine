@@ -10,11 +10,13 @@ out vec3 crntPos;
 flat out int texture_id;
 
 uniform mat4 camera;
+uniform mat4 model;
+uniform mat4 normalMatrix;
 
 void main(){
-	crntPos = pos;
-    gl_Position = camera * vec4(crntPos, 1.0f);
-	normal = normalize(norm);
+	crntPos = vec3(model * vec4(pos, 1.0f));
+  gl_Position = camera * vec4(crntPos, 1.0f);
+	normal = normalize(norm * mat3(normalMatrix));
 	texCoord = tex;
 	texture_id = int(text_id);
 }

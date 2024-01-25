@@ -194,8 +194,8 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
         }
         if (c->previous_chunkid != -1)
         {
-          translate_br_object_all(batch->obj_manager, (vec3){0.0f, -100, 0.0f}, 0);
-          add_animation_translate_br_manager(batch->obj_manager, (vec3){0.0f, 100, 0.0f}, 0, 1000);
+          translate_br_object_all(batch->obj_manager, (vec3){0.0f, -100, 0.0f});
+          add_animation_translate_br_manager(batch->obj_manager, (vec3){0.0f, 100, 0.0f}, 1000);
         }
         goto add_wanted;
       }

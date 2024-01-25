@@ -40,6 +40,10 @@ br_object_manager *create_br_object_manager(void)
 	x->vertices = create_DA_HIGH_MEMORY(sizeof(GLfloat));
 	x->indices = create_DA_HIGH_MEMORY(sizeof(GLuint));
 	x->subdata = 0;
+	glm_mat4_copy(GLM_MAT4_IDENTITY, x->model);
+	glm_mat4_copy(GLM_MAT4_IDENTITY, x->normal);
+	x->programs = create_DA(sizeof(GLuint));
+	x->uniforms = create_DA(sizeof(GLint));
 	return x;
 }
 
@@ -54,6 +58,8 @@ void delete_br_object_manager(br_object_manager *manager)
 	delete_DA(manager->objects);
 	delete_DA(manager->vertices);
 	delete_DA(manager->indices);
+	delete_DA(manager->programs);
+	delete_DA(manager->uniforms);
 	glDeleteVertexArrays(1, &(manager->VAO));
 	glDeleteBuffers(1, &(manager->VBO));
 	glDeleteBuffers(1, &(manager->EBO));
@@ -262,37 +268,39 @@ void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 	apply_model_matrix(obj);
 }
 
-void scale_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic)
+void scale_br_object_all(br_object_manager *manager, vec3 v)
 {
-	br_object **objs = get_data_DA(manager->objects);
-	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
-	{
-		scale_br_object(objs[i], v, effect_physic);
-	}
+	glm_scale(manager->model, v);
 }
 
-void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis, unsigned char effect_physic)
+void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis)
 {
-	br_object **objs = get_data_DA(manager->objects);
-	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
-	{
-		rotate_br_object(objs[i], angle, axis, effect_physic);
-	}
+	glm_rotate(manager->model, glm_rad(angle), axis);
 }
 
-void translate_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic)
+void translate_br_object_all(br_object_manager *manager, vec3 v)
 {
-	br_object **objs = get_data_DA(manager->objects);
-	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
-	{
-		translate_br_object(objs[i], v, effect_physic);
-	}
+	glm_translate(manager->model, v);
 }
 
-void use_br_object_manager(br_object_manager *manager)
+void use_br_object_manager(br_object_manager *manager, GLuint program)
 {
 	if (get_size_DA(manager->objects) > 0)
 	{
+		if (get_index_DA(manager->programs, &program) == UINT_MAX)
+		{
+			pushback_DA(manager->programs, &program);
+			GLint uniform = glGetUniformLocation(program, "model");
+			pushback_DA(manager->uniforms, &uniform);
+			uniform = glGetUniformLocation(program, "normalMatrix");
+			pushback_DA(manager->uniforms, &uniform);
+		}
+		GLint *uniforms = get_data_DA(manager->uniforms);
+		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2], 1, GL_FALSE, manager->model[0]);
+		glm_mat4_inv(manager->model, manager->normal);
+		glm_mat4_transpose(manager->normal);
+		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2 + 1], 1, GL_FALSE, manager->normal[0]);
+
 		if (manager->subdata == 1)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, manager->VBO);

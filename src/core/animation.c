@@ -12,7 +12,6 @@ typedef struct translate
   DA *brovec;
   DA *brmvec;
   DA *brop;
-  DA *brmp;
   DA *broduration;
   DA *brmduration;
 } translate;
@@ -30,7 +29,6 @@ void init_animations(void)
   tranim.brovec = create_DA(sizeof(vec3));
   tranim.brmvec = create_DA(sizeof(vec3));
   tranim.brop = create_DA(sizeof(unsigned char));
-  tranim.brmp = create_DA(sizeof(unsigned char));
   tranim.broduration = create_DA(sizeof(double));
   tranim.brmduration = create_DA(sizeof(double));
 }
@@ -47,7 +45,7 @@ void add_animation_translate_br_object(br_object *obj, vec3 v, unsigned char eff
   pushback_DA(tranim.broduration, &durationms);
 }
 
-void add_animation_translate_br_manager(br_object_manager *manager, vec3 v, unsigned char effect_physic, double durationms)
+void add_animation_translate_br_manager(br_object_manager *manager, vec3 v, double durationms)
 {
   double current = get_timems();
   double end = current + durationms;
@@ -55,7 +53,6 @@ void add_animation_translate_br_manager(br_object_manager *manager, vec3 v, unsi
   pushback_DA(tranim.brmstartms, &current);
   pushback_DA(tranim.brmendms, &end);
   pushback_DA(tranim.brmvec, &v);
-  pushback_DA(tranim.brmp, &effect_physic);
   pushback_DA(tranim.brmduration, &durationms);
 }
 
@@ -103,7 +100,6 @@ start2:
   startms = get_data_DA(tranim.brmstartms);
   endms = get_data_DA(tranim.brmendms);
   vec = get_data_DA(tranim.brmvec);
-  phy = get_data_DA(tranim.brmp);
   duration = get_data_DA(tranim.brmduration);
   for (unsigned int i = index; i < get_size_DA(tranim.brm); i++)
   {
@@ -121,13 +117,12 @@ start2:
       remove_DA(tranim.brmstartms, i);
       remove_DA(tranim.brmendms, i);
       remove_DA(tranim.brmvec, i);
-      remove_DA(tranim.brmp, i);
       remove_DA(tranim.brmduration, i);
       index = i;
       goto start2;
     }
     glm_vec3_scale(vec[i], (tmpcur - startms[i]) / duration[i], v);
-    translate_br_object_all(mng[i], v, phy[i]);
+    translate_br_object_all(mng[i], v);
     startms[i] = current;
   }
 }
@@ -143,7 +138,6 @@ void delete_animations(void)
   delete_DA(tranim.brovec);
   delete_DA(tranim.brmvec);
   delete_DA(tranim.brop);
-  delete_DA(tranim.brmp);
   delete_DA(tranim.broduration);
   delete_DA(tranim.brmduration);
 }

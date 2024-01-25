@@ -10,6 +10,10 @@ typedef struct br_object_manager
 	DA *vertices; // 3 vertex coord, 2 texture coord, 3 normal coord, 1 texture id
 	DA *indices;
 	unsigned char subdata;
+	mat4 model;
+	mat4 normal;
+	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
+	DA *uniforms;
 } br_object_manager;
 
 typedef struct br_object // batch rendering object
@@ -40,13 +44,13 @@ void rotate_br_object(br_object *obj, float angle, vec3 axis, unsigned char effe
 
 void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic);
 
-void scale_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic);
+void scale_br_object_all(br_object_manager *manager, vec3 v);
 
-void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis, unsigned char effect_physic);
+void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis);
 
-void translate_br_object_all(br_object_manager *manager, vec3 v, unsigned char effect_physic);
+void translate_br_object_all(br_object_manager *manager, vec3 v);
 
 // after deleting or creating new objects use this before rendering
 void prepare_render_br_object_manager(br_object_manager *manager);
 
-void use_br_object_manager(br_object_manager *manager);
+void use_br_object_manager(br_object_manager *manager, GLuint program);
