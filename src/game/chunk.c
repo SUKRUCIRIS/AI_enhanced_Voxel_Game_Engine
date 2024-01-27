@@ -12,7 +12,7 @@ void set_gsu_model(struct aiScene *model)
 chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm, int dimensionx, int dimensionz)
 {
   chunk_op *c = malloc(sizeof(chunk_op));
-  c->batch = create_DA(sizeof(world_batch *));
+  c->batch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
   c->chunkinfo = create_DA(sizeof(chunk_info));
   c->chunk_size = chunk_size;
   c->chunk_range = chunk_range;
@@ -64,6 +64,7 @@ void delete_chunk_op(chunk_op *c)
   world_batch **x = get_data_DA(c->batch);
   for (unsigned int i = 0; i < get_size_DA(c->batch); i++)
   {
+    remove_animation_translate_br_manager(x[i]->obj_manager);
     delete_world_batch(x[i]);
   }
   delete_DA(c->batch);
@@ -142,6 +143,7 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
     {
       if (inarray(x[i]->chunk_id, wanted_ids, c->renderedchunkcount) == 0)
       {
+        remove_animation_translate_br_manager(x[i]->obj_manager);
         delete_world_batch(x[i]);
         remove_DA(c->batch, i);
         goto delete_unwanted;
@@ -195,7 +197,7 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
         if (c->previous_chunkid != -1)
         {
           translate_br_object_all(batch->obj_manager, (vec3){0.0f, -100, 0.0f});
-          add_animation_translate_br_manager(batch->obj_manager, (vec3){0.0f, 100, 0.0f}, 1000);
+          add_animation_translate_br_manager(batch->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
         }
         goto add_wanted;
       }

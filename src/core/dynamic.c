@@ -128,7 +128,15 @@ void remove_DA(DA *da, unsigned int index)
 	{
 		return;
 	}
-	char *newitems = calloc(da->size - 1, da->itemsize);
+	char *newitems = 0;
+	if (da->high_memory == 0)
+	{
+		newitems = calloc(da->size - 1, da->itemsize);
+	}
+	else
+	{
+		newitems = da->items;
+	}
 	if (newitems == 0)
 	{
 		return;
@@ -142,8 +150,11 @@ void remove_DA(DA *da, unsigned int index)
 		memcpy(newitems, da->items, da->itemsize * index);
 		memcpy(newitems + (da->itemsize * index), (char *)(da->items) + (da->itemsize * (index + 1)), da->itemsize * (da->size - 1 - index));
 	}
-	free(da->items);
-	da->items = newitems;
+	if (da->high_memory == 0)
+	{
+		free(da->items);
+		da->items = newitems;
+	}
 	da->size--;
 	da->memory_size = da->size;
 }
@@ -154,7 +165,15 @@ void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
 	{
 		return;
 	}
-	char *newitems = calloc(da->size - (end_index - start_index + 1), da->itemsize);
+	char *newitems = 0;
+	if (da->high_memory == 0)
+	{
+		newitems = calloc(da->size - (end_index - start_index + 1), da->itemsize);
+	}
+	else
+	{
+		newitems = da->items;
+	}
 	if (newitems == 0)
 	{
 		return;
@@ -162,16 +181,19 @@ void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
 	if (start_index == 0)
 	{
 		memcpy(newitems, (char *)(da->items) + da->itemsize * (end_index - start_index + 1),
-			   da->itemsize * (da->size - (end_index - start_index + 1)));
+					 da->itemsize * (da->size - (end_index - start_index + 1)));
 	}
 	else
 	{
 		memcpy(newitems, da->items, da->itemsize * start_index);
 		memcpy(newitems + (da->itemsize * start_index), (char *)(da->items) + (da->itemsize * (end_index + 1)),
-			   da->itemsize * (da->size - 1 - end_index));
+					 da->itemsize * (da->size - 1 - end_index));
 	}
-	free(da->items);
-	da->items = newitems;
+	if (da->high_memory == 0)
+	{
+		free(da->items);
+		da->items = newitems;
+	}
 	da->size -= (end_index - start_index + 1);
 	da->memory_size = da->size;
 }
