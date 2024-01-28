@@ -12,6 +12,8 @@ struct DA
 	void *items;
 };
 
+DA *HIGH_MEMORY_BUFFER[512] = {0};
+
 DA *create_DA(unsigned int itemsize)
 {
 	DA *da = calloc(1, sizeof(DA));
@@ -38,7 +40,7 @@ DA *create_DA_HIGH_MEMORY(unsigned int itemsize)
 void pushback_DA(DA *da, void *item)
 {
 	void *tmp = da->items;
-	if (da->high_memory == 0 || da->size == 0)
+	if (da->high_memory == 0 || da->memory_size == 0)
 	{
 		tmp = realloc(da->items, (da->size + 1) * da->itemsize);
 		if (tmp != 0)
@@ -69,7 +71,7 @@ void pushback_DA(DA *da, void *item)
 void pushback_many_DA(DA *da, void *items, unsigned int count)
 {
 	void *tmp = da->items;
-	if (da->high_memory == 0 || da->size == 0)
+	if (da->high_memory == 0 || da->memory_size == 0)
 	{
 		tmp = realloc(da->items, (da->size + count) * da->itemsize);
 		if (tmp != 0)
@@ -150,13 +152,13 @@ void remove_DA(DA *da, unsigned int index)
 		memcpy(newitems, da->items, da->itemsize * index);
 		memcpy(newitems + (da->itemsize * index), (char *)(da->items) + (da->itemsize * (index + 1)), da->itemsize * (da->size - 1 - index));
 	}
+	da->size--;
 	if (da->high_memory == 0)
 	{
 		free(da->items);
 		da->items = newitems;
+		da->memory_size = da->size;
 	}
-	da->size--;
-	da->memory_size = da->size;
 }
 
 void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
@@ -189,13 +191,13 @@ void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
 		memcpy(newitems + (da->itemsize * start_index), (char *)(da->items) + (da->itemsize * (end_index + 1)),
 					 da->itemsize * (da->size - 1 - end_index));
 	}
+	da->size -= (end_index - start_index + 1);
 	if (da->high_memory == 0)
 	{
 		free(da->items);
 		da->items = newitems;
+		da->memory_size = da->size;
 	}
-	da->size -= (end_index - start_index + 1);
-	da->memory_size = da->size;
 }
 
 void clear_DA(DA *da)

@@ -66,39 +66,25 @@ void add_animation_translate_br_manager(br_object_manager *manager, vec3 v, doub
 
 void remove_animation_translate_br_object(br_object *obj)
 {
-  br_object **objs = get_data_DA(tranim.bro);
-  for (unsigned int i = 0; i < get_size_DA(tranim.bro); i++)
-  {
-    if (objs[i] == obj)
-    {
-      remove_DA(tranim.bro, i);
-      remove_DA(tranim.brostartms, i);
-      remove_DA(tranim.broendms, i);
-      remove_DA(tranim.brotargetvec, i);
-      remove_DA(tranim.brocurrentvec, i);
-      remove_DA(tranim.brop, i);
-      remove_DA(tranim.broduration, i);
-      break;
-    }
-  }
+  unsigned int index = get_index_DA(tranim.bro, &obj);
+  remove_DA(tranim.bro, index);
+  remove_DA(tranim.brostartms, index);
+  remove_DA(tranim.broendms, index);
+  remove_DA(tranim.brotargetvec, index);
+  remove_DA(tranim.brocurrentvec, index);
+  remove_DA(tranim.brop, index);
+  remove_DA(tranim.broduration, index);
 }
 
 void remove_animation_translate_br_manager(br_object_manager *manager)
 {
-  br_object_manager **mng = get_data_DA(tranim.brm);
-  for (unsigned int i = 0; i < get_size_DA(tranim.brm); i++)
-  {
-    if (mng[i] == manager)
-    {
-      remove_DA(tranim.brm, i);
-      remove_DA(tranim.brmstartms, i);
-      remove_DA(tranim.brmendms, i);
-      remove_DA(tranim.brmtargetvec, i);
-      remove_DA(tranim.brmcurrentvec, i);
-      remove_DA(tranim.brmduration, i);
-      break;
-    }
-  }
+  unsigned int index = get_index_DA(tranim.brm, &manager);
+  remove_DA(tranim.brm, index);
+  remove_DA(tranim.brmstartms, index);
+  remove_DA(tranim.brmendms, index);
+  remove_DA(tranim.brmtargetvec, index);
+  remove_DA(tranim.brmcurrentvec, index);
+  remove_DA(tranim.brmduration, index);
 }
 
 void play_animations(void)
@@ -149,7 +135,6 @@ start2:
   duration = get_data_DA(tranim.brmduration);
   for (unsigned int i = index; i < get_size_DA(tranim.brm); i++)
   {
-    printf("%d %f\n", i, current);
     if (current >= endms[i])
     {
       glm_vec3_scale(veccurrent[i], -1, veccurrent[i]);
