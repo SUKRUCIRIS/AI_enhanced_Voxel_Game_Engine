@@ -17,6 +17,8 @@ int main(void)
 	int chunk_range = 32;
 	float render_distance = (float)chunk_size * chunk_range * 2;
 
+	init_recycle_DA(chunk_range * 4);
+
 	int window_w = 0, window_h = 0;
 	glfwGetWindowSize(window, &window_w, &window_h);
 	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
@@ -96,6 +98,7 @@ int main(void)
 	destroy_programs();
 	delete_window(window);
 	delete_animations();
+	delete_recycle_DA();
 
 	free(hm);
 	free_model(gsu_model);

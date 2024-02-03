@@ -12,7 +12,48 @@ struct DA
 	void *items;
 };
 
-DA *HIGH_MEMORY_BUFFER[512] = {0};
+unsigned int recycle_max_size = 0;
+DA *HIGH_MEMORY_RECYCLE_BUFFER = 0;
+
+void init_recycle_DA(unsigned int max_size)
+{
+	if (max_size > 0)
+	{
+		delete_recycle_DA();
+		HIGH_MEMORY_RECYCLE_BUFFER = create_DA_HIGH_MEMORY(sizeof(DA *));
+		recycle_max_size = max_size;
+	}
+}
+
+void delete_recycle_DA(void)
+{
+	if (HIGH_MEMORY_RECYCLE_BUFFER != 0)
+	{
+		DA **das = get_data_DA(HIGH_MEMORY_RECYCLE_BUFFER);
+		for (unsigned int i = 0; i < HIGH_MEMORY_RECYCLE_BUFFER->size; i++)
+		{
+			free(das[i]->items);
+			free(das[i]);
+		}
+		free(HIGH_MEMORY_RECYCLE_BUFFER->items);
+		free(HIGH_MEMORY_RECYCLE_BUFFER);
+		HIGH_MEMORY_RECYCLE_BUFFER = 0;
+	}
+}
+
+void clear_recycle_DA(void)
+{
+	if (HIGH_MEMORY_RECYCLE_BUFFER != 0)
+	{
+		DA **das = get_data_DA(HIGH_MEMORY_RECYCLE_BUFFER);
+		for (unsigned int i = 0; i < HIGH_MEMORY_RECYCLE_BUFFER->size; i++)
+		{
+			free(das[i]->items);
+			free(das[i]);
+		}
+		clear_DA(HIGH_MEMORY_RECYCLE_BUFFER);
+	}
+}
 
 DA *create_DA(unsigned int itemsize)
 {
@@ -27,13 +68,37 @@ DA *create_DA(unsigned int itemsize)
 
 DA *create_DA_HIGH_MEMORY(unsigned int itemsize)
 {
-	DA *da = calloc(1, sizeof(DA));
-	if (da == 0)
+	DA *da = 0;
+	unsigned char found = 0;
+	if (HIGH_MEMORY_RECYCLE_BUFFER != 0 && HIGH_MEMORY_RECYCLE_BUFFER->size > 0)
 	{
-		return 0;
+		DA **das = get_data_DA(HIGH_MEMORY_RECYCLE_BUFFER);
+		unsigned int i = 0;
+		for (i = 0; i < HIGH_MEMORY_RECYCLE_BUFFER->size; i++)
+		{
+			if (itemsize == das[i]->itemsize)
+			{
+				da = das[i];
+				found = 1;
+				break;
+			}
+		}
+		if (found == 1)
+		{
+			remove_DA(HIGH_MEMORY_RECYCLE_BUFFER, i);
+			da->size = 0;
+		}
 	}
-	da->itemsize = itemsize;
-	da->high_memory = 1;
+	else if (found == 0)
+	{
+		da = calloc(1, sizeof(DA));
+		if (da == 0)
+		{
+			return 0;
+		}
+		da->itemsize = itemsize;
+		da->high_memory = 1;
+	}
 	return da;
 }
 
@@ -102,7 +167,11 @@ void pushback_many_DA(DA *da, void *items, unsigned int count)
 
 void delete_DA(DA *da)
 {
-	if (da)
+	if (da && da->high_memory == 1 && HIGH_MEMORY_RECYCLE_BUFFER != 0 && HIGH_MEMORY_RECYCLE_BUFFER->size < recycle_max_size)
+	{
+		pushback_DA(HIGH_MEMORY_RECYCLE_BUFFER, &da);
+	}
+	else if (da)
 	{
 		free(da->items);
 		free(da);
