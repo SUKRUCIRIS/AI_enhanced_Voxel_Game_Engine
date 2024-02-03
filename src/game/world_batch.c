@@ -264,6 +264,7 @@ void use_world_batch(world_batch *w, GLuint program)
 void delete_world_batch(world_batch *w)
 {
 	delete_br_object_manager(w->obj_manager);
+	free(w);
 }
 
 br_texture_manager *get_world_texture_manager(void)
