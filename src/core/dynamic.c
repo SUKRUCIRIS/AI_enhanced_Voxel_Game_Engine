@@ -271,12 +271,16 @@ void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
 
 void clear_DA(DA *da)
 {
-	if (da)
+	if (da && da->high_memory == 0)
 	{
 		free(da->items);
 		da->items = 0;
 		da->size = 0;
 		da->memory_size = 0;
+	}
+	else if (da)
+	{
+		da->size = 0;
 	}
 }
 
@@ -298,4 +302,17 @@ unsigned int get_index_DA(DA *da, void *item)
 		}
 	}
 	return UINT_MAX;
+}
+
+void trim_DA(DA *da)
+{
+	if (da->memory_size > da->size)
+	{
+		void *x = realloc(da->items, da->itemsize * da->size);
+		if (x)
+		{
+			da->items = x;
+			da->memory_size = da->size;
+		}
+	}
 }

@@ -39,6 +39,7 @@ void init_animations(void)
 
 void add_animation_translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic, double durationms)
 {
+  remove_animation_translate_br_object(obj);
   double current = get_timems();
   double end = current + durationms;
   vec3 currentv = {0, 0, 0};
@@ -53,6 +54,7 @@ void add_animation_translate_br_object(br_object *obj, vec3 v, unsigned char eff
 
 void add_animation_translate_br_manager(br_object_manager *manager, vec3 v, double durationms)
 {
+  remove_animation_translate_br_manager(manager);
   double current = get_timems();
   double end = current + durationms;
   vec3 currentv = {0, 0, 0};

@@ -36,3 +36,5 @@ void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index);
 void clear_DA(DA *da);
 
 unsigned int get_index_DA(DA *da, void *item);
+
+void trim_DA(DA *da);

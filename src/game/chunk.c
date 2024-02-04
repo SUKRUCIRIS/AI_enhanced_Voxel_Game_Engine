@@ -13,7 +13,8 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
 {
   chunk_op *c = malloc(sizeof(chunk_op));
   c->batch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
-  c->chunkinfo = create_DA(sizeof(chunk_info));
+  c->allbatch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
+  c->chunkinfo = create_DA_HIGH_MEMORY(sizeof(chunk_info));
   c->chunk_size = chunk_size;
   c->chunk_range = chunk_range;
   c->p = p;
@@ -56,6 +57,36 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       }
     }
   }
+  trim_DA(c->chunkinfo);
+  chunk_info *y = get_data_DA(c->chunkinfo);
+  for (unsigned int i = 0; i < get_size_DA(c->chunkinfo); i++)
+  {
+    world_batch *batch = create_world_batch(c->hm, y[i].startx, y[i].startz,
+                                            c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz, 0);
+    batch->chunk_id = i;
+    pushback_DA(c->allbatch, &batch);
+    if (i == c->centerchunkid)
+    {
+      br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 8, 0, 3, 10, 0.1f, 0.5f);
+      float scalex = gsu_x / (gsu.box.mMax.x - gsu.box.mMin.x),
+            scaley = gsu_h / (gsu.box.mMax.y - gsu.box.mMin.y),
+            scalez = gsu_z / (gsu.box.mMax.z - gsu.box.mMin.z);
+      gsu.box.mMin.y *= scaley;
+      gsu.box.mMax.y *= scaley;
+      gsu.box.mMin.x *= scalex;
+      gsu.box.mMax.x *= scalex;
+      gsu.box.mMin.z *= scalez;
+      gsu.box.mMax.z *= scalez;
+      for (unsigned int i2 = 0; i2 < gsu.mesh_count; i2++)
+      {
+        scale_br_object(gsu.meshes[i2], (vec3){scalex, scaley, scalez}, 0);
+        translate_br_object(gsu.meshes[i2], (vec3){y[c->centerchunkid].minxy[0] - gsu.box.mMin.x, gsu_y + 0.5f - gsu.box.mMin.y, y[c->centerchunkid].minxy[1] - gsu.box.mMin.z}, 0);
+      }
+      prepare_render_br_object_manager(batch->obj_manager);
+    }
+    delete_cpu_memory_br_object_manager(batch->obj_manager);
+  }
+  trim_DA(c->allbatch);
   return c;
 }
 
@@ -65,9 +96,14 @@ void delete_chunk_op(chunk_op *c)
   for (unsigned int i = 0; i < get_size_DA(c->batch); i++)
   {
     remove_animation_translate_br_manager(x[i]->obj_manager);
-    delete_world_batch(x[i]);
   }
   delete_DA(c->batch);
+  world_batch **y = get_data_DA(c->allbatch);
+  for (unsigned int i = 0; i < get_size_DA(c->allbatch); i++)
+  {
+    delete_world_batch(y[i]);
+  }
+  delete_DA(c->allbatch);
   delete_DA(c->chunkinfo);
   free(c);
   delete_world_texture_manager();
@@ -85,7 +121,7 @@ unsigned char inarray(int x, int *array, int size)
   return 0;
 }
 
-void update_chunk_op(chunk_op *c, vec3 lightdir)
+void update_chunk_op(chunk_op *c)
 {
   float *pos = c->p->fp_camera->position;
   chunk_info *y = get_data_DA(c->chunkinfo);
@@ -123,88 +159,32 @@ void update_chunk_op(chunk_op *c, vec3 lightdir)
     }
   }
 
-  // find out which ids will be rendered
-  int *wanted_ids = malloc(sizeof(int) * c->renderedchunkcount);
+  clear_DA(c->batch);
+  world_batch **z = get_data_DA(c->allbatch);
+
   int index = 0;
   for (unsigned int i = 0; i <= 2 * c->chunk_range; i++)
   {
     for (unsigned int i2 = 0; i2 <= 2 * c->chunk_range; i2++)
     {
-      wanted_ids[index] = current_id - (c->chunk_range - i) -
-                          ((c->chunk_range - i2) * c->chunknumberinrow);
-      index++;
-    }
-  }
-
-  {
-  delete_unwanted:
-    world_batch **x = get_data_DA(c->batch);
-    for (unsigned int i = 0; i < get_size_DA(c->batch); i++)
-    {
-      if (inarray(x[i]->chunk_id, wanted_ids, c->renderedchunkcount) == 0)
-      {
-        remove_animation_translate_br_manager(x[i]->obj_manager);
-        delete_world_batch(x[i]);
-        remove_DA(c->batch, i);
-        goto delete_unwanted;
-      }
-    }
-  }
-
-  {
-  add_wanted:
-    world_batch **x = get_data_DA(c->batch);
-    for (int i = 0; i < c->renderedchunkcount; i++)
-    {
-      if (wanted_ids[i] < 0 || wanted_ids[i] >= (int)get_size_DA(c->chunkinfo))
+      index = current_id - (c->chunk_range - i) -
+              ((c->chunk_range - i2) * c->chunknumberinrow);
+      if (index < 0 || index >= (int)get_size_DA(c->chunkinfo))
       {
         continue;
       }
-      found = 0;
-      for (unsigned int i2 = 0; i2 < get_size_DA(c->batch); i2++)
+      pushback_DA(c->batch, &(z[index]));
+      glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->model);
+      glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->normal);
+      if (c->previous_chunkid != -1)
       {
-        if (wanted_ids[i] == x[i2]->chunk_id)
-        {
-          found = 1;
-          break;
-        }
-      }
-      if (found == 0)
-      {
-        world_batch *batch = create_world_batch(c->hm, y[wanted_ids[i]].startx, y[wanted_ids[i]].startz,
-                                                c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz, lightdir);
-        batch->chunk_id = wanted_ids[i];
-        pushback_DA(c->batch, &batch);
-        if (wanted_ids[i] == c->centerchunkid)
-        {
-          br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 8, 0, 3, 10, 0.1f, 0.5f);
-          float scalex = gsu_x / (gsu.box.mMax.x - gsu.box.mMin.x),
-                scaley = gsu_h / (gsu.box.mMax.y - gsu.box.mMin.y),
-                scalez = gsu_z / (gsu.box.mMax.z - gsu.box.mMin.z);
-          gsu.box.mMin.y *= scaley;
-          gsu.box.mMax.y *= scaley;
-          gsu.box.mMin.x *= scalex;
-          gsu.box.mMax.x *= scalex;
-          gsu.box.mMin.z *= scalez;
-          gsu.box.mMax.z *= scalez;
-          for (unsigned int i2 = 0; i2 < gsu.mesh_count; i2++)
-          {
-            scale_br_object(gsu.meshes[i2], (vec3){scalex, scaley, scalez}, 0);
-            translate_br_object(gsu.meshes[i2], (vec3){y[c->centerchunkid].minxy[0] - gsu.box.mMin.x, gsu_y + 0.5f - gsu.box.mMin.y, y[c->centerchunkid].minxy[1] - gsu.box.mMin.z}, 0);
-          }
-          prepare_render_br_object_manager(batch->obj_manager);
-        }
-        if (c->previous_chunkid != -1)
-        {
-          translate_br_object_all(batch->obj_manager, (vec3){0.0f, -100, 0.0f});
-          add_animation_translate_br_manager(batch->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
-        }
-        goto add_wanted;
+        // translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
+        // add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
       }
     }
   }
+
   c->previous_chunkid = current_id;
-  free(wanted_ids);
 }
 
 void use_chunk_op(chunk_op *c, GLuint program, camera *cam)
@@ -226,7 +206,7 @@ void use_chunk_op(chunk_op *c, GLuint program, camera *cam)
     box2[1][2] = y[x[i]->chunk_id].maxxy[1];
     glm_aabb_center(box2, center);
     if (glm_aabb_frustum(box2, planes) ||
-        glm_vec3_distance((vec3){cam->position[0], 0, cam->position[2]}, (vec3){center[0], 0, center[2]}) <= (float)c->chunk_size * 2.0f)
+        glm_vec3_distance((vec3){cam->position[0], 0, cam->position[2]}, (vec3){center[0], 0, center[2]}) <= (float)c->chunk_size * 4.0f)
     {
       use_world_batch(x[i], program);
     }

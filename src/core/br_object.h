@@ -14,6 +14,8 @@ typedef struct br_object_manager
 	mat4 normal;
 	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
 	DA *uniforms;
+	unsigned int object_number;
+	unsigned int indice_number;
 } br_object_manager;
 
 typedef struct br_object // batch rendering object
@@ -54,3 +56,5 @@ void translate_br_object_all(br_object_manager *manager, vec3 v);
 void prepare_render_br_object_manager(br_object_manager *manager);
 
 void use_br_object_manager(br_object_manager *manager, GLuint program);
+
+void delete_cpu_memory_br_object_manager(br_object_manager *manager);

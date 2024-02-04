@@ -28,6 +28,7 @@ void prepare_render_br_object_manager(br_object_manager *manager)
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
+	manager->subdata = 0;
 }
 
 br_object_manager *create_br_object_manager(void)
@@ -44,16 +45,21 @@ br_object_manager *create_br_object_manager(void)
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->normal);
 	x->programs = create_DA(sizeof(GLuint));
 	x->uniforms = create_DA(sizeof(GLint));
+	x->object_number = 0;
+	x->indice_number = 0;
 	return x;
 }
 
 void delete_br_object_manager(br_object_manager *manager)
 {
-	br_object **objects = get_data_DA(manager->objects);
-	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
+	if (manager->objects != 0)
 	{
-		delete_physic(objects[i]->phy);
-		free(objects[i]);
+		br_object **objects = get_data_DA(manager->objects);
+		for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
+		{
+			delete_physic(objects[i]->phy);
+			free(objects[i]);
+		}
 	}
 	delete_DA(manager->objects);
 	delete_DA(manager->vertices);
@@ -162,6 +168,8 @@ br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsig
 		vertices[9 * i + 8] = oldtext_index;
 	}
 	free(noindice);
+	manager->indice_number = get_size_DA(manager->indices);
+	manager->object_number = get_size_DA(manager->objects);
 	return x;
 }
 
@@ -285,7 +293,7 @@ void translate_br_object_all(br_object_manager *manager, vec3 v)
 
 void use_br_object_manager(br_object_manager *manager, GLuint program)
 {
-	if (get_size_DA(manager->objects) > 0)
+	if (manager->object_number > 0)
 	{
 		if (get_index_DA(manager->programs, &program) == UINT_MAX)
 		{
@@ -310,7 +318,23 @@ void use_br_object_manager(br_object_manager *manager, GLuint program)
 		}
 
 		glBindVertexArray(manager->VAO);
-		glDrawElements(GL_TRIANGLES, get_size_DA(manager->indices), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, manager->indice_number, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
+}
+
+void delete_cpu_memory_br_object_manager(br_object_manager *manager)
+{
+	br_object **objects = get_data_DA(manager->objects);
+	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
+	{
+		delete_physic(objects[i]->phy);
+		free(objects[i]);
+	}
+	delete_DA(manager->objects);
+	delete_DA(manager->vertices);
+	delete_DA(manager->indices);
+	manager->objects = 0;
+	manager->vertices = 0;
+	manager->indices = 0;
 }

@@ -6,6 +6,7 @@ typedef struct chunk_op
 {
   DA *chunkinfo;
   DA *batch;
+  DA *allbatch;
   unsigned int chunk_size;
   unsigned int chunk_range;
   player *p;
@@ -15,7 +16,7 @@ typedef struct chunk_op
   int chunknumberinrow;
   int chunknumberincolumn;
   int renderedchunkcount;
-  int centerchunkid;
+  unsigned int centerchunkid;
 } chunk_op;
 
 typedef struct chunk_info
@@ -29,7 +30,7 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
 
 void delete_chunk_op(chunk_op *c);
 
-void update_chunk_op(chunk_op *c, vec3 lightdir);
+void update_chunk_op(chunk_op *c);
 
 void use_chunk_op(chunk_op *c, GLuint program, camera *cam);
 
