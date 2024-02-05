@@ -17,6 +17,9 @@ typedef struct chunk_op
   int chunknumberincolumn;
   int renderedchunkcount;
   unsigned int centerchunkid;
+  int *previous_ids;
+  int *current_ids;
+  DA *delete_ids;
 } chunk_op;
 
 typedef struct chunk_info

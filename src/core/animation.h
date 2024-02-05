@@ -14,3 +14,7 @@ void remove_animation_translate_br_manager(br_object_manager *manager);
 void play_animations(void);
 
 void delete_animations(void);
+
+unsigned char has_animation_br_object(br_object *obj);
+
+unsigned char has_animation_br_manager(br_object_manager *manager);

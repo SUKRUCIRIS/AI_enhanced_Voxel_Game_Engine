@@ -87,6 +87,9 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
     delete_cpu_memory_br_object_manager(batch->obj_manager);
   }
   trim_DA(c->allbatch);
+  c->previous_ids = 0;
+  c->current_ids = malloc(sizeof(int) * c->renderedchunkcount);
+  c->delete_ids = create_DA_HIGH_MEMORY(sizeof(int));
   return c;
 }
 
@@ -105,6 +108,9 @@ void delete_chunk_op(chunk_op *c)
   }
   delete_DA(c->allbatch);
   delete_DA(c->chunkinfo);
+  free(c->previous_ids);
+  free(c->current_ids);
+  delete_DA(c->delete_ids);
   free(c);
   delete_world_texture_manager();
 }
@@ -123,6 +129,21 @@ unsigned char inarray(int x, int *array, int size)
 
 void update_chunk_op(chunk_op *c)
 {
+  // remove deleted chunks after remove animation
+  world_batch **z = get_data_DA(c->allbatch);
+remove:
+  int *delids = get_data_DA(c->delete_ids);
+  for (unsigned int i = 0; i < get_size_DA(c->delete_ids); i++)
+  {
+    if (has_animation_br_manager(z[delids[i]]->obj_manager) == 0)
+    {
+      remove_DA(c->batch, get_index_DA(c->batch, &(z[delids[i]])));
+      remove_DA(c->delete_ids, i);
+      goto remove;
+    }
+  }
+
+  // dont calculate if it is in same chunk
   float *pos = c->p->fp_camera->position;
   chunk_info *y = get_data_DA(c->chunkinfo);
   if (c->previous_chunkid != -1 && y[c->previous_chunkid].minxy[0] <= pos[0] && y[c->previous_chunkid].minxy[1] <= pos[2] &&
@@ -146,7 +167,6 @@ void update_chunk_op(chunk_op *c)
   }
   if (found == 0)
   {
-    c->previous_chunkid = -1;
     return;
   }
   for (int i = 0; i < c->chunknumberincolumn; i++)
@@ -159,29 +179,66 @@ void update_chunk_op(chunk_op *c)
     }
   }
 
-  clear_DA(c->batch);
-  world_batch **z = get_data_DA(c->allbatch);
-
+  // figure out which ids will be rendered
   int index = 0;
+  int index2 = 0;
   for (unsigned int i = 0; i <= 2 * c->chunk_range; i++)
   {
     for (unsigned int i2 = 0; i2 <= 2 * c->chunk_range; i2++)
     {
       index = current_id - (c->chunk_range - i) -
               ((c->chunk_range - i2) * c->chunknumberinrow);
-      if (index < 0 || index >= (int)get_size_DA(c->chunkinfo))
+      c->current_ids[index2] = index;
+      index2++;
+    }
+  }
+
+  // add the new ids
+  for (int i = 0; i < c->renderedchunkcount; i++)
+  {
+    index = c->current_ids[i];
+    if (index < 0 || index >= (int)get_size_DA(c->chunkinfo))
+    {
+      continue;
+    }
+    if (c->previous_chunkid != -1 && c->previous_ids != 0)
+    {
+      if (inarray(index, c->previous_ids, c->renderedchunkcount) == 0)
       {
-        continue;
-      }
-      pushback_DA(c->batch, &(z[index]));
-      glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->model);
-      glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->normal);
-      if (c->previous_chunkid != -1)
-      {
-        // translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
-        // add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
+        pushback_DA(c->batch, &(z[index]));
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->model);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->normal);
+        translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
+        add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
       }
     }
+    else
+    {
+      pushback_DA(c->batch, &(z[index]));
+    }
+  }
+
+  // add the old ids remove animation
+  if (c->previous_ids != 0)
+  {
+    for (int i = 0; i < c->renderedchunkcount; i++)
+    {
+      if (inarray(c->previous_ids[i], c->current_ids, c->renderedchunkcount) == 0 &&
+          c->previous_ids[i] >= 0 && c->previous_ids[i] < (int)get_size_DA(c->chunkinfo))
+      {
+        pushback_DA(c->delete_ids, &(c->previous_ids[i]));
+        add_animation_translate_br_manager(z[c->previous_ids[i]]->obj_manager, (vec3){0.0f, -100, 0.0f}, 1500);
+      }
+    }
+  }
+
+  if (c->previous_ids == 0)
+  {
+    c->previous_ids = malloc(sizeof(int) * c->renderedchunkcount);
+  }
+  for (int i = 0; i < c->renderedchunkcount; i++)
+  {
+    c->previous_ids[i] = c->current_ids[i];
   }
 
   c->previous_chunkid = current_id;

@@ -177,3 +177,29 @@ void delete_animations(void)
   delete_DA(tranim.broduration);
   delete_DA(tranim.brmduration);
 }
+
+unsigned char has_animation_br_object(br_object *obj)
+{
+  unsigned int index = get_index_DA(tranim.bro, &obj);
+  if (index == UINT_MAX)
+  {
+    return 0;
+  }
+  else
+  {
+    return 1;
+  }
+}
+
+unsigned char has_animation_br_manager(br_object_manager *manager)
+{
+  unsigned int index = get_index_DA(tranim.brm, &manager);
+  if (index == UINT_MAX)
+  {
+    return 0;
+  }
+  else
+  {
+    return 1;
+  }
+}
