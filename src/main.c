@@ -23,7 +23,31 @@ int main(void)
 
 	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16, render_distance / 4, render_distance);
 
-	int **hm = create_heightmap(world_size, world_size, 100, 1453, 1071, 175, 100);
+	DA *points = create_DA(sizeof(float));
+	DA *heights = create_DA(sizeof(int));
+	float tmp = 0;
+	pushback_DA(points, &tmp);
+	tmp = 0.4f;
+	pushback_DA(points, &tmp);
+	tmp = 0.7f;
+	pushback_DA(points, &tmp);
+	tmp = 0.9f;
+	pushback_DA(points, &tmp);
+	tmp = 1;
+	pushback_DA(points, &tmp);
+	int tmpi = 0;
+	pushback_DA(heights, &tmpi);
+	tmpi = 20;
+	pushback_DA(heights, &tmpi);
+	tmpi = 50;
+	pushback_DA(heights, &tmpi);
+	tmpi = 95;
+	pushback_DA(heights, &tmpi);
+	tmpi = 100;
+	pushback_DA(heights, &tmpi);
+	int **hm = create_heightmap(world_size, world_size, 1453, 1071, 175, 0, points, heights);
+	delete_DA(points);
+	delete_DA(heights);
 
 	struct aiScene *gsu_model = load_model("./models/gsu.fbx", 1);
 	set_gsu_model(gsu_model);
