@@ -120,25 +120,67 @@ float snoise2(float x, float y)
 	return 40.0f * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
 }
 
+float clamp(float d, float min, float max)
+{
+	const float t = d < min ? min : d;
+	return t > max ? max : t;
+}
+
 int **create_heightmap(int dimensionx, int dimensionz, int seedx, int seedz, float precision, int border_add,
-											 DA *simplex_points, DA *corresponding_heights)
+											 DA *simplex_points, DA *corresponding_heights, int octaves, float amplitude,
+											 float lacunarity, float persistence, int maxheightmult)
 {
 	int **hm = malloc(sizeof(int *) * dimensionx);
-	float *points = get_data_DA(simplex_points);
-	int *heights = get_data_DA(corresponding_heights);
-	float tmp = 0;
+	float *points = 0;
+	int *heights = 0;
+	if (simplex_points != 0 && corresponding_heights != 0)
+	{
+		points = get_data_DA(simplex_points);
+		heights = get_data_DA(corresponding_heights);
+	}
+	float simple_res = 0;
+	float fractal_res = 0;
+	float param1 = 0, param2 = 0;
+	float amplitude2 = amplitude;
 	for (int i = 0; i < dimensionx; i++)
 	{
 		hm[i] = malloc(sizeof(int) * dimensionz);
 		for (int i2 = 0; i2 < dimensionz; i2++)
 		{
-			tmp = (snoise2((float)(seedx + i) / precision, (float)(seedz + i2) / precision) + 1) / 2.0f;
-			for (unsigned int i3 = 0; i3 < get_size_DA(simplex_points) - 1; i3++)
+			fractal_res = 0;
+			param1 = (float)(seedx + i) / precision;
+			param2 = (float)(seedz + i2) / precision;
+			amplitude2 = amplitude;
+			for (int i3 = 0; i3 < octaves; i3++)
 			{
-				if (tmp >= points[i3] && tmp <= points[i3 + 1])
+				simple_res = (snoise2(param1, param2) + 1) / 2.0f;
+				fractal_res += simple_res * amplitude2;
+				param1 *= lacunarity;
+				param2 *= lacunarity;
+				amplitude2 *= persistence;
+			}
+			if (simplex_points != 0 && corresponding_heights != 0)
+			{
+				fractal_res /= octaves;
+			}
+			fractal_res *= fractal_res;
+			if (simplex_points != 0 && corresponding_heights != 0)
+			{
+				fractal_res = clamp(fractal_res, 0, 1);
+			}
+			if (simplex_points != 0 && corresponding_heights != 0)
+			{
+				for (unsigned int i3 = 0; i3 < get_size_DA(simplex_points) - 1; i3++)
 				{
-					hm[i][i2] = (int)(heights[i3] + ((tmp - points[i3]) / (points[i3 + 1] - points[i3])) * (heights[i3 + 1] - heights[i3]));
+					if (fractal_res >= points[i3] && fractal_res <= points[i3 + 1])
+					{
+						hm[i][i2] = (int)(heights[i3] + ((fractal_res - points[i3]) / (points[i3 + 1] - points[i3])) * (heights[i3 + 1] - heights[i3]));
+					}
 				}
+			}
+			else
+			{
+				hm[i][i2] = (int)(fractal_res * maxheightmult);
 			}
 			if (i == 0 || i == dimensionx - 1 || i2 == 0 || i2 == dimensionz - 1)
 			{

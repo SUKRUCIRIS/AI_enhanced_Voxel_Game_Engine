@@ -25,27 +25,14 @@ int main(void)
 
 	DA *points = create_DA(sizeof(float));
 	DA *heights = create_DA(sizeof(int));
-	float tmp = 0;
-	pushback_DA(points, &tmp);
-	tmp = 0.4f;
-	pushback_DA(points, &tmp);
-	tmp = 0.7f;
-	pushback_DA(points, &tmp);
-	tmp = 0.9f;
-	pushback_DA(points, &tmp);
-	tmp = 1;
-	pushback_DA(points, &tmp);
-	int tmpi = 0;
-	pushback_DA(heights, &tmpi);
-	tmpi = 20;
-	pushback_DA(heights, &tmpi);
-	tmpi = 50;
-	pushback_DA(heights, &tmpi);
-	tmpi = 95;
-	pushback_DA(heights, &tmpi);
-	tmpi = 100;
-	pushback_DA(heights, &tmpi);
-	int **hm = create_heightmap(world_size, world_size, 1453, 1071, 175, 0, points, heights);
+	float tmp[] = {0, 0.30f, 0.34f, 0.37f, 0.41f, 0.44f, 0.46f, 0.48f, 0.49f, 0.51f, 0.52f, 0.54f, 0.57f, 0.60f, 0.64f, 0.67f, 0.71f, 1};
+	pushback_many_DA(points, tmp, 18);
+	int tmpi[] = {0, 35, 36, 47, 50, 50, 50, 52, 57, 64, 75, 85, 91, 93, 94, 94, 96, 100};
+	pushback_many_DA(heights, tmpi, 18);
+
+	srand((unsigned int)get_timems());
+	int **hm = create_heightmap(world_size, world_size, rand(), rand(), 600, 0, 0, 0, 3, 2, 3, 0.3f, 30);
+
 	delete_DA(points);
 	delete_DA(heights);
 
