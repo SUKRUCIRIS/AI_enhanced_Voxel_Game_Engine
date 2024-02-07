@@ -21,6 +21,10 @@ uniform float cascade1range;
 uniform float cascade2range;
 uniform float cascade3range;
 
+uniform float fog_start;
+uniform float fog_end;
+uniform vec3 fog_color;
+
 void main(){
 	float depthValue = abs((view*vec4(crntPos,1.0f)).z);
 	int layer = -1;
@@ -67,8 +71,9 @@ void main(){
 				for(int x = -sampleRadius; x <= sampleRadius; x++)
 				{
 					float closestDepth = texture(shadowMap, vec4(lightCoords.xy + vec2(x, y) * pixelSize, layer, 1));
-					if (currentDepth > closestDepth)
+					if (currentDepth > closestDepth){
 						shadow += 1.0f;     
+					}
 				}    
 			}
 			shadow /= pow((sampleRadius * 2 + 1), 2);
@@ -78,6 +83,18 @@ void main(){
 	diffuse = diffuse * (1.0f - shadow);
 	specular = specular * (1.0f - shadow);
 	FragColor = texture(textures[texture_id], texCoord) * lightColor * (diffuse + ambient + specular);
+
+	float dist = distance(crntPos, camPos);
+
+	if(dist > fog_start){
+		if(dist > fog_end){
+			FragColor.xyz = fog_color;
+		}
+		else{
+			float x = (dist - fog_start) / (fog_end - fog_start);
+			FragColor.xyz = fog_color * x + (1 - x) * FragColor.xyz;
+		}
+	}
 
 	FragColor.a = 1.0f;
 }

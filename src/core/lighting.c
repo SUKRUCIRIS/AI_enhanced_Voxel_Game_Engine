@@ -69,7 +69,7 @@ void calculate_lighting_projection(lighting *l, int step)
 }
 
 lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
-													float cascade1range, float cascade2range, float cascade3range)
+													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end, vec3 fog_color)
 {
 	lighting *l = malloc(sizeof(lighting));
 	l->programs = create_DA(sizeof(GLuint));
@@ -104,6 +104,10 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 	l->shadowMapWidth = shadowMapWidth;
 	l->shadowMapHeight = shadowMapHeight;
+
+	l->fog_start = fog_start;
+	l->fog_end = fog_end;
+	glm_vec3_copy(fog_color, l->fog_color);
 
 	glGenFramebuffers(1, &l->shadowMapFBO);
 
@@ -161,19 +165,28 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 		pushback_DA(l->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "cascade3range");
 		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "fog_start");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "fog_end");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "fog_color");
+		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
 	l->lightDir[2] = -l->lightDir[2];
-	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 10], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 10 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 2], l->ambient);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 3], l->specularStrength);
-	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 10 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 10 + 5], 1);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 6], l->cascade0range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 7], l->cascade1range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 8], l->cascade2range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 10 + 9], l->cascade3range);
+	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 13], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 13 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 2], l->ambient);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 3], l->specularStrength);
+	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 13 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 13 + 5], 1);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 6], l->cascade0range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 7], l->cascade1range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 8], l->cascade2range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 9], l->cascade3range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 10], l->fog_start);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 11], l->fog_end);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 13 + 12], l->fog_color[0], l->fog_color[1], l->fog_color[2]);
 	l->lightDir[2] = -l->lightDir[2];
 	if (shadowpass)
 	{

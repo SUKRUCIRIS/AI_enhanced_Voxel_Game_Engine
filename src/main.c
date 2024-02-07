@@ -15,13 +15,17 @@ int main(void)
 	int world_size = 2048;
 	int chunk_size = 16;
 	int chunk_range = 32;
-	float render_distance = (float)chunk_size * chunk_range * 2;
+	float render_distance = (float)chunk_size * chunk_range * 1.5f;
+	float fog_start = ((float)chunk_size - 2) * chunk_range;
+	float fog_end = (float)chunk_size * chunk_range;
+	vec3 fog_color = {0.718f, 0.702f, 0.671f};
 
 	int window_w = 0, window_h = 0;
 	glfwGetWindowSize(window, &window_w, &window_h);
 	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
 
-	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16, render_distance / 4, render_distance);
+	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16,
+																		render_distance / 4, render_distance, fog_start, fog_end, fog_color);
 
 	DA *points = create_DA(sizeof(float));
 	DA *heights = create_DA(sizeof(int));
