@@ -58,3 +58,7 @@ void prepare_render_br_object_manager(br_object_manager *manager);
 void use_br_object_manager(br_object_manager *manager, GLuint program);
 
 void delete_cpu_memory_br_object_manager(br_object_manager *manager);
+
+void scale_br_object_all_object_origin(br_object_manager *manager, vec3 v);
+
+void rotate_br_object_all_object_origin(br_object_manager *manager, float angle, vec3 axis);

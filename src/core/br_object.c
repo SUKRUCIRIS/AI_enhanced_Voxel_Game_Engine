@@ -281,9 +281,27 @@ void scale_br_object_all(br_object_manager *manager, vec3 v)
 	glm_scale(manager->model, v);
 }
 
+void scale_br_object_all_object_origin(br_object_manager *manager, vec3 v)
+{
+	vec4 translationVector;
+	glm_vec4_copy(manager->model[3], translationVector);
+	glm_vec4_zero(manager->model[3]);
+	glm_scale(manager->model, v);
+	glm_vec4_copy(translationVector, manager->model[3]);
+}
+
 void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis)
 {
 	glm_rotate(manager->model, glm_rad(angle), axis);
+}
+
+void rotate_br_object_all_object_origin(br_object_manager *manager, float angle, vec3 axis)
+{
+	vec4 translationVector;
+	glm_vec4_copy(manager->model[3], translationVector);
+	glm_vec4_zero(manager->model[3]);
+	glm_rotate(manager->model, glm_rad(angle), axis);
+	glm_vec4_copy(translationVector, manager->model[3]);
 }
 
 void translate_br_object_all(br_object_manager *manager, vec3 v)

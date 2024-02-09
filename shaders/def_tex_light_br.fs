@@ -84,7 +84,7 @@ void main(){
 	specular = specular * (1.0f - shadow);
 	FragColor = texture(textures[texture_id], texCoord) * lightColor * (diffuse + ambient + specular);
 
-	float dist = distance(crntPos, camPos);
+	float dist = distance(vec3(crntPos.x,0,crntPos.z), vec3(camPos.x,0,camPos.z));
 
 	if(dist > fog_start){
 		if(dist > fog_end){
