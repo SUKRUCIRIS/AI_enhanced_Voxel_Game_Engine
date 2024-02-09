@@ -67,7 +67,7 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
     pushback_DA(c->allbatch, &batch);
     if (i == c->centerchunkid)
     {
-      br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 8, 0, 3, 10, 0.1f, 0.5f);
+      br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 7, 0, 3, 10, 0.1f, 0.5f);
       float scalex = gsu_x / (gsu.box.mMax.x - gsu.box.mMin.x),
             scaley = gsu_h / (gsu.box.mMax.y - gsu.box.mMin.y),
             scalez = gsu_z / (gsu.box.mMax.z - gsu.box.mMin.z);

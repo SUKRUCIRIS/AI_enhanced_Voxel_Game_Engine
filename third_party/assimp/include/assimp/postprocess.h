@@ -50,7 +50,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/types.h>
 
 #ifdef __GNUC__
-#   pragma GCC system_header
+#pragma GCC system_header
 #endif
 
 #ifdef __cplusplus
@@ -69,8 +69,7 @@ extern "C" {
  *  @see aiImportFileEx
  */
 // -----------------------------------------------------------------------------------
-enum aiPostProcessSteps
-{
+enum aiPostProcessSteps {
 
     // -------------------------------------------------------------------------
     /** <hr>Calculates the tangents and bitangents for the imported meshes.
@@ -172,80 +171,80 @@ enum aiPostProcessSteps
 
     // -------------------------------------------------------------------------
     /** <hr>Generates smooth normals for all vertices in the mesh.
-    *
-    * This is ignored if normals are already there at the time this flag
-    * is evaluated. Model importers try to load them from the source file, so
-    * they're usually already there.
-    *
-    * This flag may not be specified together with
-    * #aiProcess_GenNormals. There's a importer property,
-    * <tt>#AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE</tt> which allows you to specify
-    * an angle maximum for the normal smoothing algorithm. Normals exceeding
-    * this limit are not smoothed, resulting in a 'hard' seam between two faces.
-    * Using a decent angle here (e.g. 80 degrees) results in very good visual
-    * appearance.
-    */
+     *
+     * This is ignored if normals are already there at the time this flag
+     * is evaluated. Model importers try to load them from the source file, so
+     * they're usually already there.
+     *
+     * This flag may not be specified together with
+     * #aiProcess_GenNormals. There's a importer property,
+     * <tt>#AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE</tt> which allows you to specify
+     * an angle maximum for the normal smoothing algorithm. Normals exceeding
+     * this limit are not smoothed, resulting in a 'hard' seam between two faces.
+     * Using a decent angle here (e.g. 80 degrees) results in very good visual
+     * appearance.
+     */
     aiProcess_GenSmoothNormals = 0x40,
 
     // -------------------------------------------------------------------------
     /** <hr>Splits large meshes into smaller sub-meshes.
-    *
-    * This is quite useful for real-time rendering, where the number of triangles
-    * which can be maximally processed in a single draw-call is limited
-    * by the video driver/hardware. The maximum vertex buffer is usually limited
-    * too. Both requirements can be met with this step: you may specify both a
-    * triangle and vertex limit for a single mesh.
-    *
-    * The split limits can (and should!) be set through the
-    * <tt>#AI_CONFIG_PP_SLM_VERTEX_LIMIT</tt> and <tt>#AI_CONFIG_PP_SLM_TRIANGLE_LIMIT</tt>
-    * importer properties. The default values are <tt>#AI_SLM_DEFAULT_MAX_VERTICES</tt> and
-    * <tt>#AI_SLM_DEFAULT_MAX_TRIANGLES</tt>.
-    *
-    * Note that splitting is generally a time-consuming task, but only if there's
-    * something to split. The use of this step is recommended for most users.
-    */
+     *
+     * This is quite useful for real-time rendering, where the number of triangles
+     * which can be maximally processed in a single draw-call is limited
+     * by the video driver/hardware. The maximum vertex buffer is usually limited
+     * too. Both requirements can be met with this step: you may specify both a
+     * triangle and vertex limit for a single mesh.
+     *
+     * The split limits can (and should!) be set through the
+     * <tt>#AI_CONFIG_PP_SLM_VERTEX_LIMIT</tt> and <tt>#AI_CONFIG_PP_SLM_TRIANGLE_LIMIT</tt>
+     * importer properties. The default values are <tt>#AI_SLM_DEFAULT_MAX_VERTICES</tt> and
+     * <tt>#AI_SLM_DEFAULT_MAX_TRIANGLES</tt>.
+     *
+     * Note that splitting is generally a time-consuming task, but only if there's
+     * something to split. The use of this step is recommended for most users.
+     */
     aiProcess_SplitLargeMeshes = 0x80,
 
     // -------------------------------------------------------------------------
     /** <hr>Removes the node graph and pre-transforms all vertices with
-    * the local transformation matrices of their nodes.
-    *
-    * If the resulting scene can be reduced to a single mesh, with a single
-    * material, no lights, and no cameras, then the output scene will contain
-    * only a root node (with no children) that references the single mesh.
-    * Otherwise, the output scene will be reduced to a root node with a single
-    * level of child nodes, each one referencing one mesh, and each mesh
-    * referencing one material.
-    *
-    * In either case, for rendering, you can
-    * simply render all meshes in order - you don't need to pay
-    * attention to local transformations and the node hierarchy.
-    * Animations are removed during this step.
-    * This step is intended for applications without a scenegraph.
-    * The step CAN cause some problems: if e.g. a mesh of the asset
-    * contains normals and another, using the same material index, does not,
-    * they will be brought together, but the first meshes's part of
-    * the normal list is zeroed. However, these artifacts are rare.
-    * @note The <tt>#AI_CONFIG_PP_PTV_NORMALIZE</tt> configuration property
-    * can be set to normalize the scene's spatial dimension to the -1...1
-    * range.
-    */
+     * the local transformation matrices of their nodes.
+     *
+     * If the resulting scene can be reduced to a single mesh, with a single
+     * material, no lights, and no cameras, then the output scene will contain
+     * only a root node (with no children) that references the single mesh.
+     * Otherwise, the output scene will be reduced to a root node with a single
+     * level of child nodes, each one referencing one mesh, and each mesh
+     * referencing one material.
+     *
+     * In either case, for rendering, you can
+     * simply render all meshes in order - you don't need to pay
+     * attention to local transformations and the node hierarchy.
+     * Animations are removed during this step.
+     * This step is intended for applications without a scenegraph.
+     * The step CAN cause some problems: if e.g. a mesh of the asset
+     * contains normals and another, using the same material index, does not,
+     * they will be brought together, but the first meshes's part of
+     * the normal list is zeroed. However, these artifacts are rare.
+     * @note The <tt>#AI_CONFIG_PP_PTV_NORMALIZE</tt> configuration property
+     * can be set to normalize the scene's spatial dimension to the -1...1
+     * range.
+     */
     aiProcess_PreTransformVertices = 0x100,
 
     // -------------------------------------------------------------------------
     /** <hr>Limits the number of bones simultaneously affecting a single vertex
-    *  to a maximum value.
-    *
-    * If any vertex is affected by more than the maximum number of bones, the least
-    * important vertex weights are removed and the remaining vertex weights are
-    * renormalized so that the weights still sum up to 1.
-    * The default bone weight limit is 4 (defined as <tt>#AI_LMW_MAX_WEIGHTS</tt> in
-    * config.h), but you can use the <tt>#AI_CONFIG_PP_LBW_MAX_WEIGHTS</tt> importer
-    * property to supply your own limit to the post processing step.
-    *
-    * If you intend to perform the skinning in hardware, this post processing
-    * step might be of interest to you.
-    */
+     *  to a maximum value.
+     *
+     * If any vertex is affected by more than the maximum number of bones, the least
+     * important vertex weights are removed and the remaining vertex weights are
+     * renormalized so that the weights still sum up to 1.
+     * The default bone weight limit is 4 (defined as <tt>#AI_LMW_MAX_WEIGHTS</tt> in
+     * config.h), but you can use the <tt>#AI_CONFIG_PP_LBW_MAX_WEIGHTS</tt> importer
+     * property to supply your own limit to the post processing step.
+     *
+     * If you intend to perform the skinning in hardware, this post processing
+     * step might be of interest to you.
+     */
     aiProcess_LimitBoneWeights = 0x200,
 
     // -------------------------------------------------------------------------
@@ -273,7 +272,7 @@ enum aiPostProcessSteps
      *
      * This post-processing step is not time-consuming. Its use is not
      * compulsory, but recommended.
-    */
+     */
     aiProcess_ValidateDataStructure = 0x400,
 
     // -------------------------------------------------------------------------
@@ -323,10 +322,8 @@ enum aiPostProcessSteps
      * surfaces. However, the step tries to filter such cases.
      * The step inverts all in-facing normals. Generally it is recommended
      * to enable this step, although the result is not always correct.
-    */
+     */
     aiProcess_FixInfacingNormals = 0x2000,
-
-
 
     // -------------------------------------------------------------------------
     /**
@@ -336,7 +333,7 @@ enum aiPostProcessSteps
      * If you have multiple armatures on your models we strongly recommend enabling this
      * Instead of writing your own multi-root, multi-armature lookups we have done the
      * hard work for you :)
-   */
+     */
     aiProcess_PopulateArmatureData = 0x4000,
 
     // -------------------------------------------------------------------------
@@ -350,7 +347,7 @@ enum aiPostProcessSteps
      *  You can use the <tt>#AI_CONFIG_PP_SBP_REMOVE</tt> importer property to
      *  specify which primitive types you need. This can be used to easily
      *  exclude lines and points, which are rarely used, from the import.
-    */
+     */
     aiProcess_SortByPType = 0x8000,
 
     // -------------------------------------------------------------------------
@@ -393,7 +390,7 @@ enum aiPostProcessSteps
      * they're not removed by default. There are several file formats which
      * don't support lines or points, and some exporters bypass the
      * format specification and write them as degenerate triangles instead.
-    */
+     */
     aiProcess_FindDegenerates = 0x10000,
 
     // -------------------------------------------------------------------------
@@ -408,7 +405,7 @@ enum aiPostProcessSteps
      * animation tracks consisting of hundreds if redundant keys to a single
      * key. The <tt>AI_CONFIG_PP_FID_ANIM_ACCURACY</tt> config property decides
      * the accuracy of the check for duplicate animation tracks.
-    */
+     */
     aiProcess_FindInvalidData = 0x20000,
 
     // -------------------------------------------------------------------------
@@ -442,7 +439,7 @@ enum aiPostProcessSteps
      * @note UV transformations are usually implemented in real-time apps by
      * transforming texture coordinates at vertex shader stage with a 3x3
      * (homogeneous) transformation matrix.
-    */
+     */
     aiProcess_TransformUVCoords = 0x80000,
 
     // -------------------------------------------------------------------------
@@ -468,9 +465,8 @@ enum aiPostProcessSteps
      *  This is a very effective optimization and is recommended to be used
      *  together with #aiProcess_OptimizeGraph, if possible. The flag is fully
      *  compatible with both #aiProcess_SplitLargeMeshes and #aiProcess_SortByPType.
-    */
-    aiProcess_OptimizeMeshes  = 0x200000,
-
+     */
+    aiProcess_OptimizeMeshes = 0x200000,
 
     // -------------------------------------------------------------------------
     /** <hr>A post-processing step to optimize the scene hierarchy.
@@ -497,8 +493,8 @@ enum aiPostProcessSteps
      *  in deeply nested nodes exist for almost all file formats.
      *  #aiProcess_OptimizeMeshes in combination with #aiProcess_OptimizeGraph
      *  usually fixes them all and makes them renderable.
-    */
-    aiProcess_OptimizeGraph  = 0x400000,
+     */
+    aiProcess_OptimizeGraph = 0x400000,
 
     // -------------------------------------------------------------------------
     /** <hr>This step flips all UV coordinates along the y-axis and adjusts
@@ -517,7 +513,7 @@ enum aiPostProcessSteps
      * rendering. The #aiProcess_ConvertToLeftHanded flag supersedes this
      * setting and bundles all conversions typically required for D3D-based
      * applications.
-    */
+     */
     aiProcess_FlipUVs = 0x800000,
 
     // -------------------------------------------------------------------------
@@ -532,14 +528,14 @@ enum aiPostProcessSteps
      *                         x0
      *  x1
      * @endcode
-    */
-    aiProcess_FlipWindingOrder  = 0x1000000,
+     */
+    aiProcess_FlipWindingOrder = 0x1000000,
 
     // -------------------------------------------------------------------------
     /** <hr>This step splits meshes with many bones into sub-meshes so that each
      * sub-mesh has fewer or as many bones as a given limit.
-    */
-    aiProcess_SplitByBoneCount  = 0x2000000,
+     */
+    aiProcess_SplitByBoneCount = 0x2000000,
 
     // -------------------------------------------------------------------------
     /** <hr>This step removes bones losslessly or according to some threshold.
@@ -553,21 +549,19 @@ enum aiPostProcessSteps
      *  Use <tt>#AI_CONFIG_PP_DB_THRESHOLD</tt> to control this.
      *  Use <tt>#AI_CONFIG_PP_DB_ALL_OR_NONE</tt> if you want bones removed if and
      *  only if all bones within the scene qualify for removal.
-    */
-    aiProcess_Debone  = 0x4000000,
-
-
+     */
+    aiProcess_Debone = 0x4000000,
 
     // -------------------------------------------------------------------------
     /** <hr>This step will perform a global scale of the model.
-    *
-    *  Some importers are providing a mechanism to define a scaling unit for the
-    *  model. This post processing step can be used to do so. You need to get the
-    *  global scaling from your importer settings like in FBX. Use the flag
-    *  AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY from the global property table to configure this.
-    *
-    *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to setup the global scaling factor.
-    */
+     *
+     *  Some importers are providing a mechanism to define a scaling unit for the
+     *  model. This post processing step can be used to do so. You need to get the
+     *  global scaling from your importer settings like in FBX. Use the flag
+     *  AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY from the global property table to configure this.
+     *
+     *  Use <tt>#AI_CONFIG_GLOBAL_SCALE_FACTOR_KEY</tt> to setup the global scaling factor.
+     */
     aiProcess_GlobalScale = 0x8000000,
 
     // -------------------------------------------------------------------------
@@ -579,12 +573,11 @@ enum aiPostProcessSteps
      *  it will check if a file with the same name exists at the root folder
      *  of the imported model. And if so, it uses that.
      */
-    aiProcess_EmbedTextures  = 0x10000000,
+    aiProcess_EmbedTextures = 0x10000000,
 
     // aiProcess_GenEntityMeshes = 0x100000,
     // aiProcess_OptimizeAnimations = 0x200000
     // aiProcess_FixTexturePaths = 0x200000
-
 
     aiProcess_ForceGenNormals = 0x20000000,
 
@@ -606,7 +599,6 @@ enum aiPostProcessSteps
     aiProcess_GenBoundingBoxes = 0x80000000
 };
 
-
 // ---------------------------------------------------------------------------------------
 /** @def aiProcess_ConvertToLeftHanded
  *  @brief Shortcut flag for Direct3D-based applications.
@@ -619,11 +611,10 @@ enum aiPostProcessSteps
  *  @deprecated
  */
 #define aiProcess_ConvertToLeftHanded ( \
-    aiProcess_MakeLeftHanded     | \
-    aiProcess_FlipUVs            | \
-    aiProcess_FlipWindingOrder   | \
-    0 )
-
+        aiProcess_MakeLeftHanded |      \
+        aiProcess_FlipUVs |             \
+        aiProcess_FlipWindingOrder |    \
+        0)
 
 // ---------------------------------------------------------------------------------------
 /** @def aiProcessPreset_TargetRealtime_Fast
@@ -640,67 +631,66 @@ enum aiPostProcessSteps
  *  use for you so it might be better to not specify them.
  */
 #define aiProcessPreset_TargetRealtime_Fast ( \
-    aiProcess_CalcTangentSpace      |  \
-    aiProcess_GenNormals            |  \
-    aiProcess_JoinIdenticalVertices |  \
-    aiProcess_Triangulate           |  \
-    aiProcess_GenUVCoords           |  \
-    aiProcess_SortByPType           |  \
-    0 )
+        aiProcess_CalcTangentSpace |          \
+        aiProcess_GenNormals |                \
+        aiProcess_JoinIdenticalVertices |     \
+        aiProcess_Triangulate |               \
+        aiProcess_GenUVCoords |               \
+        aiProcess_SortByPType |               \
+        0)
 
- // ---------------------------------------------------------------------------------------
- /** @def aiProcessPreset_TargetRealtime_Quality
-  *  @brief Default postprocess configuration optimizing the data for real-time rendering.
-  *
-  *  Unlike #aiProcessPreset_TargetRealtime_Fast, this configuration
-  *  performs some extra optimizations to improve rendering speed and
-  *  to minimize memory usage. It could be a good choice for a level editor
-  *  environment where import speed is not so important.
-  *
-  *  If you're using DirectX, don't forget to combine this value with
-  *  the #aiProcess_ConvertToLeftHanded step. If you don't support UV transformations
-  *  in your application apply the #aiProcess_TransformUVCoords step, too.
-  *  @note Please take the time to read the docs for the steps enabled by this preset.
-  *  Some of them offer further configurable properties, while some of them might not be
-  *  of use for you so it might be better to not specify them.
-  */
+// ---------------------------------------------------------------------------------------
+/** @def aiProcessPreset_TargetRealtime_Quality
+ *  @brief Default postprocess configuration optimizing the data for real-time rendering.
+ *
+ *  Unlike #aiProcessPreset_TargetRealtime_Fast, this configuration
+ *  performs some extra optimizations to improve rendering speed and
+ *  to minimize memory usage. It could be a good choice for a level editor
+ *  environment where import speed is not so important.
+ *
+ *  If you're using DirectX, don't forget to combine this value with
+ *  the #aiProcess_ConvertToLeftHanded step. If you don't support UV transformations
+ *  in your application apply the #aiProcess_TransformUVCoords step, too.
+ *  @note Please take the time to read the docs for the steps enabled by this preset.
+ *  Some of them offer further configurable properties, while some of them might not be
+ *  of use for you so it might be better to not specify them.
+ */
 #define aiProcessPreset_TargetRealtime_Quality ( \
-    aiProcess_CalcTangentSpace              |  \
-    aiProcess_GenSmoothNormals              |  \
-    aiProcess_JoinIdenticalVertices         |  \
-    aiProcess_ImproveCacheLocality          |  \
-    aiProcess_LimitBoneWeights              |  \
-    aiProcess_RemoveRedundantMaterials      |  \
-    aiProcess_SplitLargeMeshes              |  \
-    aiProcess_Triangulate                   |  \
-    aiProcess_GenUVCoords                   |  \
-    aiProcess_SortByPType                   |  \
-    aiProcess_FindDegenerates               |  \
-    aiProcess_FindInvalidData               |  \
-    0 )
+        aiProcess_CalcTangentSpace |             \
+        aiProcess_GenSmoothNormals |             \
+        aiProcess_JoinIdenticalVertices |        \
+        aiProcess_ImproveCacheLocality |         \
+        aiProcess_LimitBoneWeights |             \
+        aiProcess_RemoveRedundantMaterials |     \
+        aiProcess_SplitLargeMeshes |             \
+        aiProcess_Triangulate |                  \
+        aiProcess_GenUVCoords |                  \
+        aiProcess_SortByPType |                  \
+        aiProcess_FindDegenerates |              \
+        aiProcess_FindInvalidData |              \
+        0)
 
- // ---------------------------------------------------------------------------------------
- /** @def aiProcessPreset_TargetRealtime_MaxQuality
-  *  @brief Default postprocess configuration optimizing the data for real-time rendering.
-  *
-  *  This preset enables almost every optimization step to achieve perfectly
-  *  optimized data. It's your choice for level editor environments where import speed
-  *  is not important.
-  *
-  *  If you're using DirectX, don't forget to combine this value with
-  *  the #aiProcess_ConvertToLeftHanded step. If you don't support UV transformations
-  *  in your application, apply the #aiProcess_TransformUVCoords step, too.
-  *  @note Please take the time to read the docs for the steps enabled by this preset.
-  *  Some of them offer further configurable properties, while some of them might not be
-  *  of use for you so it might be better to not specify them.
-  */
+// ---------------------------------------------------------------------------------------
+/** @def aiProcessPreset_TargetRealtime_MaxQuality
+ *  @brief Default postprocess configuration optimizing the data for real-time rendering.
+ *
+ *  This preset enables almost every optimization step to achieve perfectly
+ *  optimized data. It's your choice for level editor environments where import speed
+ *  is not important.
+ *
+ *  If you're using DirectX, don't forget to combine this value with
+ *  the #aiProcess_ConvertToLeftHanded step. If you don't support UV transformations
+ *  in your application, apply the #aiProcess_TransformUVCoords step, too.
+ *  @note Please take the time to read the docs for the steps enabled by this preset.
+ *  Some of them offer further configurable properties, while some of them might not be
+ *  of use for you so it might be better to not specify them.
+ */
 #define aiProcessPreset_TargetRealtime_MaxQuality ( \
-    aiProcessPreset_TargetRealtime_Quality   |  \
-    aiProcess_FindInstances                  |  \
-    aiProcess_ValidateDataStructure          |  \
-    aiProcess_OptimizeMeshes                 |  \
-    0 )
-
+        aiProcessPreset_TargetRealtime_Quality |    \
+        aiProcess_FindInstances |                   \
+        aiProcess_ValidateDataStructure |           \
+        aiProcess_OptimizeMeshes |                  \
+        0u)
 
 #ifdef __cplusplus
 } // end of extern "C"

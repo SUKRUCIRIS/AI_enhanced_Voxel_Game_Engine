@@ -124,7 +124,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			}
 		}
 		res.meshes[i] = create_br_object(obj_manager, vertices, vertex_number, indices, indice_number,
-																		 scene->mMeshes[i]->mMaterialIndex + texture_start_index - 1,
+																		 scene->mMeshes[i]->mMaterialIndex + texture_start_index,
 																		 has_physics, priority, mass, friction, bounce);
 		free(vertices);
 		free(indices);

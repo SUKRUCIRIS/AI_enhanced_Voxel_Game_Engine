@@ -221,12 +221,12 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 	{
 		tex_manager = create_br_texture_manager();
 		create_br_texture(tex_manager, "./textures/side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 0);
-		create_br_texture(tex_manager, "./textures/dirt_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 2);
-		create_br_texture(tex_manager, "./textures/dirt.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 3);
-		create_br_texture(tex_manager, "./textures/grass_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 4);
-		create_br_texture(tex_manager, "./textures/grass.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 5);
-		create_br_texture(tex_manager, "./textures/snow_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6);
-		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 7);
+		create_br_texture(tex_manager, "./textures/dirt_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 1);
+		create_br_texture(tex_manager, "./textures/dirt.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 2);
+		create_br_texture(tex_manager, "./textures/grass_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 3);
+		create_br_texture(tex_manager, "./textures/grass.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 4);
+		create_br_texture(tex_manager, "./textures/snow_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 5);
+		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6);
 	}
 
 	// objects

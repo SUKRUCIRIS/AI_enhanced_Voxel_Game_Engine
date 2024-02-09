@@ -179,7 +179,7 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 2], l->ambient);
 	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 3], l->specularStrength);
 	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 13 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 13 + 5], 1);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 13 + 5], 31);
 	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 6], l->cascade0range);
 	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 7], l->cascade1range);
 	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 8], l->cascade2range);
@@ -203,7 +203,7 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, l->windowwidth, l->windowheight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE31);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, l->shadowMap);
 	}
 }
