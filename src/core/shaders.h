@@ -15,6 +15,8 @@ GLuint get_def_shadowmap_program(void);
 
 GLuint get_def_tex_light_br_program(void);
 
+GLuint get_def_tex_light_opt_br_program(void);
+
 GLuint get_def_shadowmap_br_program(void);
 
 GLuint get_def_tex_light_ins_program(void);

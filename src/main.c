@@ -92,10 +92,10 @@ int main(void)
 		use_lighting(light, get_def_shadowmap_br_program(), 1);
 		use_chunk_op(chunks, get_def_shadowmap_br_program(), cam);
 
-		glUseProgram(get_def_tex_light_br_program());
-		use_lighting(light, get_def_tex_light_br_program(), 0);
-		use_camera(cam, get_def_tex_light_br_program());
-		use_chunk_op(chunks, get_def_tex_light_br_program(), cam);
+		glUseProgram(get_def_tex_light_opt_br_program());
+		use_lighting(light, get_def_tex_light_opt_br_program(), 0);
+		use_camera(cam, get_def_tex_light_opt_br_program());
+		use_chunk_op(chunks, get_def_tex_light_opt_br_program(), cam);
 
 		glfwSwapBuffers(window);
 
