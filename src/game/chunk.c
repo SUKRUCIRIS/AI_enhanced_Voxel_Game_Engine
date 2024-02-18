@@ -9,7 +9,7 @@ void set_gsu_model(struct aiScene *model)
   gsu_model = model;
 }
 
-chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm, int dimensionx, int dimensionz)
+chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm, int dimensionx, int dimensionz, vec3 lightdir)
 {
   chunk_op *c = malloc(sizeof(chunk_op));
   c->batch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
@@ -62,7 +62,7 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
   for (unsigned int i = 0; i < get_size_DA(c->chunkinfo); i++)
   {
     world_batch *batch = create_world_batch(c->hm, y[i].startx, y[i].startz,
-                                            c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz, 0);
+                                            c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz, lightdir);
     batch->chunk_id = i;
     pushback_DA(c->allbatch, &batch);
     if (i == c->centerchunkid)

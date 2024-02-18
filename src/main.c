@@ -1,9 +1,10 @@
 #include "./core/core.h"
 #include "./game/chunk.h"
+#include "./game/world_batch.h"
 
 int main(void)
 {
-	GLFWwindow *window = create_window(0, 0, 1, 1, 4);
+	GLFWwindow *window = create_window(0, 0, 1, 1, 0);
 	if (window == 0)
 	{
 		return -1;
@@ -25,7 +26,7 @@ int main(void)
 	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
 
 	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16,
-																		render_distance / 4, render_distance, fog_start, fog_end, fog_color);
+																		render_distance / 4, render_distance, fog_start, fog_end, fog_color, 1);
 
 	DA *points = create_DA(sizeof(float));
 	DA *heights = create_DA(sizeof(int));
@@ -54,7 +55,7 @@ int main(void)
 	sukru.dimensionx = world_size;
 	sukru.dimensionz = world_size;
 	sukru.jumpdurationms = 100;
-	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size);
+	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size, 0);
 	unsigned char freec = 0;
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	while (!glfwWindowShouldClose(window))
@@ -89,13 +90,17 @@ int main(void)
 		}
 
 		glUseProgram(get_def_shadowmap_br_program());
-		use_lighting(light, get_def_shadowmap_br_program(), 1);
+		use_lighting(light, get_def_shadowmap_br_program(), 1, 0, 0);
 		use_chunk_op(chunks, get_def_shadowmap_br_program(), cam);
 
-		glUseProgram(get_def_tex_light_opt_br_program());
-		use_lighting(light, get_def_tex_light_opt_br_program(), 0);
-		use_camera(cam, get_def_tex_light_opt_br_program());
-		use_chunk_op(chunks, get_def_tex_light_opt_br_program(), cam);
+		glUseProgram(get_def_gbuffer_br_program());
+		use_lighting(light, get_def_gbuffer_br_program(), 0, 1, 0);
+		use_camera(cam, get_def_gbuffer_br_program());
+		use_chunk_op(chunks, get_def_gbuffer_br_program(), cam);
+
+		glUseProgram(get_def_deferred_br_program());
+		use_camera(cam, get_def_deferred_br_program());
+		use_lighting(light, get_def_deferred_br_program(), 0, 0, get_world_texture_manager());
 
 		glfwSwapBuffers(window);
 

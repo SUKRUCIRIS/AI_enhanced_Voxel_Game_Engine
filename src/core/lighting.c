@@ -69,7 +69,8 @@ void calculate_lighting_projection(lighting *l, int step)
 }
 
 lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
-													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end, vec3 fog_color)
+													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end,
+													vec3 fog_color, unsigned char deferred)
 {
 	lighting *l = malloc(sizeof(lighting));
 	l->programs = create_DA(sizeof(GLuint));
@@ -129,10 +130,70 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	if (deferred == 1)
+	{
+		glGenFramebuffers(1, &l->gbufferFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, l->gbufferFBO);
+
+		glGenTextures(1, &l->gPosition);
+		glBindTexture(GL_TEXTURE_2D, l->gPosition);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, l->windowwidth, l->windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, l->gPosition, 0);
+
+		glGenTextures(1, &l->gNormal);
+		glBindTexture(GL_TEXTURE_2D, l->gNormal);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, l->windowwidth, l->windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, l->gNormal, 0);
+
+		glGenTextures(1, &l->gTexCoord);
+		glBindTexture(GL_TEXTURE_2D, l->gTexCoord);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, l->windowwidth, l->windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, l->gTexCoord, 0);
+
+		unsigned int attachments[4] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+		glDrawBuffers(3, attachments);
+
+		glGenRenderbuffers(1, &l->gdepth);
+		glBindRenderbuffer(GL_RENDERBUFFER, l->gdepth);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, l->windowwidth, l->windowheight);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, l->gdepth);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		GLfloat quadVertices[] = {
+				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,	// top right
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // down right
+				1.0f, 1.0f, 0.0f, 1.0f, 1.0f,		// top left
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f,	// down left
+		};
+		GLuint quadindices[] = {2, 1, 0, 3, 1, 2};
+		glGenVertexArrays(1, &(l->quadvao));
+		glGenBuffers(1, &(l->quadvbo));
+		glGenBuffers(1, &(l->quadebo));
+		glBindVertexArray(l->quadvao);
+		glBindBuffer(GL_ARRAY_BUFFER, l->quadvbo);
+		glBufferData(GL_ARRAY_BUFFER, 20 * sizeof(GLfloat), quadVertices, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, l->quadebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), quadindices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	}
+
 	return l;
 }
 
-void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
+void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigned char gpass, br_texture_manager *textures)
 {
 	if (shadowpass)
 	{
@@ -171,40 +232,73 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass)
 		pushback_DA(l->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "fog_color");
 		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "gPosition");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "gNormal");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "gTexCoord");
+		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
 	l->lightDir[2] = -l->lightDir[2];
-	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 13], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 13 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 2], l->ambient);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 3], l->specularStrength);
-	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 13 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 13 + 5], 31);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 6], l->cascade0range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 7], l->cascade1range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 8], l->cascade2range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 9], l->cascade3range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 10], l->fog_start);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 13 + 11], l->fog_end);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 13 + 12], l->fog_color[0], l->fog_color[1], l->fog_color[2]);
+	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 16], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 16 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 2], l->ambient);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 3], l->specularStrength);
+	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 16 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 5], 31);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 6], l->cascade0range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 7], l->cascade1range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 8], l->cascade2range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 9], l->cascade3range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 10], l->fog_start);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 11], l->fog_end);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 16 + 12], l->fog_color[0], l->fog_color[1], l->fog_color[2]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 13], 30);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 14], 29);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 15], 28);
 	l->lightDir[2] = -l->lightDir[2];
-	if (shadowpass)
+	if (shadowpass == 1)
 	{
 		glCullFace(GL_BACK);
-		glFrontFace(GL_CCW);
 		glBindFramebuffer(GL_FRAMEBUFFER, l->shadowMapFBO);
 		glViewport(0, 0, l->shadowMapWidth, l->shadowMapHeight);
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
-	else
+	else if (gpass == 2)
 	{
 		glCullFace(GL_FRONT);
-		glFrontFace(GL_CCW);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, l->windowwidth, l->windowheight);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE31);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, l->shadowMap);
+	}
+	else if (gpass == 1)
+	{
+		glCullFace(GL_FRONT);
+		glBindFramebuffer(GL_FRAMEBUFFER, l->gbufferFBO);
+		glViewport(0, 0, l->windowwidth, l->windowheight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	else if (gpass == 0)
+	{
+		glCullFace(GL_FRONT);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, l->windowwidth, l->windowheight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE31);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, l->shadowMap);
+		glActiveTexture(GL_TEXTURE30);
+		glBindTexture(GL_TEXTURE_2D, l->gPosition);
+		glActiveTexture(GL_TEXTURE29);
+		glBindTexture(GL_TEXTURE_2D, l->gNormal);
+		glActiveTexture(GL_TEXTURE28);
+		glBindTexture(GL_TEXTURE_2D, l->gTexCoord);
+		use_br_texture_manager(textures, program);
+		glBindVertexArray(l->quadvao);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 	}
 }
 
@@ -212,6 +306,14 @@ void delete_lighting(lighting *l)
 {
 	glDeleteFramebuffers(1, &(l->shadowMapFBO));
 	glDeleteTextures(1, &(l->shadowMap));
+	glDeleteFramebuffers(1, &(l->gbufferFBO));
+	glDeleteTextures(1, &(l->gPosition));
+	glDeleteTextures(1, &(l->gNormal));
+	glDeleteTextures(1, &(l->gTexCoord));
+	glDeleteTextures(1, &(l->gdepth));
+	glDeleteVertexArrays(1, &(l->quadvao));
+	glDeleteBuffers(1, &(l->quadvbo));
+	glDeleteBuffers(1, &(l->quadebo));
 	delete_DA(l->programs);
 	delete_DA(l->uniforms);
 	free(l);

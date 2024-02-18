@@ -3,6 +3,7 @@
 #include "../../third_party/opengl/include/glad/glad.h"
 #include "dynamic.h"
 #include "camera.h"
+#include "br_texture.h"
 
 typedef struct lighting
 {
@@ -39,13 +40,16 @@ typedef struct lighting
 	float fog_start;
 	float fog_end;
 	vec3 fog_color;
+	GLuint gbufferFBO, gPosition, gNormal, gTexCoord, gdepth, quadvbo, quadvao, quadebo;
 } lighting;
 
 void calculate_lighting_projection(lighting *l, int step);
 
 lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
-													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end, vec3 fog_color);
+													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end,
+													vec3 fog_color, unsigned char deferred);
 
-void use_lighting(lighting *l, GLuint program, unsigned char shadowpass);
+// set gpass to 2 when not using deferred rendering, set textures to 0 when not using last stage deferred
+void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigned char gpass, br_texture_manager *textures);
 
 void delete_lighting(lighting *l);
