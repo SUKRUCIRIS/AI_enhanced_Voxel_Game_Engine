@@ -10,6 +10,8 @@ int main(void)
 		return -1;
 	}
 
+	random_seed(get_timems());
+
 	init_programs();
 	init_animations();
 
@@ -35,7 +37,6 @@ int main(void)
 	int tmpi[] = {0, 35, 36, 47, 50, 50, 50, 52, 57, 64, 75, 85, 91, 93, 94, 94, 96, 100};
 	pushback_many_DA(heights, tmpi, 18);
 
-	srand((unsigned int)get_timems());
 	int **hm = create_heightmap(world_size, world_size, rand(), rand(), 600, 0, 0, 0, 3, 2, 3, 0.3f, 30);
 
 	delete_DA(points);
@@ -95,11 +96,15 @@ int main(void)
 
 		glUseProgram(get_def_gbuffer_br_program());
 		use_lighting(light, get_def_gbuffer_br_program(), 0, 1, 0);
-		use_camera(cam, get_def_gbuffer_br_program());
 		use_chunk_op(chunks, get_def_gbuffer_br_program(), cam);
 
+		glUseProgram(get_def_ssao_program());
+		use_lighting_ssao(light, get_def_ssao_program());
+
+		glUseProgram(get_def_ssao_blur_program());
+		use_lighting_ssao_blur(light, get_def_ssao_blur_program());
+
 		glUseProgram(get_def_deferred_br_program());
-		use_camera(cam, get_def_deferred_br_program());
 		use_lighting(light, get_def_deferred_br_program(), 0, 0, get_world_texture_manager());
 
 		glfwSwapBuffers(window);

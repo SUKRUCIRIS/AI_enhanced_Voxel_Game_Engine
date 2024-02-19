@@ -22,3 +22,4 @@
 #include "load_object.h"
 #include "timing.h"
 #include "animation.h"
+#include "random.h"

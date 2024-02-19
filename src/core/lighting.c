@@ -1,5 +1,7 @@
 #include "lighting.h"
 #include "float.h"
+#include "random.h"
+
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
@@ -82,9 +84,9 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	l->cascade3range = cascade3range;
 
 	l->ambient = 0.5f;
-	l->lightColor[0] = 0.5294f;
-	l->lightColor[1] = 0.8078f;
-	l->lightColor[2] = 0.9216f;
+	l->lightColor[0] = 0.39f;
+	l->lightColor[1] = 0.6f;
+	l->lightColor[2] = 0.69f;
 	l->lightColor[3] = 1;
 	l->lightDir[0] = 20;
 	l->lightDir[1] = 50;
@@ -188,21 +190,62 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		glGenFramebuffers(1, &l->ssaofbo);
+		glGenFramebuffers(1, &l->ssaoblurfbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, l->ssaofbo);
+
+		glGenTextures(1, &l->ssaobuffer);
+		glBindTexture(GL_TEXTURE_2D, l->ssaobuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, l->ssaobuffer, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, l->ssaoblurfbo);
+		glGenTextures(1, &l->ssaoblurbuffer);
+		glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, l->ssaoblurbuffer, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		for (unsigned int i = 0; i < 64; ++i)
+		{
+			l->ssaoKernel[i][0] = random_float(0, 1) * 2 - 1;
+			l->ssaoKernel[i][1] = random_float(0, 1) * 2 - 1;
+			l->ssaoKernel[i][2] = random_float(0, 1);
+			glm_normalize(l->ssaoKernel[i]);
+			glm_vec3_scale(l->ssaoKernel[i], random_float(0, 1), l->ssaoKernel[i]);
+			float scale = (float)i / 64.0f;
+			scale = glm_lerp(0.1f, 1.0f, scale * scale);
+			glm_vec3_scale(l->ssaoKernel[i], scale, l->ssaoKernel[i]);
+		}
+		for (unsigned int i = 0; i < 16; i++)
+		{
+			l->ssaoNoise[i][0] = random_float(0, 1) * 2 - 1;
+			l->ssaoNoise[i][1] = random_float(0, 1) * 2 - 1;
+			l->ssaoNoise[i][2] = 0;
+		}
+		glGenTextures(1, &l->noiseTexture);
+		glBindTexture(GL_TEXTURE_2D, l->noiseTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 4, 4, 0, GL_RGB, GL_FLOAT, &l->ssaoNoise[0]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		l->noiseScale[0] = l->windowwidth / 4.0f;
+		l->noiseScale[1] = l->windowheight / 4.0f;
 	}
 
 	return l;
 }
 
-void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigned char gpass, br_texture_manager *textures)
+void lighting_set_uniforms(lighting *l, GLuint program)
 {
-	if (shadowpass)
-	{
-		calculate_lighting_projection(l, 0);
-		calculate_lighting_projection(l, 1);
-		calculate_lighting_projection(l, 2);
-		calculate_lighting_projection(l, 3);
-	}
-
 	if (get_index_DA(l->programs, &program) == UINT_MAX)
 	{
 		pushback_DA(l->programs, &program);
@@ -238,26 +281,56 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigne
 		pushback_DA(l->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "gTexCoord");
 		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "noiseScale");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "texNoise");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "ssaoInput");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "ssao");
+		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "samples");
+		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
 	l->lightDir[2] = -l->lightDir[2];
-	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 16], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 16 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 2], l->ambient);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 3], l->specularStrength);
-	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 16 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 5], 31);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 6], l->cascade0range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 7], l->cascade1range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 8], l->cascade2range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 9], l->cascade3range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 10], l->fog_start);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 16 + 11], l->fog_end);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 16 + 12], l->fog_color[0], l->fog_color[1], l->fog_color[2]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 13], 30);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 14], 29);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 16 + 15], 28);
+	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 21], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 21 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 2], l->ambient);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 3], l->specularStrength);
+	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 21 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 5], 31);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 6], l->cascade0range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 7], l->cascade1range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 8], l->cascade2range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 9], l->cascade3range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 10], l->fog_start);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 11], l->fog_end);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 21 + 12], l->fog_color[0], l->fog_color[1], l->fog_color[2]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 13], 30);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 14], 29);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 15], 28);
+	glUniform2f(uniforms[get_index_DA(l->programs, &program) * 21 + 16], l->noiseScale[0], l->noiseScale[1]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 17], 27);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 18], 26);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 19], 25);
+	glUniform3fv(uniforms[get_index_DA(l->programs, &program) * 21 + 20], 64, l->ssaoKernel[0]);
 	l->lightDir[2] = -l->lightDir[2];
+	use_camera(l->cam, program);
+}
+
+void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigned char gpass, br_texture_manager *textures)
+{
+	if (shadowpass)
+	{
+		calculate_lighting_projection(l, 0);
+		calculate_lighting_projection(l, 1);
+		calculate_lighting_projection(l, 2);
+		calculate_lighting_projection(l, 3);
+	}
+
+	lighting_set_uniforms(l, program);
+
 	if (shadowpass == 1)
 	{
 		glCullFace(GL_BACK);
@@ -295,11 +368,45 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigne
 		glBindTexture(GL_TEXTURE_2D, l->gNormal);
 		glActiveTexture(GL_TEXTURE28);
 		glBindTexture(GL_TEXTURE_2D, l->gTexCoord);
+		glActiveTexture(GL_TEXTURE25);
+		glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
 		use_br_texture_manager(textures, program);
 		glBindVertexArray(l->quadvao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
+}
+
+void use_lighting_ssao(lighting *l, GLuint program)
+{
+	lighting_set_uniforms(l, program);
+	glCullFace(GL_FRONT);
+	glBindFramebuffer(GL_FRAMEBUFFER, l->ssaofbo);
+	glViewport(0, 0, l->windowwidth, l->windowheight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glActiveTexture(GL_TEXTURE30);
+	glBindTexture(GL_TEXTURE_2D, l->gPosition);
+	glActiveTexture(GL_TEXTURE29);
+	glBindTexture(GL_TEXTURE_2D, l->gNormal);
+	glActiveTexture(GL_TEXTURE27);
+	glBindTexture(GL_TEXTURE_2D, l->noiseTexture);
+	glBindVertexArray(l->quadvao);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void use_lighting_ssao_blur(lighting *l, GLuint program)
+{
+	lighting_set_uniforms(l, program);
+	glCullFace(GL_FRONT);
+	glBindFramebuffer(GL_FRAMEBUFFER, l->ssaoblurfbo);
+	glViewport(0, 0, l->windowwidth, l->windowheight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glActiveTexture(GL_TEXTURE26);
+	glBindTexture(GL_TEXTURE_2D, l->ssaobuffer);
+	glBindVertexArray(l->quadvao);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }
 
 void delete_lighting(lighting *l)
@@ -314,6 +421,11 @@ void delete_lighting(lighting *l)
 	glDeleteVertexArrays(1, &(l->quadvao));
 	glDeleteBuffers(1, &(l->quadvbo));
 	glDeleteBuffers(1, &(l->quadebo));
+	glDeleteFramebuffers(1, &(l->ssaofbo));
+	glDeleteFramebuffers(1, &(l->ssaoblurfbo));
+	glDeleteTextures(1, &(l->ssaobuffer));
+	glDeleteTextures(1, &(l->ssaoblurbuffer));
+	glDeleteTextures(1, &(l->noiseTexture));
 	delete_DA(l->programs);
 	delete_DA(l->uniforms);
 	free(l);

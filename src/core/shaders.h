@@ -26,3 +26,7 @@ GLuint get_def_shadowmap_ins_program(void);
 GLuint get_def_gbuffer_br_program(void);
 
 GLuint get_def_deferred_br_program(void);
+
+GLuint get_def_ssao_program(void);
+
+GLuint get_def_ssao_blur_program(void);

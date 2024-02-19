@@ -41,6 +41,11 @@ typedef struct lighting
 	float fog_end;
 	vec3 fog_color;
 	GLuint gbufferFBO, gPosition, gNormal, gTexCoord, gdepth, quadvbo, quadvao, quadebo;
+	GLuint ssaofbo, ssaobuffer, ssaoblurfbo, ssaoblurbuffer;
+	vec3 ssaoKernel[64];
+	vec3 ssaoNoise[16];
+	GLuint noiseTexture;
+	vec2 noiseScale;
 } lighting;
 
 void calculate_lighting_projection(lighting *l, int step);
@@ -51,5 +56,9 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 // set gpass to 2 when not using deferred rendering, set textures to 0 when not using last stage deferred
 void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigned char gpass, br_texture_manager *textures);
+
+void use_lighting_ssao(lighting *l, GLuint program);
+
+void use_lighting_ssao_blur(lighting *l, GLuint program);
 
 void delete_lighting(lighting *l);

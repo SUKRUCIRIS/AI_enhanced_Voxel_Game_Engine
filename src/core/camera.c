@@ -151,9 +151,12 @@ void use_camera(camera *cam, GLuint program)
 		pushback_DA(cam->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "view");
 		pushback_DA(cam->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "projection");
+		pushback_DA(cam->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(cam->uniforms);
-	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 3], 1, GL_FALSE, cam->result[0]);
-	glUniform3f(uniforms[get_index_DA(cam->programs, &program) * 3 + 1], cam->position[0], cam->position[1], cam->position[2]);
-	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 3 + 2], 1, GL_FALSE, cam->view[0]);
+	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 4], 1, GL_FALSE, cam->result[0]);
+	glUniform3f(uniforms[get_index_DA(cam->programs, &program) * 4 + 1], cam->position[0], cam->position[1], cam->position[2]);
+	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 4 + 2], 1, GL_FALSE, cam->view[0]);
+	glUniformMatrix4fv(uniforms[get_index_DA(cam->programs, &program) * 4 + 3], 1, GL_FALSE, cam->projection[0]);
 }

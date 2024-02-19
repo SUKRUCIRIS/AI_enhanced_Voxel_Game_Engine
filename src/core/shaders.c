@@ -13,6 +13,8 @@ GLuint def_tex_light_ins_program = 0;
 GLuint def_shadowmap_ins_program = 0;
 GLuint def_gbuffer_br_program = 0;
 GLuint def_deferred_br_program = 0;
+GLuint def_ssao_program = 0;
+GLuint def_ssao_blur_program = 0;
 
 char *get_shader_content(const char *fileName)
 {
@@ -89,6 +91,8 @@ void init_programs(void)
 	def_shadowmap_ins_program = compile_program("./shaders/def_shadowmap.fs", "./shaders/def_shadowmap_ins.vs", "./shaders/def_shadowmap.gs");
 	def_gbuffer_br_program = compile_program("./shaders/gbuffer_br.fs", "./shaders/gbuffer_br.vs", 0);
 	def_deferred_br_program = compile_program("./shaders/deferred_br.fs", "./shaders/deferred_br.vs", 0);
+	def_ssao_program = compile_program("./shaders/ssao.fs", "./shaders/deferred_br.vs", 0);
+	def_ssao_blur_program = compile_program("./shaders/ssao_blur.fs", "./shaders/deferred_br.vs", 0);
 }
 
 void destroy_programs(void)
@@ -104,6 +108,8 @@ void destroy_programs(void)
 	glDeleteProgram(def_shadowmap_ins_program);
 	glDeleteProgram(def_gbuffer_br_program);
 	glDeleteProgram(def_deferred_br_program);
+	glDeleteProgram(def_ssao_program);
+	glDeleteProgram(def_ssao_blur_program);
 }
 
 GLuint get_def_program(void)
@@ -159,4 +165,14 @@ GLuint get_def_gbuffer_br_program(void)
 GLuint get_def_deferred_br_program(void)
 {
 	return def_deferred_br_program;
+}
+
+GLuint get_def_ssao_program(void)
+{
+	return def_ssao_program;
+}
+
+GLuint get_def_ssao_blur_program(void)
+{
+	return def_ssao_blur_program;
 }

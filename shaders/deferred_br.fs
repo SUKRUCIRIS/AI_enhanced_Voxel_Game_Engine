@@ -7,6 +7,7 @@ in vec2 TexCoords;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gTexCoord;
+uniform sampler2D ssao;
 
 uniform sampler2D textures[32];
 uniform vec4 lightColor;
@@ -25,6 +26,7 @@ void main(){
 	vec4 gpos=texture(gPosition, TexCoords);
 	vec4 gnorm=texture(gNormal, TexCoords);
 	vec4 gtex=texture(gTexCoord, TexCoords);
+	float AmbientOcclusion = texture(ssao, TexCoords).r;
 
   vec2 texCoord=gtex.xy;
   vec3 normal=gnorm.xyz;
@@ -82,7 +84,8 @@ void main(){
 		}
 	}
 
-	vec4 color = texture(textures[int(texture_id)], texCoord) * lightColor * (diffuse * (1.0f - shadow) + ambient + specular * (1.0f - shadow));
+	vec4 color = texture(textures[int(texture_id)], texCoord) * lightColor * (diffuse * (1.0f - shadow) + (ambient * AmbientOcclusion) + specular * (1.0f - shadow));
 	FragColor.xyz = color.xyz * (1 - fogmult) + fog_color * fogmult;
 	FragColor.a = 1.0f;
+	//FragColor=vec4(AmbientOcclusion,AmbientOcclusion,AmbientOcclusion,1);
 }
