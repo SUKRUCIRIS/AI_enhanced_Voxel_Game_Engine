@@ -84,7 +84,7 @@ void main(){
 		}
 	}
 
-	vec4 color = texture(textures[int(texture_id)], texCoord) * lightColor * (diffuse * (1.0f - shadow) + (ambient * AmbientOcclusion) + specular * (1.0f - shadow));
+	vec4 color = texture(textures[int(texture_id)], texCoord) * lightColor * (diffuse * (1.0f - shadow) + ambient + specular * (1.0f - shadow)) * AmbientOcclusion;
 	FragColor.xyz = color.xyz * (1 - fogmult) + fog_color * fogmult;
 	FragColor.a = 1.0f;
 	//FragColor=vec4(AmbientOcclusion,AmbientOcclusion,AmbientOcclusion,1);

@@ -84,9 +84,9 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	l->cascade3range = cascade3range;
 
 	l->ambient = 0.5f;
-	l->lightColor[0] = 0.39f;
-	l->lightColor[1] = 0.6f;
-	l->lightColor[2] = 0.69f;
+	l->lightColor[0] = 0.5294f;
+	l->lightColor[1] = 0.8078f;
+	l->lightColor[2] = 0.9216f;
 	l->lightColor[3] = 1;
 	l->lightDir[0] = 20;
 	l->lightDir[1] = 50;
@@ -293,7 +293,6 @@ void lighting_set_uniforms(lighting *l, GLuint program)
 		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
-	l->lightDir[2] = -l->lightDir[2];
 	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 21], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
 	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 21 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
 	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 2], l->ambient);
@@ -315,7 +314,6 @@ void lighting_set_uniforms(lighting *l, GLuint program)
 	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 18], 26);
 	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 19], 25);
 	glUniform3fv(uniforms[get_index_DA(l->programs, &program) * 21 + 20], 64, l->ssaoKernel[0]);
-	l->lightDir[2] = -l->lightDir[2];
 	use_camera(l->cam, program);
 }
 

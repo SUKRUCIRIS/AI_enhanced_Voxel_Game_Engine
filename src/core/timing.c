@@ -3,10 +3,13 @@
 
 double timer = 0;
 double frame_ms = 0;
+double old_frame_ms = 0;
 
 void start_game_loop(void)
 {
   timer = glfwGetTime() * 1000;
+  old_frame_ms = frame_ms;
+  frame_ms = 0;
 }
 
 void end_game_loop(void)
@@ -24,7 +27,7 @@ void end_game_loop_targetms(double targetms)
 
 double get_frame_timems(void)
 {
-  return frame_ms;
+  return old_frame_ms;
 }
 
 double get_timems(void)
