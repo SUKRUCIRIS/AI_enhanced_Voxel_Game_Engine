@@ -239,6 +239,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 		l->noiseScale[0] = l->windowwidth / 4.0f;
 		l->noiseScale[1] = l->windowheight / 4.0f;
+		l->has_ssao = 0;
 	}
 
 	return l;
@@ -291,29 +292,32 @@ void lighting_set_uniforms(lighting *l, GLuint program)
 		pushback_DA(l->uniforms, &uniform);
 		uniform = glGetUniformLocation(program, "samples");
 		pushback_DA(l->uniforms, &uniform);
+		uniform = glGetUniformLocation(program, "has_ssao");
+		pushback_DA(l->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(l->uniforms);
-	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 21], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 21 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 2], l->ambient);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 3], l->specularStrength);
-	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 21 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 5], 31);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 6], l->cascade0range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 7], l->cascade1range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 8], l->cascade2range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 9], l->cascade3range);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 10], l->fog_start);
-	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 21 + 11], l->fog_end);
-	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 21 + 12], l->fog_color[0], l->fog_color[1], l->fog_color[2]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 13], 30);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 14], 29);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 15], 28);
-	glUniform2f(uniforms[get_index_DA(l->programs, &program) * 21 + 16], l->noiseScale[0], l->noiseScale[1]);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 17], 27);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 18], 26);
-	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 21 + 19], 25);
-	glUniform3fv(uniforms[get_index_DA(l->programs, &program) * 21 + 20], 64, l->ssaoKernel[0]);
+	glUniform4f(uniforms[get_index_DA(l->programs, &program) * 22], l->lightColor[0], l->lightColor[1], l->lightColor[2], l->lightColor[3]);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 22 + 1], l->lightDir[0], l->lightDir[1], l->lightDir[2]);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 2], l->ambient);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 3], l->specularStrength);
+	glUniformMatrix4fv(uniforms[get_index_DA(l->programs, &program) * 22 + 4], 4, GL_FALSE, l->lightProjection[0][0]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 5], 31);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 6], l->cascade0range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 7], l->cascade1range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 8], l->cascade2range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 9], l->cascade3range);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 10], l->fog_start);
+	glUniform1f(uniforms[get_index_DA(l->programs, &program) * 22 + 11], l->fog_end);
+	glUniform3f(uniforms[get_index_DA(l->programs, &program) * 22 + 12], l->fog_color[0], l->fog_color[1], l->fog_color[2]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 13], 30);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 14], 29);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 15], 28);
+	glUniform2f(uniforms[get_index_DA(l->programs, &program) * 22 + 16], l->noiseScale[0], l->noiseScale[1]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 17], 27);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 18], 26);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 19], 25);
+	glUniform3fv(uniforms[get_index_DA(l->programs, &program) * 22 + 20], 64, l->ssaoKernel[0]);
+	glUniform1i(uniforms[get_index_DA(l->programs, &program) * 22 + 21], l->has_ssao);
 	use_camera(l->cam, program);
 }
 
@@ -347,6 +351,7 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigne
 	}
 	else if (gpass == 1)
 	{
+		l->has_ssao = 0;
 		glCullFace(GL_FRONT);
 		glBindFramebuffer(GL_FRAMEBUFFER, l->gbufferFBO);
 		glViewport(0, 0, l->windowwidth, l->windowheight);
@@ -366,8 +371,11 @@ void use_lighting(lighting *l, GLuint program, unsigned char shadowpass, unsigne
 		glBindTexture(GL_TEXTURE_2D, l->gNormal);
 		glActiveTexture(GL_TEXTURE28);
 		glBindTexture(GL_TEXTURE_2D, l->gTexCoord);
-		glActiveTexture(GL_TEXTURE25);
-		glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
+		if (l->has_ssao)
+		{
+			glActiveTexture(GL_TEXTURE25);
+			glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
+		}
 		use_br_texture_manager(textures, program);
 		glBindVertexArray(l->quadvao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -405,6 +413,7 @@ void use_lighting_ssao_blur(lighting *l, GLuint program)
 	glBindVertexArray(l->quadvao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+	l->has_ssao = 1;
 }
 
 void delete_lighting(lighting *l)

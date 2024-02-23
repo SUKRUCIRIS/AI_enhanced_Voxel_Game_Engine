@@ -22,11 +22,17 @@ uniform float cascade2range;
 uniform float cascade3range;
 uniform sampler2DArrayShadow shadowMap;
 
+uniform int has_ssao;
+
 void main(){
 	vec4 gpos=texture(gPosition, TexCoords);
 	vec4 gnorm=texture(gNormal, TexCoords);
 	vec4 gtex=texture(gTexCoord, TexCoords);
-	float AmbientOcclusion = texture(ssao, TexCoords).r;
+	float AmbientOcclusion = 1;
+	
+	if(has_ssao==1){
+		AmbientOcclusion=texture(ssao, TexCoords).r;
+	}
 
   vec2 texCoord=gtex.xy;
   vec3 normal=gnorm.xyz;

@@ -46,6 +46,7 @@ typedef struct lighting
 	vec3 ssaoNoise[16];
 	GLuint noiseTexture;
 	vec2 noiseScale;
+	int has_ssao;
 } lighting;
 
 void calculate_lighting_projection(lighting *l, int step);

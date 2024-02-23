@@ -4,7 +4,7 @@
 
 int main(void)
 {
-	GLFWwindow *window = create_window(1280, 720, 1, 1, 0);
+	GLFWwindow *window = create_window(0, 0, 1, 1, 0);
 	if (window == 0)
 	{
 		return -1;

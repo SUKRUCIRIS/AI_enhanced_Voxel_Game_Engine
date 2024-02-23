@@ -34,6 +34,7 @@ void main()
     vec3 samplePos = TBN * samples[i];
     samplePos = fragPos + samplePos * radius; 
 
+    //if (length(samplePos - fragPos) > 4) break;
     vec4 offset = vec4(samplePos, 1.0);
     offset = projection * offset;
     offset.xyz /= offset.w;
