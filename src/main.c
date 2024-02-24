@@ -29,6 +29,8 @@ int main(void)
 
 	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16,
 																		render_distance / 4, render_distance, fog_start, fog_end, fog_color, 1);
+	light->fxaa = 1;
+	light->vignette_pp = 1;
 
 	DA *points = create_DA(sizeof(float));
 	DA *heights = create_DA(sizeof(int));
@@ -91,11 +93,11 @@ int main(void)
 		}
 
 		glUseProgram(get_def_shadowmap_br_program());
-		use_lighting(light, get_def_shadowmap_br_program(), 1, 0, 0);
+		use_lighting_shadowpass(light, get_def_shadowmap_br_program());
 		use_chunk_op(chunks, get_def_shadowmap_br_program(), cam);
 
 		glUseProgram(get_def_gbuffer_br_program());
-		use_lighting(light, get_def_gbuffer_br_program(), 0, 1, 0);
+		use_lighting_gbuffer(light, get_def_gbuffer_br_program());
 		use_chunk_op(chunks, get_def_gbuffer_br_program(), cam);
 
 		glUseProgram(get_def_ssao_program());
@@ -105,9 +107,17 @@ int main(void)
 		use_lighting_ssao_blur(light, get_def_ssao_blur_program());
 
 		glUseProgram(get_def_deferred_br_program());
-		use_lighting(light, get_def_deferred_br_program(), 0, 0, get_world_texture_manager());
+		use_lighting_deferred(light, get_def_deferred_br_program(), get_world_texture_manager());
+
+		glUseProgram(get_def_post_process_program());
+		use_lighting_postprocess(light, get_def_post_process_program());
 
 		glfwSwapBuffers(window);
+
+		if (get_key_pressed(GLFW_KEY_F))
+		{
+			light->fxaa = 1 - light->fxaa;
+		}
 
 		end_game_loop_targetms(16.5);
 	}

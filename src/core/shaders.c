@@ -15,6 +15,7 @@ GLuint def_gbuffer_br_program = 0;
 GLuint def_deferred_br_program = 0;
 GLuint def_ssao_program = 0;
 GLuint def_ssao_blur_program = 0;
+GLuint def_post_process_program = 0;
 
 char *get_shader_content(const char *fileName)
 {
@@ -93,6 +94,7 @@ void init_programs(void)
 	def_deferred_br_program = compile_program("./shaders/deferred_br.fs", "./shaders/deferred_br.vs", 0);
 	def_ssao_program = compile_program("./shaders/ssao.fs", "./shaders/deferred_br.vs", 0);
 	def_ssao_blur_program = compile_program("./shaders/ssao_blur.fs", "./shaders/deferred_br.vs", 0);
+	def_post_process_program = compile_program("./shaders/post_process.fs", "./shaders/deferred_br.vs", 0);
 }
 
 void destroy_programs(void)
@@ -110,6 +112,7 @@ void destroy_programs(void)
 	glDeleteProgram(def_deferred_br_program);
 	glDeleteProgram(def_ssao_program);
 	glDeleteProgram(def_ssao_blur_program);
+	glDeleteProgram(def_post_process_program);
 }
 
 GLuint get_def_program(void)
@@ -175,4 +178,9 @@ GLuint get_def_ssao_program(void)
 GLuint get_def_ssao_blur_program(void)
 {
 	return def_ssao_blur_program;
+}
+
+GLuint get_def_post_process_program(void)
+{
+	return def_post_process_program;
 }
