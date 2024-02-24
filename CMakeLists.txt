@@ -40,6 +40,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	add_subdirectory(third_party/glfw)
 	add_subdirectory(third_party/cglm)
 	add_subdirectory(third_party/assimp)
+	add_subdirectory(third_party/freetype)
 
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/cglm/include)
@@ -48,12 +49,13 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/assimp/include)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/build/third_party/assimp/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype/include)
 
 	FILE(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 	add_executable(opengl_voxel_gsu ${MY_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/src/glad.c)
 
 	find_package(OpenGL REQUIRED)
-	target_link_libraries(opengl_voxel_gsu cglm glfw assimp msvcrt OpenGL::GL)
+	target_link_libraries(opengl_voxel_gsu cglm glfw assimp freetype msvcrt OpenGL::GL)
 	target_compile_options(opengl_voxel_gsu PUBLIC /MT)
 
 	set_target_properties(opengl_voxel_gsu PROPERTIES WIN32_EXECUTABLE TRUE)
