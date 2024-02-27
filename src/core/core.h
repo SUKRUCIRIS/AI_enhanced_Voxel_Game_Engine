@@ -23,3 +23,4 @@
 #include "timing.h"
 #include "animation.h"
 #include "random.h"
+#include "font.h"

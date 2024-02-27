@@ -61,6 +61,16 @@ int main(void)
 	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size, 0);
 	unsigned char freec = 0;
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+	text_manager *t = create_text_manager("./fonts/arial.ttf", 64, 1920, 1080, GL_LINEAR, GL_LINEAR);
+
+	float width, height;
+	get_text_size(t, 1, "Selam Sukru", &width, &height);
+	vec4 red = {1, 0, 0, 0.5f};
+	width = (1920 - width) / 2.0f;
+	height = (1080 - height) / 2.0f;
+	add_text(t, width, height, 1, 1, red, "Selam Sukru");
+
 	while (!glfwWindowShouldClose(window))
 	{
 		start_game_loop();
@@ -112,6 +122,9 @@ int main(void)
 		glUseProgram(get_def_post_process_program());
 		use_lighting_postprocess(light, get_def_post_process_program());
 
+		glUseProgram(get_def_text_program());
+		use_text_manager(t, get_def_text_program());
+
 		glfwSwapBuffers(window);
 
 		if (get_key_pressed(GLFW_KEY_F))
@@ -131,6 +144,7 @@ int main(void)
 	destroy_programs();
 	delete_window(window);
 	delete_animations();
+	delete_text_manager(t);
 
 	free(hm);
 	free_model(gsu_model);
