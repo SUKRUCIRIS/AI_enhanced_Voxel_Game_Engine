@@ -9,7 +9,6 @@ uniform sampler2D gNormal;
 uniform sampler2D gTexCoord;
 uniform sampler2D ssao;
 
-uniform sampler2D textures[32];
 uniform vec4 lightColor;
 uniform float ambient;
 uniform vec3 fog_color;
@@ -34,18 +33,18 @@ void main(){
 		AmbientOcclusion=texture(ssao, TexCoords).r;
 	}
 
-  vec2 texCoord=gtex.xy;
+  vec3 rgb=gtex.yzw;
   vec3 normal=gnorm.xyz;
   vec3 crntPos=gpos.xyz;
   float specular=gpos.w;
   float diffuse=gnorm.w;
-  float fogmult=gtex.z;
-  float texture_id=gtex.w;
+  float fogmult=gtex.x;
 
-	if(length(normal)==0){
-		FragColor=vec4(0.718f, 0.702f, 0.671f, 1.0f);
-		return;
-	}
+	// setting default color, dont need when i have skybox
+	//if(length(normal)==0){
+	//FragColor=vec4(0.718f, 0.702f, 0.671f, 1.0f);
+	//return;
+	//}
 
 	float depthValue = abs((view*vec4(crntPos,1.0f)).z);
 	int layer = -1;
@@ -90,7 +89,7 @@ void main(){
 		}
 	}
 
-	vec4 color = texture(textures[int(texture_id)], texCoord) * lightColor * (diffuse * (1.0f - shadow) + ambient + specular * (1.0f - shadow)) * AmbientOcclusion;
+	vec4 color = vec4(rgb,1) * lightColor * (diffuse * (1.0f - shadow) + ambient + specular * (1.0f - shadow)) * AmbientOcclusion;
 	FragColor.xyz = color.xyz * (1 - fogmult) + fog_color * fogmult;
 	FragColor.a = 1.0f;
 	//FragColor=vec4(AmbientOcclusion,AmbientOcclusion,AmbientOcclusion,1);

@@ -11,8 +11,11 @@ in float diffuse;
 in float fogmult;
 flat in float texture_id;
 
+uniform sampler2D textures[32];
+
 void main(){
   gPosition=vec4(crntPos,specular);
   gNormal=vec4(normal,diffuse);
-  gTexCoord=vec4(texCoord,fogmult,texture_id);
+  vec3 rgb=vec3(texture(textures[int(texture_id)], texCoord));
+  gTexCoord=vec4(fogmult,rgb);
 }

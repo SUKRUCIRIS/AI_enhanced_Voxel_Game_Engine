@@ -21,14 +21,15 @@ int main(void)
 	float render_distance = (float)chunk_size * chunk_range * 1.5f;
 	float fog_start = ((float)chunk_size - 2) * chunk_range;
 	float fog_end = (float)chunk_size * chunk_range;
-	vec3 fog_color = {0.718f, 0.702f, 0.671f};
+	vec3 fair_fog_color = {0.718f, 0.702f, 0.671f};
+	vec3 dark_fog_color = {0.0718f, 0.0702f, 0.0671f};
 
 	int window_w = 0, window_h = 0;
 	glfwGetWindowSize(window, &window_w, &window_h);
 	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
 
 	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16,
-																		render_distance / 4, render_distance, fog_start, fog_end, fog_color, 1);
+																		render_distance / 4, render_distance, fog_start, fog_end, dark_fog_color, 1);
 	light->fxaa = 1;
 	light->vignette_pp = 1;
 
@@ -71,6 +72,13 @@ int main(void)
 	height = (1080 - height) / 2.0f;
 	add_text(t, width, height, 1, 1, red, "Selam Sukru");
 
+	skybox *s = create_skybox("./textures/skybox/mix/right.png",
+														"./textures/skybox/mix/left.png",
+														"./textures/skybox/mix/top.png",
+														"./textures/skybox/mix/bottom.png",
+														"./textures/skybox/mix/front.png",
+														"./textures/skybox/mix/back.png", cam);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		start_game_loop();
@@ -109,6 +117,8 @@ int main(void)
 		glUseProgram(get_def_gbuffer_br_program());
 		use_lighting_gbuffer(light, get_def_gbuffer_br_program());
 		use_chunk_op(chunks, get_def_gbuffer_br_program(), cam);
+		glUseProgram(get_def_skybox_program());
+		use_skybox(s, get_def_skybox_program());
 
 		glUseProgram(get_def_ssao_program());
 		use_lighting_ssao(light, get_def_ssao_program());
@@ -117,7 +127,7 @@ int main(void)
 		use_lighting_ssao_blur(light, get_def_ssao_blur_program());
 
 		glUseProgram(get_def_deferred_br_program());
-		use_lighting_deferred(light, get_def_deferred_br_program(), get_world_texture_manager());
+		use_lighting_deferred(light, get_def_deferred_br_program());
 
 		glUseProgram(get_def_post_process_program());
 		use_lighting_postprocess(light, get_def_post_process_program());
@@ -145,6 +155,7 @@ int main(void)
 	delete_window(window);
 	delete_animations();
 	delete_text_manager(t);
+	delete_skybox(s);
 
 	free(hm);
 	free_model(gsu_model);

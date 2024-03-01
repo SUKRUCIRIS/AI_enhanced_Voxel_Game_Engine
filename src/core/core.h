@@ -24,3 +24,4 @@
 #include "animation.h"
 #include "random.h"
 #include "font.h"
+#include "skybox.h"

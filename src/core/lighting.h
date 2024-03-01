@@ -64,7 +64,7 @@ void use_lighting_forward(lighting *l, GLuint program);
 
 void use_lighting_gbuffer(lighting *l, GLuint program);
 
-void use_lighting_deferred(lighting *l, GLuint program, br_texture_manager *textures);
+void use_lighting_deferred(lighting *l, GLuint program);
 
 void use_lighting_postprocess(lighting *l, GLuint program);
 

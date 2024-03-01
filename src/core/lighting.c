@@ -411,7 +411,7 @@ void use_lighting_gbuffer(lighting *l, GLuint program)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void use_lighting_deferred(lighting *l, GLuint program, br_texture_manager *textures)
+void use_lighting_deferred(lighting *l, GLuint program)
 {
 	lighting_set_uniforms(l, program);
 	glBindFramebuffer(GL_FRAMEBUFFER, l->deferredfbo);
@@ -430,7 +430,6 @@ void use_lighting_deferred(lighting *l, GLuint program, br_texture_manager *text
 		glActiveTexture(GL_TEXTURE27);
 		glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
 	}
-	use_br_texture_manager(textures, program);
 	glBindVertexArray(l->quadvao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
