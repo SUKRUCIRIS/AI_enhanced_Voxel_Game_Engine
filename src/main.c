@@ -14,6 +14,7 @@ int main(void)
 
 	init_programs();
 	init_animations();
+	init_jolt();
 
 	int world_size = 2048;
 	int chunk_size = 16;
@@ -94,10 +95,10 @@ int main(void)
 			height = 1080 - height;
 			add_text(t, width, height, 1, 1, red, "Sukru Ciris Engine");
 
-			get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
+			get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
 			width = 0;
 			height = 1080 - height;
-			add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
+			add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
 		}
 
 		glfwPollEvents();
@@ -173,6 +174,7 @@ int main(void)
 	delete_animations();
 	delete_text_manager(t);
 	delete_skybox(s);
+	deinit_jolt();
 
 	free(hm);
 	free_model(gsu_model);
