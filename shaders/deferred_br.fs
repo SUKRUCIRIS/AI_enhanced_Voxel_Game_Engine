@@ -40,11 +40,10 @@ void main(){
   float diffuse=gnorm.w;
   float fogmult=gtex.x;
 
-	// setting default color, dont need when i have skybox
-	//if(length(normal)==0){
-	//FragColor=vec4(0.718f, 0.702f, 0.671f, 1.0f);
-	//return;
-	//}
+	if(length(normal)==0){
+		FragColor=vec4(rgb,1);
+		return;
+	}
 
 	float depthValue = abs((view*vec4(crntPos,1.0f)).z);
 	int layer = -1;

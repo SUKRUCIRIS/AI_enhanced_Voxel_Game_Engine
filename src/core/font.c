@@ -1,5 +1,6 @@
 #include "font.h"
 #include "../../third_party/freetype/include/ft2build.h"
+#include <stdarg.h>
 #include FT_FREETYPE_H
 #ifdef _MSC_VER
 #include <Windows.h>
@@ -112,7 +113,7 @@ void add_text(text_manager *f, float startx, float starty, float z, int scale, v
   starty = (float)((int)starty);
   f->newdata = 1;
   GLuint *indices = malloc(sizeof(GLuint) * 6 * strlen(text));
-  unsigned int vertex_start = get_size_DA(f->vertices) / 8;
+  unsigned int vertex_start = get_size_DA(f->vertices) / 9;
   for (unsigned int i = 0; i < strlen(text); i++)
   {
     indices[i * 6] = 2 + vertex_start + 4 * i;
@@ -127,7 +128,7 @@ void add_text(text_manager *f, float startx, float starty, float z, int scale, v
   {
     if (text[i] == '\n')
     {
-      starty += (f->theight + 3) * scale;
+      starty -= (f->theight + 3) * scale;
       startx = old_startx;
       continue;
     }
@@ -155,6 +156,26 @@ void add_text(text_manager *f, float startx, float starty, float z, int scale, v
   free(indices);
 }
 
+char static_text[1024];
+
+void add_text_variadic(text_manager *f, float startx, float starty, float z, int scale, vec4 rgba, const char *text, ...)
+{
+  va_list args;
+  va_start(args, text);
+  vsnprintf(static_text, 1024 * sizeof(char), text, args);
+  va_end(args);
+  add_text(f, startx, starty, z, scale, rgba, static_text);
+}
+
+void get_text_size_variadic(text_manager *f, int scale, float *width, float *height, const char *text, ...)
+{
+  va_list args;
+  va_start(args, text);
+  vsnprintf(static_text, 1024 * sizeof(char), text, args);
+  va_end(args);
+  get_text_size(f, scale, static_text, width, height);
+}
+
 void get_text_size(text_manager *f, int scale, const char *text, float *width, float *height)
 {
   *width = 0;
@@ -166,7 +187,7 @@ void get_text_size(text_manager *f, int scale, const char *text, float *width, f
   {
     if (text[i] == '\n')
     {
-      starty += (f->theight + 3) * scale;
+      starty -= (f->theight + 3) * scale;
       startx = old_startx;
       continue;
     }

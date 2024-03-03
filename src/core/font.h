@@ -30,7 +30,11 @@ void delete_text_manager(text_manager *f);
 
 void add_text(text_manager *f, float startx, float starty, float z, int scale, vec4 rgba, const char *text);
 
-void get_text_size(text_manager *f, int scale, const char *text, float *w, float *h);
+void add_text_variadic(text_manager *f, float startx, float starty, float z, int scale, vec4 rgba, const char *text, ...);
+
+void get_text_size(text_manager *f, int scale, const char *text, float *width, float *height);
+
+void get_text_size_variadic(text_manager *f, int scale, float *width, float *height, const char *text, ...);
 
 void use_text_manager(text_manager *f, GLuint program);
 

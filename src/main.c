@@ -21,7 +21,7 @@ int main(void)
 	float render_distance = (float)chunk_size * chunk_range * 1.5f;
 	float fog_start = ((float)chunk_size - 2) * chunk_range;
 	float fog_end = (float)chunk_size * chunk_range;
-	vec3 fair_fog_color = {0.718f, 0.702f, 0.671f};
+	// vec3 fair_fog_color = {0.718f, 0.702f, 0.671f};
 	vec3 dark_fog_color = {0.0718f, 0.0702f, 0.0671f};
 
 	int window_w = 0, window_h = 0;
@@ -40,7 +40,10 @@ int main(void)
 	int tmpi[] = {0, 35, 36, 47, 50, 50, 50, 52, 57, 64, 75, 85, 91, 93, 94, 94, 96, 100};
 	pushback_many_DA(heights, tmpi, 18);
 
-	int **hm = create_heightmap(world_size, world_size, rand(), rand(), 600, 0, 0, 0, 3, 2, 3, 0.3f, 30);
+	int seedx = rand();
+	int seedz = rand();
+
+	int **hm = create_heightmap(world_size, world_size, seedx, seedz, 600, 0, 0, 0, 3, 2, 3, 0.3f, 30);
 
 	delete_DA(points);
 	delete_DA(heights);
@@ -63,14 +66,14 @@ int main(void)
 	unsigned char freec = 0;
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-	text_manager *t = create_text_manager("./fonts/arial.ttf", 64, 1920, 1080, GL_LINEAR, GL_LINEAR);
+	text_manager *t = create_text_manager("./fonts/arial.ttf", 16, 1920, 1080, GL_LINEAR, GL_LINEAR);
 
 	float width, height;
-	get_text_size(t, 1, "Selam Sukru", &width, &height);
-	vec4 red = {1, 0, 0, 0.5f};
-	width = (1920 - width) / 2.0f;
-	height = (1080 - height) / 2.0f;
-	add_text(t, width, height, 1, 1, red, "Selam Sukru");
+	vec4 red = {1, 0, 0, 1};
+	get_text_size(t, 1, "Sukru Ciris Engine", &width, &height);
+	width = 1920 - width;
+	height = 1080 - height;
+	add_text(t, width, height, 1, 1, red, "Sukru Ciris Engine");
 
 	skybox *s = create_skybox("./textures/skybox/mix/right.png",
 														"./textures/skybox/mix/left.png",
@@ -82,6 +85,20 @@ int main(void)
 	while (!glfwWindowShouldClose(window))
 	{
 		start_game_loop();
+
+		{
+			clear_text_manager(t);
+
+			get_text_size(t, 1, "Sukru Ciris Engine", &width, &height);
+			width = 1920 - width;
+			height = 1080 - height;
+			add_text(t, width, height, 1, 1, red, "Sukru Ciris Engine");
+
+			get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
+			width = 0;
+			height = 1080 - height;
+			add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
+		}
 
 		glfwPollEvents();
 		poll_events(window);
