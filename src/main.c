@@ -76,12 +76,12 @@ int main(void)
 	height = 1080 - height;
 	add_text(t, width, height, 1, 1, red, "Sukru Ciris Engine");
 
-	skybox *s = create_skybox("./textures/skybox/mix/right.png",
-														"./textures/skybox/mix/left.png",
-														"./textures/skybox/mix/top.png",
-														"./textures/skybox/mix/bottom.png",
-														"./textures/skybox/mix/front.png",
-														"./textures/skybox/mix/back.png", cam);
+	skybox *s = create_skybox("./textures/skybox/eso/right.png",
+														"./textures/skybox/eso/left.png",
+														"./textures/skybox/eso/top.png",
+														"./textures/skybox/eso/bottom.png",
+														"./textures/skybox/eso/front.png",
+														"./textures/skybox/eso/back.png", cam);
 
 	while (!glfwWindowShouldClose(window))
 	{

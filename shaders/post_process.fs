@@ -4,6 +4,7 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D deferred;
+uniform sampler2D gNormal;
 
 uniform int vignette;
 uniform int kernel;
@@ -83,6 +84,11 @@ vec3 FxaaPixelShader(vec4 uv, sampler2D tex, vec2 rcpFrame) {
 
 vec4 texture_fxaa(sampler2D text, vec2 coord){
   if(fxaa==1){
+    vec4 gnorm=texture(gNormal, TexCoords);
+    vec3 normal=gnorm.xyz;
+    if(length(normal)==0){
+      return texture(text, coord);
+    }
     vec2 rcpFrame = 1/screenResolution;
     return vec4(FxaaPixelShader(vec4(coord, coord - (rcpFrame * (0.5 + FXAA_SUBPIX_SHIFT))), text, rcpFrame),1.0);
   }
