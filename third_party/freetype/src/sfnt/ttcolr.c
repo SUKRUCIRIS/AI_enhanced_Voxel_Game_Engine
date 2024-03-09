@@ -725,11 +725,8 @@
 
     if ( !get_child_table_pointer( colr, paint_base, &p, &child_table_p ) )
       return 0;
-
-    if ( apaint->format == FT_COLR_PAINTFORMAT_LINEAR_GRADIENT      ||
-         ( do_read_var =
-             ( (FT_PaintFormat_Internal)apaint->format ==
-               FT_COLR_PAINTFORMAT_INTERNAL_VAR_LINEAR_GRADIENT ) ) )
+    do_read_var = ((FT_PaintFormat_Internal)apaint->format == FT_COLR_PAINTFORMAT_INTERNAL_VAR_LINEAR_GRADIENT);
+    if ( apaint->format == FT_COLR_PAINTFORMAT_LINEAR_GRADIENT || do_read_var)
     {
       if ( !read_color_line( colr,
                              child_table_p,
@@ -774,10 +771,7 @@
       return 1;
     }
 
-    else if ( apaint->format == FT_COLR_PAINTFORMAT_RADIAL_GRADIENT      ||
-              ( do_read_var =
-                  ( (FT_PaintFormat_Internal)apaint->format ==
-                    FT_COLR_PAINTFORMAT_INTERNAL_VAR_RADIAL_GRADIENT ) ) )
+    else if ( apaint->format == FT_COLR_PAINTFORMAT_RADIAL_GRADIENT || do_read_var )
     {
       FT_Pos  tmp;
 
@@ -836,10 +830,7 @@
       return 1;
     }
 
-    else if ( apaint->format == FT_COLR_PAINTFORMAT_SWEEP_GRADIENT      ||
-              ( do_read_var =
-                  ( (FT_PaintFormat_Internal)apaint->format ==
-                    FT_COLR_PAINTFORMAT_INTERNAL_VAR_SWEEP_GRADIENT ) ) )
+    else if ( apaint->format == FT_COLR_PAINTFORMAT_SWEEP_GRADIENT || do_read_var )
     {
       if ( !read_color_line( colr,
                              child_table_p,

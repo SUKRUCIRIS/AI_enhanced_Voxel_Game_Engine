@@ -82,7 +82,7 @@ int main(void)
 														"./textures/skybox/eso/bottom.png",
 														"./textures/skybox/eso/front.png",
 														"./textures/skybox/eso/back.png",
-														cam, 0.0001f, (vec3){0, 1, 0});
+														cam, 0.00005f, (vec3){0, 1, 1});
 
 	while (!glfwWindowShouldClose(window))
 	{

@@ -877,7 +877,7 @@
         return NULL;
       }
 
-      len = ft_strlen( result );
+      len = (FT_UInt)ft_strlen( result );
 
       /* sanitize if necessary; we reserve space for 36 bytes (a 128bit  */
       /* checksum as a hex number, preceded by `-' and followed by three */
@@ -1029,7 +1029,7 @@
       FT_UInt32*  h;
 
 
-      murmur_hash_3_128( result, p - result, seed, hash );
+      murmur_hash_3_128( result, (const unsigned int)(p - result), seed, hash );
 
       p = result + face->var_postscript_prefix_len;
       *p++ = '-';

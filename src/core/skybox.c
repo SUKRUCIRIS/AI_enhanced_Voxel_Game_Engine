@@ -236,6 +236,7 @@ skybox *create_skybox(const char *right_texture, const char *left_texture, const
     stbi_image_free(data);
   }
   glm_vec3_copy(rotate_axis, s->rotate_axis);
+  glm_normalize(s->rotate_axis);
   s->rotate_frame = rotate_frame;
   s->rotate_full = 0;
   return s;

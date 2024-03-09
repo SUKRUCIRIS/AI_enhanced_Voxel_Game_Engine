@@ -105,7 +105,7 @@ if (MSVC)
 	# Set compiler flags for various configurations
 	set(CMAKE_CXX_FLAGS_DEBUG "/GS /Od /Ob0 /RTC1")
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
-	set(CMAKE_CXX_FLAGS_DISTRIBUTION "//O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
+	set(CMAKE_CXX_FLAGS_DISTRIBUTION "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
 	set(CMAKE_CXX_FLAGS_RELEASEASAN "-fsanitize=address /Od")
 	set(CMAKE_CXX_FLAGS_RELEASEUBSAN "-fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
 	set(CMAKE_CXX_FLAGS_RELEASECOVERAGE "-fprofile-instr-generate -fcoverage-mapping")

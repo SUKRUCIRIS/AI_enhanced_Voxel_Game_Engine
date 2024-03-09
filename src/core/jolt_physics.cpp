@@ -11,12 +11,24 @@
 #include "../../third_party/jolt/Jolt/Physics/Collision/Shape/SphereShape.h"
 #include "../../third_party/jolt/Jolt/Physics/Body/BodyCreationSettings.h"
 #include "../../third_party/jolt/Jolt/Physics/Body/BodyActivationListener.h"
+#include "../../third_party/jolt/Jolt/Physics/Collision/Shape/HeightFieldShape.h"
 
 // Disable common warnings triggered by Jolt, you can use JPH_SUPPRESS_WARNING_PUSH / JPH_SUPPRESS_WARNING_POP to store and restore the warning state
 JPH_SUPPRESS_WARNINGS
 
 // All Jolt symbols are in the JPH namespace
 using namespace JPH;
+
+// If you want your code to compile using single or double precision write 0.0_r to get a Real value that compiles to double or float depending if JPH_DOUBLE_PRECISION is set or not.
+using namespace JPH::literals;
+
+// We're also using STL classes in this example
+using namespace std;
+
+struct bodyid
+{
+  BodyID x;
+};
 
 // If you want your code to compile using single or double precision write 0.0_r to get a Real value that compiles to double or float depending if JPH_DOUBLE_PRECISION is set or not.
 using namespace JPH::literals;
@@ -127,6 +139,20 @@ public:
 
 PhysicsSystem physics_system;
 
+const float cOriginDeltaTime = 1.0f / 60.0f;
+
+// We need a temp allocator for temporary allocations during the physics update. We're
+// pre-allocating 10 MB to avoid having to do allocations during the physics update.
+// B.t.w. 10 MB is way too much for this example but it is a typical value you can use.
+// If you don't want to pre-allocate you can also use TempAllocatorMalloc to fall back to
+// malloc / free.
+TempAllocatorImpl *temp_allocator = 0;
+
+// We need a job system that will execute physics jobs on multiple threads. Typically
+// you would implement the JobSystem interface yourself and let Jolt Physics run on top
+// of your own job scheduler. JobSystemThreadPool is an example implementation.
+JobSystemThreadPool *job_system = 0;
+
 void init_jolt(void)
 {
   // Register allocation hook
@@ -138,17 +164,9 @@ void init_jolt(void)
   // Register all Jolt physics types
   RegisterTypes();
 
-  // We need a temp allocator for temporary allocations during the physics update. We're
-  // pre-allocating 10 MB to avoid having to do allocations during the physics update.
-  // B.t.w. 10 MB is way too much for this example but it is a typical value you can use.
-  // If you don't want to pre-allocate you can also use TempAllocatorMalloc to fall back to
-  // malloc / free.
-  TempAllocatorImpl temp_allocator(10 * 1024 * 1024);
+  temp_allocator = new TempAllocatorImpl(10 * 1024 * 1024);
 
-  // We need a job system that will execute physics jobs on multiple threads. Typically
-  // you would implement the JobSystem interface yourself and let Jolt Physics run on top
-  // of your own job scheduler. JobSystemThreadPool is an example implementation.
-  JobSystemThreadPool job_system(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
+  job_system = new JobSystemThreadPool(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
 
   // This is the max amount of rigid bodies that you can add to the physics system. If you try to add more you'll get an error.
   // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
@@ -183,10 +201,6 @@ void init_jolt(void)
   // Now we can create the actual physics system.
   physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
 
-  // The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
-  // variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
-  BodyInterface &body_interface = physics_system.GetBodyInterface();
-
   // Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
   // You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
   // Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
@@ -195,10 +209,49 @@ void init_jolt(void)
 
 void deinit_jolt(void)
 {
+  delete temp_allocator;
+  delete job_system;
+  temp_allocator = 0;
+  job_system = 0;
   // Unregisters all types with the factory and cleans up the default material
   UnregisterTypes();
 
   // Destroy the factory
   delete Factory::sInstance;
   Factory::sInstance = nullptr;
+}
+
+void run_jolt(float cDeltaTime)
+{
+  if (cDeltaTime < cOriginDeltaTime)
+  {
+    cDeltaTime = cOriginDeltaTime;
+  }
+  physics_system.Update(cDeltaTime, (int)(cDeltaTime / cOriginDeltaTime), temp_allocator, job_system);
+}
+
+bodyid create_hm_jolt(float *heightmappoints, vec3 offset, vec3 scale, int length)
+{
+  Vec3 xoffset(offset[0], offset[1], offset[2]);
+  Vec3 xscale(scale[0], scale[1], scale[2]);
+  HeightFieldShapeSettings settings(heightmappoints, xoffset, xscale, length);
+  ShapeSettings::ShapeResult floor_shape_result = settings.Create();
+  ShapeRefC floor_shape = floor_shape_result.Get();
+  BodyCreationSettings floor_settings(floor_shape, RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
+  Body *floor = physics_system.GetBodyInterface().CreateBody(floor_settings);
+  physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::DontActivate);
+  bodyid res;
+  res.x = floor->GetID();
+  return res;
+}
+
+void delete_body_jolt(bodyid id)
+{
+  physics_system.GetBodyInterface().RemoveBody(id.x);
+  physics_system.GetBodyInterface().DestroyBody(id.x);
+}
+
+void optimize_jolt(void)
+{
+  physics_system.OptimizeBroadPhase();
 }
