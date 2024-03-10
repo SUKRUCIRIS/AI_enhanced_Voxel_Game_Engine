@@ -725,9 +725,12 @@
 
     if ( !get_child_table_pointer( colr, paint_base, &p, &child_table_p ) )
       return 0;
-    do_read_var = ((FT_PaintFormat_Internal)apaint->format == FT_COLR_PAINTFORMAT_INTERNAL_VAR_LINEAR_GRADIENT);
-    if ( apaint->format == FT_COLR_PAINTFORMAT_LINEAR_GRADIENT || do_read_var)
+    if ( apaint->format == FT_COLR_PAINTFORMAT_LINEAR_GRADIENT ||
+         (FT_PaintFormat_Internal)apaint->format ==
+             FT_COLR_PAINTFORMAT_INTERNAL_VAR_LINEAR_GRADIENT )
     {
+      do_read_var = ( (FT_PaintFormat_Internal)apaint->format ==
+                      FT_COLR_PAINTFORMAT_INTERNAL_VAR_LINEAR_GRADIENT );
       if ( !read_color_line( colr,
                              child_table_p,
                              &apaint->u.linear_gradient.colorline,
@@ -771,17 +774,17 @@
       return 1;
     }
 
-    else if ( apaint->format == FT_COLR_PAINTFORMAT_RADIAL_GRADIENT || do_read_var )
+    else if ( apaint->format == FT_COLR_PAINTFORMAT_RADIAL_GRADIENT ||
+              (FT_PaintFormat_Internal)apaint->format ==
+                  FT_COLR_PAINTFORMAT_INTERNAL_VAR_RADIAL_GRADIENT )
     {
       FT_Pos  tmp;
+      do_read_var = ((FT_PaintFormat_Internal)apaint->format ==
+                    FT_COLR_PAINTFORMAT_INTERNAL_VAR_RADIAL_GRADIENT);
 
-
-      if ( !read_color_line( colr,
-                             child_table_p,
-                             &apaint->u.radial_gradient.colorline,
-                             do_read_var ) )
-        return 0;
-
+      if ( !read_color_line( colr, child_table_p,
+                            &apaint->u.radial_gradient.colorline,
+                            do_read_var ) ) return 0;
 
       /* In the OpenType specification, `r0` and `r1` are defined as   */
       /* `UFWORD`.  Since FreeType doesn't have a corresponding 16.16  */
@@ -830,8 +833,13 @@
       return 1;
     }
 
-    else if ( apaint->format == FT_COLR_PAINTFORMAT_SWEEP_GRADIENT || do_read_var )
+    else if ( apaint->format == FT_COLR_PAINTFORMAT_SWEEP_GRADIENT ||
+              (FT_PaintFormat_Internal)apaint->format ==
+                  FT_COLR_PAINTFORMAT_INTERNAL_VAR_SWEEP_GRADIENT )
     {
+      do_read_var =
+                  ( (FT_PaintFormat_Internal)apaint->format ==
+                    FT_COLR_PAINTFORMAT_INTERNAL_VAR_SWEEP_GRADIENT );
       if ( !read_color_line( colr,
                              child_table_p,
                              &apaint->u.sweep_gradient.colorline,

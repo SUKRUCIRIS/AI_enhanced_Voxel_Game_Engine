@@ -11,3 +11,5 @@ float snoise2(float x, float y);
 int **create_heightmap(int dimensionx, int dimensionz, int seedx, int seedz, float precision, int border_add,
                        DA *simplex_points, DA *corresponding_heights, int octaves, float amplitude,
                        float lacunarity, float persistence, int maxheightmult);
+
+float *create_points_heightmap(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz);

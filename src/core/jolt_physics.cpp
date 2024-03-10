@@ -25,7 +25,7 @@ using namespace JPH::literals;
 // We're also using STL classes in this example
 using namespace std;
 
-struct bodyid
+extern "C" struct bodyid
 {
   BodyID x;
 };
@@ -153,7 +153,19 @@ TempAllocatorImpl *temp_allocator = 0;
 // of your own job scheduler. JobSystemThreadPool is an example implementation.
 JobSystemThreadPool *job_system = 0;
 
-void init_jolt(void)
+// Create mapping table from object layer to broadphase layer
+// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
+BPLayerInterfaceImpl broad_phase_layer_interface;
+
+// Create class that filters object vs broadphase layers
+// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
+ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
+
+// Create class that filters object vs object layers
+// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
+ObjectLayerPairFilterImpl object_vs_object_layer_filter;
+
+extern "C" void init_jolt(float *gravity)
 {
   // Register allocation hook
   RegisterDefaultAllocator();
@@ -164,7 +176,7 @@ void init_jolt(void)
   // Register all Jolt physics types
   RegisterTypes();
 
-  temp_allocator = new TempAllocatorImpl(10 * 1024 * 1024);
+  temp_allocator = new TempAllocatorImpl(512 * 1024 * 1024);
 
   job_system = new JobSystemThreadPool(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
 
@@ -186,28 +198,18 @@ void init_jolt(void)
   // Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
   const uint cMaxContactConstraints = 1024;
 
-  // Create mapping table from object layer to broadphase layer
-  // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-  BPLayerInterfaceImpl broad_phase_layer_interface;
-
-  // Create class that filters object vs broadphase layers
-  // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-  ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
-
-  // Create class that filters object vs object layers
-  // Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
-  ObjectLayerPairFilterImpl object_vs_object_layer_filter;
-
   // Now we can create the actual physics system.
-  physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
+  physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface,
+                      object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
 
   // Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
   // You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
   // Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
   physics_system.OptimizeBroadPhase();
+  physics_system.SetGravity(Vec3(gravity[0], gravity[1], gravity[2]));
 }
 
-void deinit_jolt(void)
+extern "C" void deinit_jolt(void)
 {
   delete temp_allocator;
   delete job_system;
@@ -221,7 +223,7 @@ void deinit_jolt(void)
   Factory::sInstance = nullptr;
 }
 
-void run_jolt(float cDeltaTime)
+extern "C" void run_jolt(float cDeltaTime)
 {
   if (cDeltaTime < cOriginDeltaTime)
   {
@@ -230,28 +232,126 @@ void run_jolt(float cDeltaTime)
   physics_system.Update(cDeltaTime, (int)(cDeltaTime / cOriginDeltaTime), temp_allocator, job_system);
 }
 
-bodyid create_hm_jolt(float *heightmappoints, vec3 offset, vec3 scale, int length)
+extern "C" bodyid *create_hm_jolt(float *heightmappoints, float *offset, float *scale, unsigned int length,
+                                  float friction, float restitution, float gravityfactor)
 {
   Vec3 xoffset(offset[0], offset[1], offset[2]);
   Vec3 xscale(scale[0], scale[1], scale[2]);
-  HeightFieldShapeSettings settings(heightmappoints, xoffset, xscale, length);
+  HeightFieldShapeSettings settings(heightmappoints, xoffset, xscale, (uint32)length);
+  settings.mBlockSize = 8;
+  settings.mBitsPerSample = 8;
   ShapeSettings::ShapeResult floor_shape_result = settings.Create();
   ShapeRefC floor_shape = floor_shape_result.Get();
-  BodyCreationSettings floor_settings(floor_shape, RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
+  BodyCreationSettings floor_settings(floor_shape, RVec3::sZero(), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
+  floor_settings.mFriction = friction;
+  floor_settings.mRestitution = restitution;
+  floor_settings.mGravityFactor = gravityfactor;
   Body *floor = physics_system.GetBodyInterface().CreateBody(floor_settings);
-  physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::DontActivate);
-  bodyid res;
-  res.x = floor->GetID();
+  physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::Activate);
+  bodyid *res = new bodyid;
+  res->x = floor->GetID();
   return res;
 }
 
-void delete_body_jolt(bodyid id)
+extern "C" void delete_body_jolt(bodyid *id)
 {
-  physics_system.GetBodyInterface().RemoveBody(id.x);
-  physics_system.GetBodyInterface().DestroyBody(id.x);
+  physics_system.GetBodyInterface().RemoveBody(id->x);
+  physics_system.GetBodyInterface().DestroyBody(id->x);
+  delete id;
 }
 
-void optimize_jolt(void)
+extern "C" void optimize_jolt(void)
 {
   physics_system.OptimizeBroadPhase();
+}
+
+extern "C" bodyid *create_box_jolt(float *boxsize, float *center, float friction, float restitution, float gravityfactor, unsigned char noangular, unsigned int type)
+{
+  BoxShapeSettings floor_shape_settings(Vec3(boxsize[0] / 2, boxsize[1] / 2, boxsize[2] / 2));
+  ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
+  ShapeRefC floor_shape = floor_shape_result.Get();
+  BodyCreationSettings *floor_settings = 0;
+  if (type == 0)
+  {
+    floor_settings = new BodyCreationSettings(floor_shape, RVec3(center[0], center[1], center[2]), Quat::sIdentity(),
+                                              EMotionType::Static, Layers::NON_MOVING);
+  }
+  else if (type == 1)
+  {
+    floor_settings = new BodyCreationSettings(floor_shape, RVec3(center[0], center[1], center[2]), Quat::sIdentity(),
+                                              EMotionType::Kinematic, Layers::NON_MOVING);
+  }
+  else if (type == 2)
+  {
+    floor_settings = new BodyCreationSettings(floor_shape, RVec3(center[0], center[1], center[2]), Quat::sIdentity(),
+                                              EMotionType::Dynamic, Layers::NON_MOVING);
+  }
+  floor_settings->mFriction = friction;
+  floor_settings->mRestitution = restitution;
+  floor_settings->mGravityFactor = gravityfactor;
+  if (noangular == 1)
+  {
+    floor_settings->mMaxAngularVelocity = 0;
+    floor_settings->mAngularDamping = 1;
+  }
+  Body *floor = physics_system.GetBodyInterface().CreateBody(*floor_settings);
+  delete floor_settings;
+  physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::Activate);
+  bodyid *res = new bodyid;
+  res->x = floor->GetID();
+  return res;
+}
+
+extern "C" void set_linear_velocity_jolt(bodyid *id, float *velocity)
+{
+  physics_system.GetBodyInterface().SetLinearVelocity(id->x, Vec3(velocity[0], velocity[1], velocity[2]));
+}
+
+extern "C" void set_angular_velocity_jolt(bodyid *id, float *velocity)
+{
+  physics_system.GetBodyInterface().SetAngularVelocity(id->x, Vec3(velocity[0], velocity[1], velocity[2]));
+}
+
+extern "C" void set_position_jolt(bodyid *id, float *position)
+{
+  physics_system.GetBodyInterface().SetPosition(id->x, Vec3(position[0], position[1], position[2]), EActivation::Activate);
+}
+
+extern "C" void set_rotation_jolt(bodyid *id, float *rotation)
+{
+  physics_system.GetBodyInterface().SetRotation(id->x, Quat(rotation[0], rotation[1], rotation[2], rotation[3]), EActivation::Activate);
+}
+
+extern "C" void add_force_jolt(bodyid *id, float *force)
+{
+  physics_system.GetBodyInterface().AddForce(id->x, Vec3(force[0], force[1], force[2]));
+}
+
+extern "C" void get_linear_velocity_jolt(bodyid *id, float *velocity)
+{
+  velocity[0] = physics_system.GetBodyInterface().GetLinearVelocity(id->x)[0];
+  velocity[1] = physics_system.GetBodyInterface().GetLinearVelocity(id->x)[1];
+  velocity[2] = physics_system.GetBodyInterface().GetLinearVelocity(id->x)[2];
+}
+
+extern "C" void get_angular_velocity_jolt(bodyid *id, float *velocity)
+{
+  velocity[0] = physics_system.GetBodyInterface().GetAngularVelocity(id->x)[0];
+  velocity[1] = physics_system.GetBodyInterface().GetAngularVelocity(id->x)[1];
+  velocity[2] = physics_system.GetBodyInterface().GetAngularVelocity(id->x)[2];
+}
+
+extern "C" void get_position_jolt(bodyid *id, float *position)
+{
+  position[0] = physics_system.GetBodyInterface().GetPosition(id->x)[0];
+  position[1] = physics_system.GetBodyInterface().GetPosition(id->x)[1];
+  position[2] = physics_system.GetBodyInterface().GetPosition(id->x)[2];
+}
+
+extern "C" void get_rotation_jolt(bodyid *id, float *rotation)
+{
+  rotation[0] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[0];
+  rotation[1] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[1];
+  rotation[2] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[2];
+  rotation[3] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[3];
 }

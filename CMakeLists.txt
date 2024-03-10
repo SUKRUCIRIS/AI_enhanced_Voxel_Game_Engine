@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(opengl_voxel_gsu C CXX)
+project(voxel_engine C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -64,17 +64,17 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 
 	FILE(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 	add_executable(
-	opengl_voxel_gsu
+	voxel_engine
 	${MY_SOURCES}
 	${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/src/glad.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/core/jolt_physics.cpp
 	)
 
 	find_package(OpenGL REQUIRED)
-	target_link_libraries(opengl_voxel_gsu cglm glfw assimp freetype Jolt msvcrt OpenGL::GL)
-	target_compile_options(opengl_voxel_gsu PUBLIC /MT)
+	target_link_libraries(voxel_engine cglm glfw assimp freetype Jolt msvcrt OpenGL::GL)
+	target_compile_options(voxel_engine PUBLIC /MT)
 
-	set_target_properties(opengl_voxel_gsu PROPERTIES WIN32_EXECUTABLE TRUE)
+	set_target_properties(voxel_engine PROPERTIES WIN32_EXECUTABLE TRUE)
 
 else()
 

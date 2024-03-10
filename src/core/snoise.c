@@ -1,6 +1,7 @@
 #include "snoise.h"
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 
 #define FASTFLOOR(x) (((int)(x) <= (x)) ? ((int)x) : (((int)x) - 1))
 
@@ -190,4 +191,30 @@ int **create_heightmap(int dimensionx, int dimensionz, int seedx, int seedz, flo
 	}
 
 	return hm;
+}
+
+float *create_points_heightmap(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz)
+{
+	float *res = malloc(sizeof(float) * widthx * widthz * 4);
+	for (int i2 = startz; i2 < startz + widthz; i2++)
+	{
+		for (int i = startx; i < startx + widthx; i++)
+		{
+			if (i < dimensionx && i2 < dimensionz)
+			{
+				res[4 * i2 * widthz + 2 * i] = (float)hm[i][i2];
+				res[4 * i2 * widthz + 2 * i + 1] = (float)hm[i][i2];
+				res[4 * i2 * widthz + 2 * i + 2 * widthz] = (float)hm[i][i2];
+				res[4 * i2 * widthz + 2 * i + 2 * widthz + 1] = (float)hm[i][i2];
+			}
+			else
+			{
+				res[4 * i2 * widthz + 2 * i] = FLT_MAX;
+				res[4 * i2 * widthz + 2 * i + 1] = FLT_MAX;
+				res[4 * i2 * widthz + 2 * i + 2 * widthz] = FLT_MAX;
+				res[4 * i2 * widthz + 2 * i + 2 * widthz + 1] = FLT_MAX;
+			}
+		}
+	}
+	return res;
 }

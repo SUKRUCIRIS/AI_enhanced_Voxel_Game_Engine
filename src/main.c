@@ -14,7 +14,8 @@ int main(void)
 
 	init_programs();
 	init_animations();
-	init_jolt();
+	float gravity[3] = {0, -10, 0};
+	init_jolt(gravity);
 
 	int world_size = 2048;
 	int chunk_size = 16;
@@ -82,8 +83,14 @@ int main(void)
 														"./textures/skybox/eso/bottom.png",
 														"./textures/skybox/eso/front.png",
 														"./textures/skybox/eso/back.png",
-														cam, 0.00005f, (vec3){0, 1, 1});
+														cam, 0.00005f, (vec3){1, 1, 1});
 
+	float *hm_points = create_points_heightmap(hm, world_size, world_size, 0, 0, world_size, world_size);
+	float hm_offset[3] = {(float)(-(int)(world_size / 2)), 0, (float)(-(int)(world_size / 2))};
+	float hm_scale[3] = {1, 1, 1};
+	bodyid *hm_phy = create_hm_jolt(hm_points, hm_offset, hm_scale, world_size * 2, 0.2f, 0, 1);
+	free(hm_points);
+	optimize_jolt();
 	while (!glfwWindowShouldClose(window))
 	{
 		start_game_loop();
@@ -161,6 +168,7 @@ int main(void)
 			light->fxaa = 1 - light->fxaa;
 		}
 
+		run_jolt((float)get_frame_timems() / 1000.0f);
 		end_game_loop_targetms(16.5);
 	}
 
@@ -175,6 +183,8 @@ int main(void)
 	delete_animations();
 	delete_text_manager(t);
 	delete_skybox(s);
+
+	delete_body_jolt(hm_phy);
 	deinit_jolt();
 
 	free(hm);
