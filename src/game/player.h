@@ -14,6 +14,7 @@ typedef struct player
   int dimensionz;
   double jumpstartms;
   double jumpdurationms;
+  bodyid *phy;
 } player;
 
 void run_input_player(player *p, GLFWwindow *window, double framems);

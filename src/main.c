@@ -17,7 +17,7 @@ int main(void)
 	float gravity[3] = {0, -10, 0};
 	init_jolt(gravity);
 
-	int world_size = 2048;
+	int world_size = 128;
 	int chunk_size = 16;
 	int chunk_range = 32;
 	float render_distance = (float)chunk_size * chunk_range * 1.5f;
@@ -54,7 +54,7 @@ int main(void)
 	set_gsu_model(gsu_model);
 
 	player sukru;
-	sukru.speed = 0.005f;
+	sukru.speed = 10;
 	sukru.jumping = 0;
 	sukru.onland = 1;
 	sukru.fp_camera = cam;
@@ -64,6 +64,9 @@ int main(void)
 	sukru.dimensionx = world_size;
 	sukru.dimensionz = world_size;
 	sukru.jumpdurationms = 100;
+	float size[3] = {sukru.width, sukru.height, sukru.width};
+	float center[3] = {0, 400, 0};
+	sukru.phy = create_box_jolt(size, center, 0.5f, 0, 1, 1, 2);
 	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size, 0);
 	unsigned char freec = 0;
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -84,12 +87,7 @@ int main(void)
 														"./textures/skybox/eso/front.png",
 														"./textures/skybox/eso/back.png",
 														cam, 0.00005f, (vec3){1, 1, 1});
-
-	float *hm_points = create_points_heightmap(hm, world_size, world_size, 0, 0, world_size, world_size);
-	float hm_offset[3] = {(float)(-(int)(world_size / 2)), 0, (float)(-(int)(world_size / 2))};
-	float hm_scale[3] = {1, 1, 1};
-	bodyid *hm_phy = create_hm_jolt(hm_points, hm_offset, hm_scale, world_size * 2, 0.2f, 0, 1);
-	free(hm_points);
+	DA *hm_boxes = create_hm_voxel_jolt(hm, world_size, world_size, 0, 0, world_size, world_size, 0.5f, 0);
 	optimize_jolt();
 	while (!glfwWindowShouldClose(window))
 	{
@@ -103,10 +101,13 @@ int main(void)
 			height = 1080 - height;
 			add_text(t, width, height, 1, 1, red, "Sukru Ciris Engine");
 
-			get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
+			get_gravity_jolt(gravity);
+			get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf - %.2lf - %.2lf}",
+														 get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
 			width = 0;
 			height = 1080 - height;
-			add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d", get_frame_timems(), seedx, seedz);
+			add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf - %.2lf - %.2lf}",
+												get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
 		}
 
 		glfwPollEvents();
@@ -184,7 +185,8 @@ int main(void)
 	delete_text_manager(t);
 	delete_skybox(s);
 
-	delete_body_jolt(hm_phy);
+	delete_hm_voxel_jolt(hm_boxes);
+	delete_body_jolt(sukru.phy);
 	deinit_jolt();
 
 	free(hm);

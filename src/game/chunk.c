@@ -3,6 +3,7 @@
 
 struct aiScene *gsu_model = 0;
 int gsu_x = 64, gsu_z = 32, gsu_y = 50, gsu_h = 16;
+unsigned char gsu_can_exist = 0;
 
 void set_gsu_model(struct aiScene *model)
 {
@@ -11,6 +12,10 @@ void set_gsu_model(struct aiScene *model)
 
 chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm, int dimensionx, int dimensionz, vec3 lightdir)
 {
+  if (dimensionx > 2 * gsu_x && dimensionz > 2 * gsu_z)
+  {
+    gsu_can_exist = 1;
+  }
   chunk_op *c = malloc(sizeof(chunk_op));
   c->batch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
   c->allbatch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
@@ -43,7 +48,7 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       x.maxxy[0] += 1;
       x.maxxy[1] += 1;
       pushback_DA(c->chunkinfo, &x);
-      if (i == c->chunknumberinrow / 2 && i2 == c->chunknumberincolumn / 2)
+      if (i == c->chunknumberinrow / 2 && i2 == c->chunknumberincolumn / 2 && gsu_can_exist)
       {
         c->centerchunkid = get_size_DA(c->chunkinfo) - 1;
         // setting gsu terrain
@@ -65,7 +70,7 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
                                             c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz, lightdir);
     batch->chunk_id = i;
     pushback_DA(c->allbatch, &batch);
-    if (i == c->centerchunkid)
+    if (i == c->centerchunkid && gsu_can_exist)
     {
       br_scene gsu = load_object_br(batch->obj_manager, get_world_texture_manager(), gsu_model, 7, 0, 3, 10, 0.1f, 0.5f);
       float scalex = gsu_x / (gsu.box.mMax.x - gsu.box.mMin.x),

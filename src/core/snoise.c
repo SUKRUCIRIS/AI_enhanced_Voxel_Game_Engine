@@ -193,6 +193,8 @@ int **create_heightmap(int dimensionx, int dimensionz, int seedx, int seedz, flo
 	return hm;
 }
 
+/*
+disaster wrong function
 float *create_points_heightmap(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz)
 {
 	float *res = malloc(sizeof(float) * widthx * widthz * 4);
@@ -217,4 +219,4 @@ float *create_points_heightmap(int **hm, int dimensionx, int dimensionz, int sta
 		}
 	}
 	return res;
-}
+}*/

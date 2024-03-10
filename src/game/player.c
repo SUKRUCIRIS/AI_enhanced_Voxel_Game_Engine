@@ -31,34 +31,57 @@ void run_input_player(player *p, GLFWwindow *window, double framems)
   }
   move[1] = 0;
   glm_normalize_to(move, move);
-  move[1] = -1;
-  if (p->jumping == 0 && p->onland == 1 && get_key_pressed(GLFW_KEY_SPACE))
+  if (p->phy == 0)
   {
-    p->jumping = 1;
-    p->jumpstartms = get_timems();
-  }
-  else if (p->jumping == 1 && p->jumpstartms + p->jumpdurationms > get_timems())
-  {
-    move[1] = 4;
-  }
-  else if (p->jumping == 1 && p->jumpstartms + p->jumpdurationms <= get_timems())
-  {
-    p->jumping = 0;
-  }
-  glm_vec3_scale(move, p->speed * (float)framems, move);
-  glm_vec3_add(move, p->fp_camera->position, p->fp_camera->position);
-  int indexx = (int)(p->fp_camera->position[0] + p->dimensionx / 2.0f);
-  int indexz = (int)(p->fp_camera->position[2] + p->dimensionz / 2.0f);
-  if (indexx >= 0 && indexx < p->dimensionx && indexz >= 0 && indexz < p->dimensionz)
-  {
-    if (p->fp_camera->position[1] - p->height <= p->hm[indexx][indexz])
+    move[1] = -1;
+    if (p->jumping == 0 && p->onland == 1 && get_key_pressed(GLFW_KEY_SPACE))
     {
-      p->fp_camera->position[1] = p->hm[indexx][indexz] + p->height;
-      p->onland = 1;
+      p->jumping = 1;
+      p->jumpstartms = get_timems();
+    }
+    else if (p->jumping == 1 && p->jumpstartms + p->jumpdurationms > get_timems())
+    {
+      move[1] = 4;
+    }
+    else if (p->jumping == 1 && p->jumpstartms + p->jumpdurationms <= get_timems())
+    {
+      p->jumping = 0;
+    }
+    glm_vec3_scale(move, p->speed * (float)framems, move);
+    glm_vec3_add(move, p->fp_camera->position, p->fp_camera->position);
+    int indexx = (int)(p->fp_camera->position[0] + p->dimensionx / 2.0f);
+    int indexz = (int)(p->fp_camera->position[2] + p->dimensionz / 2.0f);
+    if (indexx >= 0 && indexx < p->dimensionx && indexz >= 0 && indexz < p->dimensionz)
+    {
+      if (p->fp_camera->position[1] - p->height <= p->hm[indexx][indexz])
+      {
+        p->fp_camera->position[1] = p->hm[indexx][indexz] + p->height;
+        p->onland = 1;
+      }
+      else
+      {
+        p->onland = 0;
+      }
+    }
+  }
+  else
+  {
+    glm_vec3_scale(move, p->speed, move);
+    if (get_key_pressed(GLFW_KEY_SPACE))
+    {
+      move[1] = 10;
     }
     else
     {
-      p->onland = 0;
+      vec3 old;
+      get_linear_velocity_jolt(p->phy, old);
+      move[1] = old[1];
     }
+    set_linear_velocity_jolt(p->phy, move);
+
+    get_position_jolt(p->phy, move);
+    p->fp_camera->position[0] = move[0];
+    p->fp_camera->position[1] = move[1] + p->height / 2;
+    p->fp_camera->position[2] = move[2];
   }
 }

@@ -12,6 +12,9 @@
 #include "../../third_party/jolt/Jolt/Physics/Body/BodyCreationSettings.h"
 #include "../../third_party/jolt/Jolt/Physics/Body/BodyActivationListener.h"
 #include "../../third_party/jolt/Jolt/Physics/Collision/Shape/HeightFieldShape.h"
+#include "../../third_party/jolt/Jolt/Physics/Character/CharacterVirtual.h"
+#include "../../third_party/jolt/Jolt/Physics/Collision/Shape/CapsuleShape.h"
+#include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 
 // Disable common warnings triggered by Jolt, you can use JPH_SUPPRESS_WARNING_PUSH / JPH_SUPPRESS_WARNING_POP to store and restore the warning state
 JPH_SUPPRESS_WARNINGS
@@ -28,6 +31,11 @@ using namespace std;
 extern "C" struct bodyid
 {
   BodyID x;
+};
+
+extern "C" struct playerid
+{
+  CharacterVirtual *x;
 };
 
 // If you want your code to compile using single or double precision write 0.0_r to get a Real value that compiles to double or float depending if JPH_DOUBLE_PRECISION is set or not.
@@ -182,7 +190,7 @@ extern "C" void init_jolt(float *gravity)
 
   // This is the max amount of rigid bodies that you can add to the physics system. If you try to add more you'll get an error.
   // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-  const uint cMaxBodies = 1024;
+  const uint cMaxBodies = 65536;
 
   // This determines how many mutexes to allocate to protect rigid bodies from concurrent access. Set it to 0 for the default settings.
   const uint cNumBodyMutexes = 0;
@@ -191,12 +199,12 @@ extern "C" void init_jolt(float *gravity)
   // body pairs based on their bounding boxes and will insert them into a queue for the narrowphase). If you make this buffer
   // too small the queue will fill up and the broad phase jobs will start to do narrow phase work. This is slightly less efficient.
   // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-  const uint cMaxBodyPairs = 1024;
+  const uint cMaxBodyPairs = 65536;
 
   // This is the maximum size of the contact constraint buffer. If more contacts (collisions between bodies) are detected than this
   // number then these contacts will be ignored and bodies will start interpenetrating / fall through the world.
   // Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
-  const uint cMaxContactConstraints = 1024;
+  const uint cMaxContactConstraints = 10240;
 
   // Now we can create the actual physics system.
   physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface,
@@ -279,12 +287,12 @@ extern "C" bodyid *create_box_jolt(float *boxsize, float *center, float friction
   else if (type == 1)
   {
     floor_settings = new BodyCreationSettings(floor_shape, RVec3(center[0], center[1], center[2]), Quat::sIdentity(),
-                                              EMotionType::Kinematic, Layers::NON_MOVING);
+                                              EMotionType::Kinematic, Layers::MOVING);
   }
   else if (type == 2)
   {
     floor_settings = new BodyCreationSettings(floor_shape, RVec3(center[0], center[1], center[2]), Quat::sIdentity(),
-                                              EMotionType::Dynamic, Layers::NON_MOVING);
+                                              EMotionType::Dynamic, Layers::MOVING);
   }
   floor_settings->mFriction = friction;
   floor_settings->mRestitution = restitution;
@@ -354,4 +362,102 @@ extern "C" void get_rotation_jolt(bodyid *id, float *rotation)
   rotation[1] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[1];
   rotation[2] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[2];
   rotation[3] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[3];
+}
+
+DA *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz,
+                         float friction, float restitution)
+{
+  DA *res = create_DA(sizeof(bodyid *));
+  for (int i2 = startz; i2 < startz + widthz; i2++)
+  {
+    for (int i = startx; i < startx + widthx; i++)
+    {
+      if (i < dimensionx && i2 < dimensionz)
+      {
+        {
+          float size[3] = {1, 1, 1};
+          float center[3] = {(float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))};
+          bodyid *x = create_box_jolt(size, center, friction, restitution, 1, 1, 0);
+          pushback_DA(res, &x);
+        }
+
+        if (hm[i][i2] != 0)
+        {
+          for (int i3 = hm[i][i2] - 1; i3 >= 0; i3--)
+          {
+            if ((!(i2 > 0) || hm[i][i2 - 1] >= i3) &&
+                (!(i2 < dimensionz - 1) || hm[i][i2 + 1] >= i3) &&
+                (!(i > 0) || hm[i - 1][i2] >= i3) &&
+                (!(i < dimensionx - 1) || hm[i + 1][i2] >= i3))
+            {
+              break;
+            }
+            float size[3] = {1, 1, 1};
+            float center[3] = {(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))};
+            bodyid *x = create_box_jolt(size, center, friction, restitution, 1, 1, 0);
+            pushback_DA(res, &x);
+          }
+        }
+      }
+    }
+  }
+  return res;
+}
+
+void delete_hm_voxel_jolt(DA *hm)
+{
+  bodyid **x = (bodyid **)get_data_DA(hm);
+  for (unsigned int i = 0; i < get_size_DA(hm); i++)
+  {
+    delete_body_jolt(x[i]);
+  }
+  delete_DA(hm);
+}
+
+unsigned int get_body_count_jolt(void)
+{
+  return physics_system.GetNumBodies();
+}
+
+unsigned int get_active_body_count_jolt(void)
+{
+  return physics_system.GetNumActiveBodies(EBodyType::RigidBody);
+}
+
+void get_gravity_jolt(float *vec)
+{
+  Vec3 x = physics_system.GetGravity();
+  vec[0] = x[0];
+  vec[1] = x[1];
+  vec[2] = x[2];
+}
+
+void set_gravity_jolt(float *vec)
+{
+  physics_system.SetGravity(Vec3(vec[0], vec[1], vec[2]));
+}
+
+playerid *create_player_jolt(float height, float radius, float *pos)
+{
+  CharacterVirtualSettings settings = CharacterVirtualSettings();
+  settings.mMaxSlopeAngle = DegreesToRadians(45.0f);
+  settings.mMaxStrength = 100.0f;
+  settings.mMass = 100.0f;
+  JPH::CapsuleShape shape = CapsuleShape(0.5f * height, radius);
+  settings.mShape = RotatedTranslatedShapeSettings(Vec3(0, 0.5f * height + radius, 0), Quat::sIdentity(), &shape).Create().Get();
+  settings.mBackFaceMode = EBackFaceMode::CollideWithBackFaces;
+  settings.mCharacterPadding = 0.02f;
+  settings.mPenetrationRecoverySpeed = 1.0f;
+  settings.mPredictiveContactDistance = 0.1f;
+  settings.mSupportingVolume = Plane(Vec3::sAxisY(), -radius);
+  CharacterVirtual *x = new CharacterVirtual(&settings, RVec3(pos[0], pos[1], pos[2]), Quat::sIdentity(), &physics_system);
+  playerid *res = new playerid;
+  res->x = x;
+  return res;
+}
+
+void delete_player_jolt(playerid *x)
+{
+  delete x->x;
+  delete x;
 }
