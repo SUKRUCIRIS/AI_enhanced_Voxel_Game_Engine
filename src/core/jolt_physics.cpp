@@ -15,6 +15,7 @@
 #include "../../third_party/jolt/Jolt/Physics/Character/CharacterVirtual.h"
 #include "../../third_party/jolt/Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
+#include "../../third_party/jolt/Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
 
 // Disable common warnings triggered by Jolt, you can use JPH_SUPPRESS_WARNING_PUSH / JPH_SUPPRESS_WARNING_POP to store and restore the warning state
 JPH_SUPPRESS_WARNINGS
@@ -297,6 +298,7 @@ extern "C" bodyid *create_box_jolt(float *boxsize, float *center, float friction
   floor_settings->mFriction = friction;
   floor_settings->mRestitution = restitution;
   floor_settings->mGravityFactor = gravityfactor;
+  floor_settings->mEnhancedInternalEdgeRemoval = true;
   if (noangular == 1)
   {
     floor_settings->mMaxAngularVelocity = 0;
@@ -364,21 +366,63 @@ extern "C" void get_rotation_jolt(bodyid *id, float *rotation)
   rotation[3] = physics_system.GetBodyInterface().GetRotation(id->x).GetXYZW()[3];
 }
 
-DA *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz,
-                         float friction, float restitution)
+bodyid *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz,
+                             float friction, float restitution)
 {
-  DA *res = create_DA(sizeof(bodyid *));
+  Ref<StaticCompoundShapeSettings> compound_shape = new StaticCompoundShapeSettings;
+  unsigned char **done = (unsigned char **)calloc(dimensionz, sizeof(unsigned char *));
+  for (int i = 0; i < dimensionz; i++)
+  {
+    done[i] = (unsigned char *)calloc(dimensionx, sizeof(unsigned char));
+  }
   for (int i2 = startz; i2 < startz + widthz; i2++)
   {
     for (int i = startx; i < startx + widthx; i++)
     {
       if (i < dimensionx && i2 < dimensionz)
       {
+        if (done[i][i2] == 0)
         {
-          float size[3] = {1, 1, 1};
-          float center[3] = {(float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))};
-          bodyid *x = create_box_jolt(size, center, friction, restitution, 1, 1, 0);
-          pushback_DA(res, &x);
+          int loop = 0;
+          unsigned char x = 0;
+          if (i < dimensionx - 1 && hm[i + 1][i2] == hm[i][i2] && done[i + 1][i2] == 0)
+          {
+            x = 1;
+          }
+          else if (i2 < dimensionz - 1 && hm[i][i2 + 1] == hm[i][i2] && done[i][i2 + 1] == 0)
+          {
+            x = 0;
+          }
+          else
+          {
+            x = 2;
+          }
+          if (x == 2)
+          {
+            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
+                                     Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, 0.5f)));
+            done[i][i2] = 1;
+          }
+          else if (x == 0)
+          {
+            while (i2 + loop < dimensionz - 1 && hm[i][i2 + loop] == hm[i][i2] && done[i][i2 + loop] == 0)
+            {
+              done[i][i2 + loop] = 1;
+              loop++;
+            }
+            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 + loop / 2.0f - (int)(dimensionz / 2))),
+                                     Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, (float)loop / 2.0f)));
+          }
+          else if (x == 1)
+          {
+            while (i + loop < dimensionx - 1 && hm[i + loop][i2] == hm[i][i2] && done[i + loop][i2] == 0)
+            {
+              done[i + loop][i2] = 1;
+              loop++;
+            }
+            compound_shape->AddShape(Vec3((float)(i + loop / 2.0f - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
+                                     Quat::sIdentity(), new BoxShape(Vec3((float)loop / 2.0f, 0.5f, 0.5f)));
+          }
         }
 
         if (hm[i][i2] != 0)
@@ -392,26 +436,28 @@ DA *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int startx, i
             {
               break;
             }
-            float size[3] = {1, 1, 1};
-            float center[3] = {(float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))};
-            bodyid *x = create_box_jolt(size, center, friction, restitution, 1, 1, 0);
-            pushback_DA(res, &x);
+            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))),
+                                     Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, 0.5f)));
           }
         }
       }
     }
   }
-  return res;
-}
-
-void delete_hm_voxel_jolt(DA *hm)
-{
-  bodyid **x = (bodyid **)get_data_DA(hm);
-  for (unsigned int i = 0; i < get_size_DA(hm); i++)
+  for (int i = 0; i < dimensionz; i++)
   {
-    delete_body_jolt(x[i]);
+    free(done[i]);
   }
-  delete_DA(hm);
+  free(done);
+  BodyCreationSettings floor_settings = BodyCreationSettings(compound_shape, Vec3::sZero(), Quat::sIdentity(),
+                                                             EMotionType::Static, Layers::NON_MOVING);
+  floor_settings.mFriction = friction;
+  floor_settings.mRestitution = restitution;
+  floor_settings.mEnhancedInternalEdgeRemoval = true;
+  Body *floor = physics_system.GetBodyInterface().CreateBody(floor_settings);
+  physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::Activate);
+  bodyid *res = new bodyid;
+  res->x = floor->GetID();
+  return res;
 }
 
 unsigned int get_body_count_jolt(void)
@@ -437,20 +483,21 @@ void set_gravity_jolt(float *vec)
   physics_system.SetGravity(Vec3(vec[0], vec[1], vec[2]));
 }
 
-playerid *create_player_jolt(float height, float radius, float *pos)
+playerid *create_player_jolt(float height, float radius, float maxslopeangle, float maxstrength, float mass, float *pos)
 {
   CharacterVirtualSettings settings = CharacterVirtualSettings();
-  settings.mMaxSlopeAngle = DegreesToRadians(45.0f);
-  settings.mMaxStrength = 100.0f;
-  settings.mMass = 100.0f;
-  JPH::CapsuleShape shape = CapsuleShape(0.5f * height, radius);
-  settings.mShape = RotatedTranslatedShapeSettings(Vec3(0, 0.5f * height + radius, 0), Quat::sIdentity(), &shape).Create().Get();
+  settings.mMaxSlopeAngle = DegreesToRadians(maxslopeangle);
+  settings.mMaxStrength = maxstrength;
+  settings.mMass = mass;
+  JPH::CapsuleShape *shape = new CapsuleShape(0.5f * height, radius);
+  settings.mShape = RotatedTranslatedShapeSettings(Vec3(0, 0.5f * height + radius, 0), Quat::sIdentity(), shape).Create().Get();
   settings.mBackFaceMode = EBackFaceMode::CollideWithBackFaces;
   settings.mCharacterPadding = 0.02f;
   settings.mPenetrationRecoverySpeed = 1.0f;
   settings.mPredictiveContactDistance = 0.1f;
   settings.mSupportingVolume = Plane(Vec3::sAxisY(), -radius);
   CharacterVirtual *x = new CharacterVirtual(&settings, RVec3(pos[0], pos[1], pos[2]), Quat::sIdentity(), &physics_system);
+  x->SetUp(Vec3(0, 1, 0));
   playerid *res = new playerid;
   res->x = x;
   return res;
@@ -460,4 +507,85 @@ void delete_player_jolt(playerid *x)
 {
   delete x->x;
   delete x;
+}
+
+void set_linear_velocity_player_jolt(playerid *id, float *velocity)
+{
+  id->x->SetLinearVelocity(Vec3(velocity[0], velocity[1], velocity[2]));
+}
+
+void set_position_player_jolt(playerid *id, float *position)
+{
+  id->x->SetPosition(RVec3(position[0], position[1], position[2]));
+}
+
+void set_rotation_player_jolt(playerid *id, float *rotation)
+{
+  id->x->SetRotation(Quat(rotation[0], rotation[1], rotation[2], rotation[3]));
+}
+
+void get_linear_velocity_player_jolt(playerid *id, float *velocity)
+{
+  velocity[0] = id->x->GetLinearVelocity()[0];
+  velocity[1] = id->x->GetLinearVelocity()[1];
+  velocity[2] = id->x->GetLinearVelocity()[2];
+}
+
+void get_position_player_jolt(playerid *id, float *position)
+{
+  position[0] = id->x->GetPosition()[0];
+  position[1] = id->x->GetPosition()[1];
+  position[2] = id->x->GetPosition()[2];
+}
+
+void get_rotation_player_jolt(playerid *id, float *rotation)
+{
+  rotation[0] = id->x->GetRotation().GetXYZW()[0];
+  rotation[1] = id->x->GetRotation().GetXYZW()[1];
+  rotation[2] = id->x->GetRotation().GetXYZW()[2];
+  rotation[3] = id->x->GetRotation().GetXYZW()[3];
+}
+
+unsigned char is_supported_jolt(playerid *id)
+{
+  return id->x->IsSupported();
+}
+
+void update_player_jolt(playerid *id, float deltatime, unsigned char enablesticktofloor, unsigned char enablewalkstairs,
+                        float *input_velocity, float gravity_factor)
+{
+  Vec3 velocity = Vec3::sZero();
+  id->x->UpdateGroundVelocity();
+  bool moving_towards_ground = (input_velocity[1] - id->x->GetGroundVelocity().GetY()) < 0.1f;
+  if (id->x->GetGroundState() == CharacterVirtual::EGroundState::OnGround && moving_towards_ground)
+  {
+    velocity = id->x->GetGroundVelocity() + Vec3(input_velocity[0], input_velocity[1], input_velocity[2]) +
+               deltatime * physics_system.GetGravity() * gravity_factor;
+  }
+  else
+  {
+    velocity = Vec3(input_velocity[0], input_velocity[1], input_velocity[2]) +
+               deltatime * physics_system.GetGravity() * gravity_factor;
+  }
+  id->x->SetLinearVelocity(velocity);
+  CharacterVirtual::ExtendedUpdateSettings update_settings;
+  if (!enablesticktofloor)
+  {
+    update_settings.mStickToFloorStepDown = Vec3::sZero();
+  }
+  else
+  {
+    update_settings.mStickToFloorStepDown = -id->x->GetUp() * update_settings.mStickToFloorStepDown.Length();
+  }
+  if (!enablewalkstairs)
+  {
+    update_settings.mWalkStairsStepUp = Vec3::sZero();
+  }
+  else
+  {
+    update_settings.mWalkStairsStepUp = id->x->GetUp() * update_settings.mWalkStairsStepUp.Length();
+  }
+  id->x->ExtendedUpdate(deltatime, -id->x->GetUp() * physics_system.GetGravity().Length() * gravity_factor, update_settings,
+                        physics_system.GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
+                        physics_system.GetDefaultLayerFilter(Layers::MOVING), {}, {}, *temp_allocator);
 }

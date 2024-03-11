@@ -5,6 +5,9 @@ typedef struct player
 {
   camera *fp_camera;
   float speed;
+  float jumpspeed;
+  float airspeedfactor;
+  float boostspeedfactor;
   float width;
   float height;
   unsigned char jumping;
@@ -14,7 +17,7 @@ typedef struct player
   int dimensionz;
   double jumpstartms;
   double jumpdurationms;
-  bodyid *phy;
+  playerid *phy;
 } player;
 
 void run_input_player(player *p, GLFWwindow *window, double framems);

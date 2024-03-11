@@ -21,7 +21,7 @@ option(CROSS_COMPILE_ARM "Cross compile to aarch64-linux-gnu" OFF)
 option(BUILD_SHARED_LIBS "Compile Jolt as a shared library" OFF)
 
 # When turning this option on, the library will be compiled with interprocedural optimizations enabled, also known as link-time optimizations or link-time code generation.
-# Note that if you turn this on you need to use SET_INTERPROCEDURAL_OPTIMIZATION() or set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON) to enable LTO specificly for your own project as well.
+# Note that if you turn this on you need to use SET_INTERPROCEDURAL_OPTIMIZATION() or set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON) to enable LTO specifically for your own project as well.
 # If you don't do this you may get an error: /usr/bin/ld: libJolt.a: error adding symbols: file format not recognized
 option(INTERPROCEDURAL_OPTIMIZATION "Enable interprocedural optimizations" ON)
 
@@ -52,6 +52,13 @@ option(TRACK_BROADPHASE_STATS "Track Broadphase Stats" OFF)
 
 # Setting to periodically trace narrowphase stats to help determine which collision queries could be optimized
 option(TRACK_NARROWPHASE_STATS "Track Narrowphase Stats" OFF)
+
+# Setting to enable the debug renderer. The debug renderer is enabled by default with Debug and Release builds.
+# Note that enabling this reduces the performance of the library even if you're not drawing anything.
+option(DEBUG_RENDERER_IN_DISTRIBUTION "Enable debug renderer in Distribution builds" OFF)
+
+# Setting this option will force the library to use malloc/free instead of allowing the user to override the memory allocator
+option(DISABLE_CUSTOM_ALLOCATOR "Disable support for a custom memory allocator" OFF)
 
 include(CMakeDependentOption)
 
@@ -151,6 +158,11 @@ else()
 		if (CMAKE_CXX_COMPILER_VERSION LESS 14 OR CROSS_PLATFORM_DETERMINISTIC)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=off")
 		endif()
+	endif()
+
+	# See https://github.com/jrouwe/JoltPhysics/issues/922. When compiling with DOUBLE_PRECISION=YES and CMAKE_OSX_DEPLOYMENT_TARGET=10.12 clang triggers a warning that we silence here.
+	if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin" AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -faligned-allocation")
 	endif()
 
 	# Cross compiler flags

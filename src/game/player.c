@@ -67,21 +67,29 @@ void run_input_player(player *p, GLFWwindow *window, double framems)
   else
   {
     glm_vec3_scale(move, p->speed, move);
-    if (get_key_pressed(GLFW_KEY_SPACE))
+    if (!is_supported_jolt(p->phy))
     {
-      move[1] = 10;
+      glm_vec3_scale(move, p->airspeedfactor, move);
+    }
+    if (get_key_down(GLFW_KEY_LEFT_SHIFT))
+    {
+      glm_vec3_scale(move, p->boostspeedfactor, move);
+    }
+    if (get_key_pressed(GLFW_KEY_SPACE) && is_supported_jolt(p->phy))
+    {
+      move[1] = p->jumpspeed;
     }
     else
     {
       vec3 old;
-      get_linear_velocity_jolt(p->phy, old);
+      get_linear_velocity_player_jolt(p->phy, old);
       move[1] = old[1];
     }
-    set_linear_velocity_jolt(p->phy, move);
+    update_player_jolt(p->phy, (float)framems / 1000.0f, 0, 0, move, 1);
 
-    get_position_jolt(p->phy, move);
+    get_position_player_jolt(p->phy, move);
     p->fp_camera->position[0] = move[0];
-    p->fp_camera->position[1] = move[1] + p->height / 2;
+    p->fp_camera->position[1] = move[1] + p->height;
     p->fp_camera->position[2] = move[2];
   }
 }
