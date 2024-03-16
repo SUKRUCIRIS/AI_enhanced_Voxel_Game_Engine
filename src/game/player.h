@@ -22,4 +22,4 @@ typedef struct player
   br_texture_manager *textures;
 } player;
 
-void run_input_fp_player(player *p, GLFWwindow *window, double framems);
+void run_input_player(player *p, GLFWwindow *window, double framems, unsigned char fp0_tp1);

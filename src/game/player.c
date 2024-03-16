@@ -1,6 +1,6 @@
 #include "player.h"
 
-void run_input_fp_player(player *p, GLFWwindow *window, double framems)
+void run_input_player(player *p, GLFWwindow *window, double framems, unsigned char fp0_tp1)
 {
   run_input_fp_camera(p->fp_camera, window);
   vec3 move = {0, 0, 0};
@@ -31,6 +31,7 @@ void run_input_fp_player(player *p, GLFWwindow *window, double framems)
   }
   move[1] = 0;
   glm_normalize_to(move, move);
+  vec3 moven;
   if (p->phy == 0)
   {
     move[1] = -1;
@@ -66,6 +67,7 @@ void run_input_fp_player(player *p, GLFWwindow *window, double framems)
   }
   else
   {
+    glm_vec3_copy(move, moven);
     glm_vec3_scale(move, p->speed, move);
     if (!is_supported_jolt(p->phy))
     {
@@ -92,18 +94,37 @@ void run_input_fp_player(player *p, GLFWwindow *window, double framems)
     glm_vec3_copy(p->fp_camera->orientation, tmp);
     tmp[1] = 0;
     glm_normalize(tmp);
-    glm_vec3_scale(tmp, p->width / 2.0f, tmp);
-    p->fp_camera->position[0] = move[0] + tmp[0];
-    p->fp_camera->position[1] = move[1] + p->height - 0.5f;
-    p->fp_camera->position[2] = move[2] + tmp[2];
+    if (fp0_tp1 == 0)
+    {
+      glm_vec3_scale(tmp, p->width / 2.0f, tmp);
+      p->fp_camera->position[0] = move[0] + tmp[0];
+      p->fp_camera->position[1] = move[1] + p->height - 0.5f;
+      p->fp_camera->position[2] = move[2] + tmp[2];
+    }
+    else
+    {
+      glm_vec3_scale(tmp, -2, tmp);
+      p->fp_camera->position[0] = move[0] + tmp[0];
+      p->fp_camera->position[1] = move[1] + p->height;
+      p->fp_camera->position[2] = move[2] + tmp[2];
+    }
   }
   if (p->model)
   {
     get_position_player_jolt(p->phy, move);
     move[1] -= 0.055f;
     set_position_br_object_all(p->model, move);
-
     vec3 axis = {0, 1, 0};
-    set_rotation_br_object_all(p->model, p->fp_camera->uprot, axis);
+    if (fp0_tp1 == 0)
+    {
+      set_rotation_br_object_all(p->model, glm_deg(-atan2f(p->fp_camera->orientation[2], p->fp_camera->orientation[0])), axis);
+    }
+    else
+    {
+      if (glm_vec3_norm2(moven) != 0)
+      {
+        set_rotation_br_object_all(p->model, glm_deg(-atan2f(moven[2], moven[0])), axis);
+      }
+    }
   }
 }

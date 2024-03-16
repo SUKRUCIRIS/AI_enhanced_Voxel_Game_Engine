@@ -128,12 +128,17 @@ int main(void)
 			height = 1080 - height;
 			add_text(t, width, height, 1, 1, red, "Sukru Ciris Engine");
 
+			get_text_size(t, 1, "AI Enhanced Voxel Game Engine", &width, &height);
+			width = 1920 - width;
+			height = 1060 - height;
+			add_text(t, width, height, 1, 1, red, "AI Enhanced Voxel Game Engine");
+
 			get_gravity_jolt(gravity);
-			get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}",
+			get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
 														 get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
 			width = 0;
 			height = 1080 - height;
-			add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}",
+			add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
 												get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
 		}
 
@@ -149,7 +154,11 @@ int main(void)
 			{
 				freec = 1;
 			}
-			else
+			else if (freec == 1)
+			{
+				freec = 2;
+			}
+			else if (freec == 2)
 			{
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 				freec = 0;
@@ -157,9 +166,13 @@ int main(void)
 		}
 		if (freec == 0)
 		{
-			run_input_fp_player(&sukru, window, get_frame_timems());
+			run_input_player(&sukru, window, get_frame_timems(), 0);
 		}
-		else
+		else if (freec == 1)
+		{
+			run_input_player(&sukru, window, get_frame_timems(), 1);
+		}
+		else if (freec == 2)
 		{
 			run_input_free_camera(cam, window);
 		}
