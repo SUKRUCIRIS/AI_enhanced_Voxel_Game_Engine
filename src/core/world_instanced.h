@@ -1,5 +1,6 @@
 #pragma once
-#include "../core/core.h"
+#include "ins_object.h"
+#include "br_texture.h"
 
 typedef struct world_instanced
 {

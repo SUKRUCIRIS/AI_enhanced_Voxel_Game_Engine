@@ -1,5 +1,5 @@
 #include "chunk.h"
-#include "world_batch.h"
+#include "core.h"
 
 struct aiScene *gsu_model = 0;
 int gsu_x = 64, gsu_z = 32, gsu_y = 50, gsu_h = 16;

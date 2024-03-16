@@ -1,4 +1,5 @@
 #include "world_instanced.h"
+#include "core.h"
 
 GLfloat cube_vertices_ins[] = {
 		-1, -1, -1, 0, 0, 0, 0, 1, // A 0

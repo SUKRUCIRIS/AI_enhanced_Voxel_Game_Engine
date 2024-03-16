@@ -1,4 +1,75 @@
 #include "player.h"
+#include "core.h"
+
+player *create_player(camera *fp_camera, float speed, float jumpspeed, float airspeedfactor,
+                      float boostspeedfactor, float width, float height, int **hm, int dimensionx,
+                      int dimensionz, const char *modelpath, float *start_pos, float maxslopeangle,
+                      float maxstrength, float mass, unsigned char scaleall0_scaleonlyheight1)
+{
+  player *sukru = malloc(sizeof(player));
+  sukru->speed = speed;
+  sukru->jumpspeed = jumpspeed;
+  sukru->airspeedfactor = airspeedfactor;
+  sukru->boostspeedfactor = boostspeedfactor;
+  sukru->jumping = 0;
+  sukru->onland = 1;
+  sukru->fp_camera = fp_camera;
+  sukru->width = width;
+  sukru->height = height;
+  sukru->hm = hm;
+  sukru->dimensionx = dimensionx;
+  sukru->dimensionz = dimensionz;
+  sukru->jumpdurationms = 100;
+  sukru->model = create_br_object_manager();
+  sukru->textures = create_br_texture_manager();
+  sukru->phy = create_player_jolt(sukru->height, sukru->width / 2, maxslopeangle, maxstrength, mass, start_pos);
+  {
+    struct aiScene *player_model = load_model(modelpath, 1);
+    br_scene player = load_object_br(sukru->model, sukru->textures, player_model, 0, 0, 3, 10, 0.1f, 0.5f);
+
+    if (scaleall0_scaleonlyheight1 == 0)
+    {
+      float scalex = sukru->width / (player.box.mMax.x - player.box.mMin.x),
+            scaley = sukru->height / (player.box.mMax.y - player.box.mMin.y),
+            scalez = sukru->width / (player.box.mMax.z - player.box.mMin.z);
+
+      vec3 scale = {scalex, scaley, scalez};
+
+      for (unsigned int i2 = 0; i2 < player.mesh_count; i2++)
+      {
+        scale_br_object(player.meshes[i2], scale, 0);
+        // scale in cpu beacuse i dont want the scale affect the translation
+      }
+    }
+    else
+    {
+      float scaley = sukru->height / (player.box.mMax.y - player.box.mMin.y);
+
+      vec3 scale = {scaley, scaley, scaley};
+
+      for (unsigned int i2 = 0; i2 < player.mesh_count; i2++)
+      {
+        scale_br_object(player.meshes[i2], scale, 0);
+        // scale in cpu beacuse i dont want the scale affect the translation
+      }
+    }
+
+    prepare_render_br_object_manager(sukru->model);
+
+    free_model(player_model);
+    free(player.meshes);
+    free(player.textures);
+  }
+  return sukru;
+}
+
+void delete_player(player *p)
+{
+  delete_player_jolt(p->phy);
+  delete_br_object_manager(p->model);
+  delete_br_texture_manager(p->textures);
+  free(p);
+}
 
 void run_input_player(player *p, GLFWwindow *window, double framems, unsigned char fp0_tp1)
 {
@@ -112,7 +183,7 @@ void run_input_player(player *p, GLFWwindow *window, double framems, unsigned ch
   if (p->model)
   {
     get_position_player_jolt(p->phy, move);
-    move[1] -= 0.055f;
+    move[1] -= 0.03f;
     set_position_br_object_all(p->model, move);
     vec3 axis = {0, 1, 0};
     if (fp0_tp1 == 0)
@@ -127,4 +198,10 @@ void run_input_player(player *p, GLFWwindow *window, double framems, unsigned ch
       }
     }
   }
+}
+
+void render_player(player *p, GLuint program)
+{
+  use_br_texture_manager(p->textures, program);
+  use_br_object_manager(p->model, program);
 }

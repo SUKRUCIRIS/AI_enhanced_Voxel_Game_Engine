@@ -1,6 +1,8 @@
 #pragma once
-#include "../core/core.h"
 #include "player.h"
+#include "dynamic.h"
+#include "camera.h"
+#include "load_object.h"
 
 typedef struct chunk_op
 {

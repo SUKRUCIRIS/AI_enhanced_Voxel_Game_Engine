@@ -26,3 +26,7 @@
 #include "font.h"
 #include "skybox.h"
 #include "jolt_physics.h"
+#include "player.h"
+#include "world_batch.h"
+#include "world_instanced.h"
+#include "chunk.h"
