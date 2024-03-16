@@ -18,6 +18,8 @@ typedef struct player
   double jumpstartms;
   double jumpdurationms;
   playerid *phy;
+  br_object_manager *model;
+  br_texture_manager *textures;
 } player;
 
-void run_input_player(player *p, GLFWwindow *window, double framems);
+void run_input_fp_player(player *p, GLFWwindow *window, double framems);

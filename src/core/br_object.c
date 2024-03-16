@@ -43,6 +43,9 @@ br_object_manager *create_br_object_manager(void)
 	x->subdata = 0;
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->model);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->normal);
+	glm_mat4_copy(GLM_MAT4_IDENTITY, x->translation);
+	glm_mat4_copy(GLM_MAT4_IDENTITY, x->rotation);
+	glm_mat4_copy(GLM_MAT4_IDENTITY, x->scale);
 	x->programs = create_DA(sizeof(GLuint));
 	x->uniforms = create_DA(sizeof(GLint));
 	x->object_number = 0;
@@ -278,35 +281,21 @@ void translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic)
 
 void scale_br_object_all(br_object_manager *manager, vec3 v)
 {
-	glm_scale(manager->model, v);
-}
-
-void scale_br_object_all_object_origin(br_object_manager *manager, vec3 v)
-{
-	vec4 translationVector;
-	glm_vec4_copy(manager->model[3], translationVector);
-	glm_vec4_zero(manager->model[3]);
-	glm_scale(manager->model, v);
-	glm_vec4_copy(translationVector, manager->model[3]);
+	mat4 tmp;
+	glm_scale_make(tmp, v);
+	glm_mat4_mul(tmp, manager->scale, manager->scale);
 }
 
 void rotate_br_object_all(br_object_manager *manager, float angle, vec3 axis)
 {
-	glm_rotate(manager->model, glm_rad(angle), axis);
-}
-
-void rotate_br_object_all_object_origin(br_object_manager *manager, float angle, vec3 axis)
-{
-	vec4 translationVector;
-	glm_vec4_copy(manager->model[3], translationVector);
-	glm_vec4_zero(manager->model[3]);
-	glm_rotate(manager->model, glm_rad(angle), axis);
-	glm_vec4_copy(translationVector, manager->model[3]);
+	mat4 tmp;
+	glm_rotate_make(tmp, glm_rad(angle), axis);
+	glm_mat4_mul(tmp, manager->rotation, manager->rotation);
 }
 
 void translate_br_object_all(br_object_manager *manager, vec3 v)
 {
-	glm_translate(manager->model, v);
+	glm_vec3_add(v, manager->translation[3], manager->translation[3]);
 }
 
 void use_br_object_manager(br_object_manager *manager, GLuint program)
@@ -323,6 +312,7 @@ void use_br_object_manager(br_object_manager *manager, GLuint program)
 		}
 		GLint *uniforms = get_data_DA(manager->uniforms);
 		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2], 1, GL_FALSE, manager->model[0]);
+		glm_mat4_mulN((mat4 *[]){&manager->translation, &manager->rotation, &manager->scale}, 3, manager->model);
 		glm_mat4_inv(manager->model, manager->normal);
 		glm_mat4_transpose(manager->normal);
 		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2 + 1], 1, GL_FALSE, manager->normal[0]);
@@ -355,4 +345,14 @@ void delete_cpu_memory_br_object_manager(br_object_manager *manager)
 	manager->objects = 0;
 	manager->vertices = 0;
 	manager->indices = 0;
+}
+
+void set_position_br_object_all(br_object_manager *manager, vec3 v)
+{
+	glm_translate_make(manager->translation, v);
+}
+
+void set_rotation_br_object_all(br_object_manager *manager, float angle, vec3 axis)
+{
+	glm_rotate_make(manager->rotation, glm_rad(angle), axis);
 }

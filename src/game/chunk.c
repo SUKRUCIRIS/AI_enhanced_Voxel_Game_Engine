@@ -88,6 +88,8 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
         translate_br_object(gsu.meshes[i2], (vec3){y[c->centerchunkid].minxy[0] - gsu.box.mMin.x, gsu_y + 0.5f - gsu.box.mMin.y, y[c->centerchunkid].minxy[1] - gsu.box.mMin.z}, 0);
       }
       prepare_render_br_object_manager(batch->obj_manager);
+      free(gsu.textures);
+      free(gsu.meshes);
     }
     delete_cpu_memory_br_object_manager(batch->obj_manager);
   }
@@ -213,6 +215,9 @@ remove:
         pushback_DA(c->batch, &(z[index]));
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->model);
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->normal);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->translation);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->rotation);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->scale);
         translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
         add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
       }

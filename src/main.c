@@ -28,7 +28,7 @@ int main(void)
 
 	int window_w = 0, window_h = 0;
 	glfwGetWindowSize(window, &window_w, &window_h);
-	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -15, (vec3){1, 0, 0});
+	camera *cam = create_camera(window_w, window_h, (vec3){0.0f, 5, 60.0f}, 60, 0.1f, render_distance, 1, 100, -90, (vec3){0, 1, 0});
 
 	lighting *light = create_lighting(window, cam, 4096, 4096, render_distance / 64, render_distance / 16,
 																		render_distance / 4, render_distance, fog_start, fog_end, dark_fog_color, 1);
@@ -61,14 +61,39 @@ int main(void)
 	sukru.jumping = 0;
 	sukru.onland = 1;
 	sukru.fp_camera = cam;
-	sukru.width = 0.9f;
-	sukru.height = 3;
+	sukru.width = 1;
+	sukru.height = 2;
 	sukru.hm = hm;
 	sukru.dimensionx = world_size;
 	sukru.dimensionz = world_size;
 	sukru.jumpdurationms = 100;
+	sukru.model = create_br_object_manager();
+	sukru.textures = create_br_texture_manager();
 	float center[3] = {150, (float)hm[world_size / 2 + 150][world_size / 2] + 5.0f, 0};
 	sukru.phy = create_player_jolt(sukru.height, sukru.width / 2, 80, 100, 70, center);
+	{
+		struct aiScene *player_model = load_model("./models/bimax.fbx", 1);
+		br_scene player = load_object_br(sukru.model, sukru.textures, player_model, 0, 0, 3, 10, 0.1f, 0.5f);
+
+		float scalex = sukru.width / (player.box.mMax.x - player.box.mMin.x),
+					scaley = sukru.height / (player.box.mMax.y - player.box.mMin.y),
+					scalez = sukru.width / (player.box.mMax.z - player.box.mMin.z);
+
+		vec3 scale = {scalex, scaley, scalez};
+
+		for (unsigned int i2 = 0; i2 < player.mesh_count; i2++)
+		{
+			scale_br_object(player.meshes[i2], scale, 0);
+			// scale in cpu beacuse i dont want the scale affect the translation
+		}
+
+		prepare_render_br_object_manager(sukru.model);
+
+		free_model(player_model);
+		free(player.meshes);
+		free(player.textures);
+	}
+
 	chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, &sukru, hm, world_size, world_size, 0);
 	unsigned char freec = 0;
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -132,7 +157,7 @@ int main(void)
 		}
 		if (freec == 0)
 		{
-			run_input_player(&sukru, window, get_frame_timems());
+			run_input_fp_player(&sukru, window, get_frame_timems());
 		}
 		else
 		{
@@ -142,10 +167,13 @@ int main(void)
 		glUseProgram(get_def_shadowmap_br_program());
 		use_lighting_shadowpass(light, get_def_shadowmap_br_program());
 		use_chunk_op(chunks, get_def_shadowmap_br_program(), cam);
+		use_br_object_manager(sukru.model, get_def_shadowmap_br_program());
 
 		glUseProgram(get_def_gbuffer_br_program());
 		use_lighting_gbuffer(light, get_def_gbuffer_br_program());
 		use_chunk_op(chunks, get_def_gbuffer_br_program(), cam);
+		use_br_texture_manager(sukru.textures, get_def_gbuffer_br_program());
+		use_br_object_manager(sukru.model, get_def_gbuffer_br_program());
 		glUseProgram(get_def_skybox_program());
 		use_skybox(s, get_def_skybox_program());
 

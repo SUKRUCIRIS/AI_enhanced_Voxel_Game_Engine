@@ -10,6 +10,9 @@ typedef struct br_object_manager
 	DA *vertices; // 3 vertex coord, 2 texture coord, 3 normal coord, 1 texture id
 	DA *indices;
 	unsigned char subdata;
+	mat4 translation;
+	mat4 rotation;
+	mat4 scale;
 	mat4 model;
 	mat4 normal;
 	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
@@ -59,6 +62,6 @@ void use_br_object_manager(br_object_manager *manager, GLuint program);
 
 void delete_cpu_memory_br_object_manager(br_object_manager *manager);
 
-void scale_br_object_all_object_origin(br_object_manager *manager, vec3 v);
+void set_position_br_object_all(br_object_manager *manager, vec3 v);
 
-void rotate_br_object_all_object_origin(br_object_manager *manager, float angle, vec3 axis);
+void set_rotation_br_object_all(br_object_manager *manager, float angle, vec3 axis);

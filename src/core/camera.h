@@ -22,6 +22,7 @@ typedef struct camera
 	mat4 projection;
 	DA *programs; // i will save uniforms here. i wont find their locations everytime i render for performance
 	DA *uniforms;
+	float uprot;
 } camera;
 
 camera *create_camera(int width, int height, vec3 position, float FOVdeg, float nearPlane, float farPlane, float speed,

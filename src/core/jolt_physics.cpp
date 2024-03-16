@@ -410,7 +410,7 @@ bodyid *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int start
               done[i][i2 + loop] = 1;
               loop++;
             }
-            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 + loop / 2.0f - (int)(dimensionz / 2))),
+            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 + (loop - 1) / 2.0f - (int)(dimensionz / 2))),
                                      Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, (float)loop / 2.0f)));
           }
           else if (x == 1)
@@ -420,7 +420,7 @@ bodyid *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int start
               done[i + loop][i2] = 1;
               loop++;
             }
-            compound_shape->AddShape(Vec3((float)(i + loop / 2.0f - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
+            compound_shape->AddShape(Vec3((float)(i + (loop - 1) / 2.0f - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
                                      Quat::sIdentity(), new BoxShape(Vec3((float)loop / 2.0f, 0.5f, 0.5f)));
           }
         }

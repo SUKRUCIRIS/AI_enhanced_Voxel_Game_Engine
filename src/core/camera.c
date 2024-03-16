@@ -26,6 +26,7 @@ camera *create_camera(int width, int height, vec3 position, float FOVdeg, float 
 	glm_mat4_identity(cam->projection);
 	cam->programs = create_DA(sizeof(GLuint));
 	cam->uniforms = create_DA(sizeof(GLint));
+	cam->uprot = 0;
 	return cam;
 }
 
@@ -63,6 +64,7 @@ void run_input_fp_camera(camera *cam, GLFWwindow *window)
 		cam->orientation[2] = oldor[2];
 	}
 	glm_vec3_rotate(cam->orientation, glm_rad(-rotY), cam->up);
+	cam->uprot -= rotY;
 	glfwSetCursorPos(window, (cam->width / 2), (cam->height / 2));
 }
 

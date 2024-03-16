@@ -12,6 +12,7 @@ typedef struct br_scene
 	struct aiAABB box;
 } br_scene;
 
+// you can free textures and meshes variables if you dont want to modify
 br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text_manager,
 												struct aiScene *scene, float texture_start_index, unsigned char has_physics,
 												unsigned char priority, float mass, float friction, float bounce);
