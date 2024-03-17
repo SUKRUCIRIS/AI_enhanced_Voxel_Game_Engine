@@ -1,12 +1,11 @@
 #include "gameloop.h"
 
-void gameloop(GLFWwindow *window)
+void gameloop(GLFWwindow *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz)
 {
   init_animations();
-  float gravity[3] = {0, -9, 0};
+  float gravity[3] = {0, -10, 0};
   init_jolt(gravity);
 
-  int world_size = 2048;
   int chunk_size = 16;
   int chunk_range = 32;
   float render_distance = (float)chunk_size * chunk_range * 1.5f;
@@ -24,28 +23,13 @@ void gameloop(GLFWwindow *window)
   light->fxaa = 1;
   light->vignette_pp = 1;
 
-  DA *points = create_DA(sizeof(float));
-  DA *heights = create_DA(sizeof(int));
-  float tmp[] = {0, 0.30f, 0.34f, 0.37f, 0.41f, 0.44f, 0.46f, 0.48f, 0.49f, 0.51f, 0.52f, 0.54f, 0.57f, 0.60f, 0.64f, 0.67f, 0.71f, 1};
-  pushback_many_DA(points, tmp, 18);
-  int tmpi[] = {0, 35, 36, 47, 50, 50, 50, 52, 57, 64, 75, 85, 91, 93, 94, 94, 96, 100};
-  pushback_many_DA(heights, tmpi, 18);
-
-  int seedx = rand();
-  int seedz = rand();
-
-  int **hm = create_heightmap(world_size, world_size, seedx, seedz, 600, 0, 0, 0, 3, 2, 3, 0.3f, 30);
-
-  delete_DA(points);
-  delete_DA(heights);
-
   struct aiScene *gsu_model = load_model("./models/gsu.fbx", 1);
   set_gsu_model(gsu_model);
 
-  float startpos[3] = {150, (float)hm[world_size / 2 + 150][world_size / 2] + 5.0f, 0};
-  player *p = create_player(cam, 3, 5, 0.75f, 2, 0.8f, 2, hm, world_size, world_size, "./models/player.fbx", startpos, 80, 100, 70, 1);
+  float startpos[3] = {150, (float)hm[dimensionx / 2 + 150][dimensionz / 2] + 5.0f, 0};
+  player *p = create_player(cam, 3, 5, 0.75f, 2, 0.8f, 2, hm, dimensionx, dimensionz, "./models/player.fbx", startpos, 80, 100, 70, 1);
 
-  chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, p, hm, world_size, world_size, 0);
+  chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, p, hm, dimensionx, dimensionz, 0);
   unsigned char freec = 0;
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
@@ -65,7 +49,7 @@ void gameloop(GLFWwindow *window)
                             "./textures/skybox/eso/front.png",
                             "./textures/skybox/eso/back.png",
                             cam, 0.00005f, (vec3){1, 1, 1});
-  bodyid *hm_boxes = create_hm_voxel_jolt(hm, world_size, world_size, 0, 0, world_size, world_size, 0.2f, 0.2f, 1);
+  bodyid *hm_boxes = create_hm_voxel_jolt(hm, dimensionx, dimensionz, 0, 0, dimensionx, dimensionz, 0.2f, 0.2f, 1);
   optimize_jolt();
   while (!glfwWindowShouldClose(window))
   {
@@ -85,12 +69,25 @@ void gameloop(GLFWwindow *window)
       add_text(t, width, height, 1, 1, red, "AI Enhanced Voxel Game Engine");
 
       get_gravity_jolt(gravity);
-      get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
-                             get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
-      width = 0;
-      height = 1080 - height;
-      add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
-                        get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+
+      if (seedx != -1 || seedz != -1)
+      {
+        get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
+                               get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+        width = 0;
+        height = 1080 - height;
+        add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
+                          get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+      }
+      else
+      {
+        get_text_size_variadic(t, 1, &width, &height, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
+                               get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+        width = 0;
+        height = 1080 - height;
+        add_text_variadic(t, width, height, 1, 1, red, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
+                          get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+      }
     }
 
     glfwPollEvents();
@@ -180,6 +177,5 @@ void gameloop(GLFWwindow *window)
   delete_player(p);
   deinit_jolt();
 
-  free(hm);
   free_model(gsu_model);
 }

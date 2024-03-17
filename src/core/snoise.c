@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+#include "../../third_party/stb/stb_image.h"
 
 #define FASTFLOOR(x) (((int)(x) <= (x)) ? ((int)x) : (((int)x) - 1))
 
@@ -220,3 +221,107 @@ float *create_points_heightmap(int **hm, int dimensionx, int dimensionz, int sta
 	}
 	return res;
 }*/
+
+void bilinear_interpolation(float **data, int input_x,
+														int input_y, int output_x,
+														int output_y, float **output)
+{
+	float x_ratio, y_ratio;
+
+	if (output_x > 1)
+	{
+		x_ratio = ((float)input_x - 1.0f) / ((float)output_x - 1.0f);
+	}
+	else
+	{
+		x_ratio = 0;
+	}
+
+	if (output_y > 1)
+	{
+		y_ratio = ((float)input_y - 1.0f) / ((float)output_y - 1.0f);
+	}
+	else
+	{
+		y_ratio = 0;
+	}
+
+	for (int i = 0; i < output_y; i++)
+	{
+		for (int j = 0; j < output_x; j++)
+		{
+			float x_l = floorf(x_ratio * (float)j);
+			float y_l = floorf(y_ratio * (float)i);
+			float x_h = ceilf(x_ratio * (float)j);
+			float y_h = ceilf(y_ratio * (float)i);
+
+			float x_weight = (x_ratio * (float)j) - x_l;
+			float y_weight = (y_ratio * (float)i) - y_l;
+
+			float a = data[(int)x_l][(int)y_l];
+			float b = data[(int)x_h][(int)y_l];
+			float c = data[(int)x_l][(int)y_h];
+			float d = data[(int)x_h][(int)y_h];
+
+			float pixel = a * (1.0f - x_weight) * (1.0f - y_weight) +
+										b * x_weight * (1.0f - y_weight) +
+										c * y_weight * (1.0f - x_weight) +
+										d * x_weight * y_weight;
+
+			output[j][i] = pixel;
+		}
+	}
+}
+
+int **create_heightmap_texture(const char *path, int maxheightmult, int border_add, int result_dimensionx, int result_dimensionz)
+{
+	int widthImg, heightImg, numColCh;
+	float *bytes = stbi_loadf(path, &widthImg, &heightImg, &numColCh, 1);
+
+	float **hm = malloc(sizeof(float *) * heightImg);
+	for (int i = 0; i < heightImg; i++)
+	{
+		hm[i] = malloc(sizeof(float) * widthImg);
+		for (int i2 = 0; i2 < widthImg; i2++)
+		{
+			hm[i][i2] = bytes[i * widthImg + i2];
+		}
+	}
+
+	stbi_image_free(bytes);
+
+	float **interpolated_hm = malloc(sizeof(float *) * result_dimensionx);
+	for (int i = 0; i < result_dimensionx; i++)
+	{
+		interpolated_hm[i] = malloc(sizeof(float) * result_dimensionz);
+	}
+	bilinear_interpolation(hm, heightImg, widthImg, result_dimensionx, result_dimensionz, interpolated_hm);
+
+	int **res = malloc(sizeof(int *) * result_dimensionx);
+	for (int i = 0; i < result_dimensionx; i++)
+	{
+		res[i] = malloc(sizeof(int) * result_dimensionz);
+		for (int i2 = 0; i2 < result_dimensionz; i2++)
+		{
+			res[i][i2] = (int)(interpolated_hm[i][i2] * (float)maxheightmult);
+			if (i == 0 || i == heightImg - 1 || i2 == 0 || i2 == widthImg - 1)
+			{
+				res[i][i2] += border_add;
+			}
+		}
+	}
+
+	for (int i = 0; i < heightImg; i++)
+	{
+		free(hm[i]);
+	}
+	free(hm);
+
+	for (int i = 0; i < result_dimensionx; i++)
+	{
+		free(interpolated_hm[i]);
+	}
+	free(interpolated_hm);
+
+	return res;
+}

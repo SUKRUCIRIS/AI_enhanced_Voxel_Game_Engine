@@ -13,3 +13,5 @@ int **create_heightmap(int dimensionx, int dimensionz, int seedx, int seedz, flo
                        float lacunarity, float persistence, int maxheightmult);
 
 // float *create_points_heightmap(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz);
+
+int **create_heightmap_texture(const char *path, int maxheightmult, int border_add, int result_dimensionx, int result_dimensionz);
