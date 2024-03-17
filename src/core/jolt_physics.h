@@ -20,7 +20,7 @@ extern "C"
                          float friction, float restitution, float gravityfactor);
 
   bodyid *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz,
-                               float friction, float restitution);
+                               float friction, float restitution, unsigned char compound0_mesh1);
 
   void delete_body_jolt(bodyid *id);
 

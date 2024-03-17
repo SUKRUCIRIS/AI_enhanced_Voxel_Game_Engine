@@ -16,6 +16,7 @@
 #include "../../third_party/jolt/Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include "../../third_party/jolt/Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
+#include "../../third_party/jolt/Jolt/Physics/Collision/Shape/MeshShape.h"
 
 // Disable common warnings triggered by Jolt, you can use JPH_SUPPRESS_WARNING_PUSH / JPH_SUPPRESS_WARNING_POP to store and restore the warning state
 JPH_SUPPRESS_WARNINGS
@@ -367,64 +368,171 @@ extern "C" void get_rotation_jolt(bodyid *id, float *rotation)
 }
 
 bodyid *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int startx, int startz, int widthx, int widthz,
-                             float friction, float restitution)
+                             float friction, float restitution, unsigned char compound0_mesh1)
 {
-  Ref<StaticCompoundShapeSettings> compound_shape = new StaticCompoundShapeSettings;
-  unsigned char **done = (unsigned char **)calloc(dimensionz, sizeof(unsigned char *));
-  for (int i = 0; i < dimensionz; i++)
+  if (compound0_mesh1 == 0)
   {
-    done[i] = (unsigned char *)calloc(dimensionx, sizeof(unsigned char));
-  }
-  for (int i2 = startz; i2 < startz + widthz; i2++)
-  {
-    for (int i = startx; i < startx + widthx; i++)
+    Ref<StaticCompoundShapeSettings> compound_shape = new StaticCompoundShapeSettings;
+    unsigned char **done = (unsigned char **)calloc(dimensionz, sizeof(unsigned char *));
+    for (int i = 0; i < dimensionz; i++)
     {
-      if (i < dimensionx && i2 < dimensionz)
+      done[i] = (unsigned char *)calloc(dimensionx, sizeof(unsigned char));
+    }
+    for (int i2 = startz; i2 < startz + widthz; i2++)
+    {
+      for (int i = startx; i < startx + widthx; i++)
       {
-        if (done[i][i2] == 0)
+        if (i < dimensionx && i2 < dimensionz)
         {
-          int loop = 0;
-          unsigned char x = 0;
-          if (i < dimensionx - 1 && hm[i + 1][i2] == hm[i][i2] && done[i + 1][i2] == 0)
+          if (done[i][i2] == 0)
           {
-            x = 1;
-          }
-          else if (i2 < dimensionz - 1 && hm[i][i2 + 1] == hm[i][i2] && done[i][i2 + 1] == 0)
-          {
-            x = 0;
-          }
-          else
-          {
-            x = 2;
-          }
-          if (x == 2)
-          {
-            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
-                                     Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, 0.5f)));
-            done[i][i2] = 1;
-          }
-          else if (x == 0)
-          {
-            while (i2 + loop < dimensionz - 1 && hm[i][i2 + loop] == hm[i][i2] && done[i][i2 + loop] == 0)
+            int loop = 0;
+            unsigned char x = 0;
+            if (i < dimensionx - 1 && hm[i + 1][i2] == hm[i][i2] && done[i + 1][i2] == 0)
             {
-              done[i][i2 + loop] = 1;
-              loop++;
+              x = 1;
             }
-            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 + (loop - 1) / 2.0f - (int)(dimensionz / 2))),
-                                     Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, (float)loop / 2.0f)));
-          }
-          else if (x == 1)
-          {
-            while (i + loop < dimensionx - 1 && hm[i + loop][i2] == hm[i][i2] && done[i + loop][i2] == 0)
+            else if (i2 < dimensionz - 1 && hm[i][i2 + 1] == hm[i][i2] && done[i][i2 + 1] == 0)
             {
-              done[i + loop][i2] = 1;
-              loop++;
+              x = 0;
             }
-            compound_shape->AddShape(Vec3((float)(i + (loop - 1) / 2.0f - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
-                                     Quat::sIdentity(), new BoxShape(Vec3((float)loop / 2.0f, 0.5f, 0.5f)));
+            else
+            {
+              x = 2;
+            }
+            if (x == 2)
+            {
+              compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
+                                       Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, 0.5f)));
+              done[i][i2] = 1;
+            }
+            else if (x == 0)
+            {
+              while (i2 + loop < dimensionz - 1 && hm[i][i2 + loop] == hm[i][i2] && done[i][i2 + loop] == 0)
+              {
+                done[i][i2 + loop] = 1;
+                loop++;
+              }
+              compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 + (loop - 1) / 2.0f - (int)(dimensionz / 2))),
+                                       Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, (float)loop / 2.0f)));
+            }
+            else if (x == 1)
+            {
+              while (i + loop < dimensionx - 1 && hm[i + loop][i2] == hm[i][i2] && done[i + loop][i2] == 0)
+              {
+                done[i + loop][i2] = 1;
+                loop++;
+              }
+              compound_shape->AddShape(Vec3((float)(i + (loop - 1) / 2.0f - (int)(dimensionx / 2)), (float)hm[i][i2], (float)(i2 - (int)(dimensionz / 2))),
+                                       Quat::sIdentity(), new BoxShape(Vec3((float)loop / 2.0f, 0.5f, 0.5f)));
+            }
+          }
+
+          if (hm[i][i2] != 0)
+          {
+            for (int i3 = hm[i][i2] - 1; i3 >= 0; i3--)
+            {
+              if ((!(i2 > 0) || hm[i][i2 - 1] >= i3) &&
+                  (!(i2 < dimensionz - 1) || hm[i][i2 + 1] >= i3) &&
+                  (!(i > 0) || hm[i - 1][i2] >= i3) &&
+                  (!(i < dimensionx - 1) || hm[i + 1][i2] >= i3))
+              {
+                break;
+              }
+              compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))),
+                                       Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, 0.5f)));
+            }
           }
         }
+      }
+    }
+    for (int i = 0; i < dimensionz; i++)
+    {
+      free(done[i]);
+    }
+    free(done);
+    BodyCreationSettings floor_settings = BodyCreationSettings(compound_shape, Vec3::sZero(), Quat::sIdentity(),
+                                                               EMotionType::Static, Layers::NON_MOVING);
+    floor_settings.mFriction = friction;
+    floor_settings.mRestitution = restitution;
+    floor_settings.mEnhancedInternalEdgeRemoval = true;
+    Body *floor = physics_system.GetBodyInterface().CreateBody(floor_settings);
+    physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::Activate);
+    bodyid *res = new bodyid;
+    res->x = floor->GetID();
+    return res;
+  }
+  else
+  {
+    Vec3 cube_vertices[] = {
+        Vec3(-0.5f, -0.5f, -0.5f), // A 0
+        Vec3(-0.5f, 0.5f, -0.5f),  // B 1
+        Vec3(0.5f, 0.5f, -0.5f),   // C 2
+        Vec3(0.5f, -0.5f, -0.5f),  // D 3
+        Vec3(-0.5f, -0.5f, 0.5f),  // E 4
+        Vec3(0.5f, -0.5f, 0.5f),   // F 5
+        Vec3(0.5f, 0.5f, 0.5f),    // G 6
+        Vec3(-0.5f, 0.5f, 0.5f),   // H 7
 
+        Vec3(-0.5f, 0.5f, -0.5f),  // D 8
+        Vec3(-0.5f, -0.5f, -0.5f), // A 9
+        Vec3(-0.5f, -0.5f, 0.5f),  // E 10
+        Vec3(-0.5f, 0.5f, 0.5f),   // H 11
+        Vec3(0.5f, -0.5f, -0.5f),  // B 12
+        Vec3(0.5f, 0.5f, -0.5f),   // C 13
+        Vec3(0.5f, 0.5f, 0.5f),    // G 14
+        Vec3(0.5f, -0.5f, 0.5f),   // F 15
+
+        Vec3(-0.5f, -0.5f, -0.5f), // A 16
+        Vec3(0.5f, -0.5f, -0.5f),  // B 17
+        Vec3(0.5f, -0.5f, 0.5f),   // F 18
+        Vec3(-0.5f, -0.5f, 0.5f),  // E 19
+        Vec3(0.5f, 0.5f, -0.5f),   // C 20
+        Vec3(-0.5f, 0.5f, -0.5f),  // D 21
+        Vec3(-0.5f, 0.5f, 0.5f),   // H 22
+        Vec3(0.5f, 0.5f, 0.5f),    // G 23
+    };
+    TriangleList triangles;
+    Vec3 translation;
+    auto create_surfaces = [&triangles, &translation, &cube_vertices](int i, int i2, int i3, int dimensionx, int dimensionz, int **hm)
+    {
+      translation.Set((float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2)));
+      triangles.push_back(Triangle(cube_vertices[22] + translation, cube_vertices[21] + translation, cube_vertices[20] + translation));
+      triangles.push_back(Triangle(cube_vertices[20] + translation, cube_vertices[23] + translation, cube_vertices[22] + translation));
+      /*
+      //doesn't work as expected
+      if (hm[i][i2] == i3)
+      {
+        triangles.push_back(Triangle(cube_vertices[22] + translation, cube_vertices[21] + translation, cube_vertices[20] + translation));
+        triangles.push_back(Triangle(cube_vertices[20] + translation, cube_vertices[23] + translation, cube_vertices[22] + translation));
+      }
+      if (i2 > 0 && hm[i][i2 - 1] < i3)
+      {
+        triangles.push_back(Triangle(cube_vertices[2] + translation, cube_vertices[1] + translation, cube_vertices[0] + translation));
+        triangles.push_back(Triangle(cube_vertices[0] + translation, cube_vertices[3] + translation, cube_vertices[2] + translation));
+      }
+      if (i2 < dimensionz - 1 && hm[i][i2 + 1] < i3)
+      {
+        triangles.push_back(Triangle(cube_vertices[6] + translation, cube_vertices[5] + translation, cube_vertices[4] + translation));
+        triangles.push_back(Triangle(cube_vertices[4] + translation, cube_vertices[7] + translation, cube_vertices[6] + translation));
+      }
+      if (i > 0 && hm[i - 1][i2] < i3)
+      {
+        triangles.push_back(Triangle(cube_vertices[9] + translation, cube_vertices[8] + translation, cube_vertices[11] + translation));
+        triangles.push_back(Triangle(cube_vertices[11] + translation, cube_vertices[10] + translation, cube_vertices[9] + translation));
+      }
+      if (i < dimensionx - 1 && hm[i + 1][i2] < i3)
+      {
+        triangles.push_back(Triangle(cube_vertices[14] + translation, cube_vertices[13] + translation, cube_vertices[12] + translation));
+        triangles.push_back(Triangle(cube_vertices[12] + translation, cube_vertices[15] + translation, cube_vertices[14] + translation));
+      }
+      */
+    };
+    for (int i = startx; i < startx + widthx; i++)
+    {
+      for (int i2 = startz; i2 < startz + widthz; i2++)
+      {
+        create_surfaces(i, i2, hm[i][i2], dimensionx, dimensionz, hm);
         if (hm[i][i2] != 0)
         {
           for (int i3 = hm[i][i2] - 1; i3 >= 0; i3--)
@@ -436,28 +544,23 @@ bodyid *create_hm_voxel_jolt(int **hm, int dimensionx, int dimensionz, int start
             {
               break;
             }
-            compound_shape->AddShape(Vec3((float)(i - (int)(dimensionx / 2)), (float)i3, (float)(i2 - (int)(dimensionz / 2))),
-                                     Quat::sIdentity(), new BoxShape(Vec3(0.5f, 0.5f, 0.5f)));
+            create_surfaces(i, i2, i3, dimensionx, dimensionz, hm);
           }
         }
       }
     }
+    Ref<MeshShapeSettings> mesh_shape = new MeshShapeSettings(triangles);
+    BodyCreationSettings floor_settings = BodyCreationSettings(mesh_shape, Vec3::sZero(), Quat::sIdentity(),
+                                                               EMotionType::Static, Layers::NON_MOVING);
+    floor_settings.mFriction = friction;
+    floor_settings.mRestitution = restitution;
+    floor_settings.mEnhancedInternalEdgeRemoval = true;
+    Body *floor = physics_system.GetBodyInterface().CreateBody(floor_settings);
+    physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::Activate);
+    bodyid *res = new bodyid;
+    res->x = floor->GetID();
+    return res;
   }
-  for (int i = 0; i < dimensionz; i++)
-  {
-    free(done[i]);
-  }
-  free(done);
-  BodyCreationSettings floor_settings = BodyCreationSettings(compound_shape, Vec3::sZero(), Quat::sIdentity(),
-                                                             EMotionType::Static, Layers::NON_MOVING);
-  floor_settings.mFriction = friction;
-  floor_settings.mRestitution = restitution;
-  floor_settings.mEnhancedInternalEdgeRemoval = true;
-  Body *floor = physics_system.GetBodyInterface().CreateBody(floor_settings);
-  physics_system.GetBodyInterface().AddBody(floor->GetID(), EActivation::Activate);
-  bodyid *res = new bodyid;
-  res->x = floor->GetID();
-  return res;
 }
 
 unsigned int get_body_count_jolt(void)

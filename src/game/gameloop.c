@@ -43,9 +43,9 @@ void gameloop(GLFWwindow *window)
   set_gsu_model(gsu_model);
 
   float startpos[3] = {150, (float)hm[world_size / 2 + 150][world_size / 2] + 5.0f, 0};
-  player *sukru = create_player(cam, 7, 7, 0.5f, 1.5f, 1, 2, hm, world_size, world_size, "./models/player.fbx", startpos, 80, 100, 70, 1);
+  player *p = create_player(cam, 3, 5, 0.75f, 2, 0.8f, 2, hm, world_size, world_size, "./models/player.fbx", startpos, 80, 100, 70, 1);
 
-  chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, sukru, hm, world_size, world_size, 0);
+  chunk_op *chunks = create_chunk_op(chunk_size, chunk_range, p, hm, world_size, world_size, 0);
   unsigned char freec = 0;
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
@@ -65,7 +65,7 @@ void gameloop(GLFWwindow *window)
                             "./textures/skybox/eso/front.png",
                             "./textures/skybox/eso/back.png",
                             cam, 0.00005f, (vec3){1, 1, 1});
-  bodyid *hm_boxes = create_hm_voxel_jolt(hm, world_size, world_size, 0, 0, world_size, world_size, 0.2f, 0.2f);
+  bodyid *hm_boxes = create_hm_voxel_jolt(hm, world_size, world_size, 0, 0, world_size, world_size, 0.2f, 0.2f, 1);
   optimize_jolt();
   while (!glfwWindowShouldClose(window))
   {
@@ -117,11 +117,11 @@ void gameloop(GLFWwindow *window)
     }
     if (freec == 0)
     {
-      run_input_player(sukru, window, get_frame_timems(), 0);
+      run_input_player(p, window, get_frame_timems(), 0);
     }
     else if (freec == 1)
     {
-      run_input_player(sukru, window, get_frame_timems(), 1);
+      run_input_player(p, window, get_frame_timems(), 1);
     }
     else if (freec == 2)
     {
@@ -131,12 +131,12 @@ void gameloop(GLFWwindow *window)
     glUseProgram(get_def_shadowmap_br_program());
     use_lighting_shadowpass(light, get_def_shadowmap_br_program());
     use_chunk_op(chunks, get_def_shadowmap_br_program(), cam);
-    render_player(sukru, get_def_shadowmap_br_program());
+    render_player(p, get_def_shadowmap_br_program());
 
     glUseProgram(get_def_gbuffer_br_program());
     use_lighting_gbuffer(light, get_def_gbuffer_br_program());
     use_chunk_op(chunks, get_def_gbuffer_br_program(), cam);
-    render_player(sukru, get_def_gbuffer_br_program());
+    render_player(p, get_def_gbuffer_br_program());
     glUseProgram(get_def_skybox_program());
     use_skybox(s, get_def_skybox_program());
 
@@ -177,7 +177,7 @@ void gameloop(GLFWwindow *window)
   delete_skybox(s);
 
   delete_body_jolt(hm_boxes);
-  delete_player(sukru);
+  delete_player(p);
   deinit_jolt();
 
   free(hm);

@@ -6,32 +6,32 @@ player *create_player(camera *fp_camera, float speed, float jumpspeed, float air
                       int dimensionz, const char *modelpath, float *start_pos, float maxslopeangle,
                       float maxstrength, float mass, unsigned char scaleall0_scaleonlyheight1)
 {
-  player *sukru = malloc(sizeof(player));
-  sukru->speed = speed;
-  sukru->jumpspeed = jumpspeed;
-  sukru->airspeedfactor = airspeedfactor;
-  sukru->boostspeedfactor = boostspeedfactor;
-  sukru->jumping = 0;
-  sukru->onland = 1;
-  sukru->fp_camera = fp_camera;
-  sukru->width = width;
-  sukru->height = height;
-  sukru->hm = hm;
-  sukru->dimensionx = dimensionx;
-  sukru->dimensionz = dimensionz;
-  sukru->jumpdurationms = 100;
-  sukru->model = create_br_object_manager();
-  sukru->textures = create_br_texture_manager();
-  sukru->phy = create_player_jolt(sukru->height, sukru->width / 2, maxslopeangle, maxstrength, mass, start_pos);
+  player *p = malloc(sizeof(player));
+  p->speed = speed;
+  p->jumpspeed = jumpspeed;
+  p->airspeedfactor = airspeedfactor;
+  p->boostspeedfactor = boostspeedfactor;
+  p->jumping = 0;
+  p->onland = 1;
+  p->fp_camera = fp_camera;
+  p->width = width;
+  p->height = height;
+  p->hm = hm;
+  p->dimensionx = dimensionx;
+  p->dimensionz = dimensionz;
+  p->jumpdurationms = 100;
+  p->model = create_br_object_manager();
+  p->textures = create_br_texture_manager();
+  p->phy = create_player_jolt(p->height, p->width / 2, maxslopeangle, maxstrength, mass, start_pos);
   {
     struct aiScene *player_model = load_model(modelpath, 1);
-    br_scene player = load_object_br(sukru->model, sukru->textures, player_model, 0, 0, 3, 10, 0.1f, 0.5f);
+    br_scene player = load_object_br(p->model, p->textures, player_model, 0, 0, 3, 10, 0.1f, 0.5f);
 
     if (scaleall0_scaleonlyheight1 == 0)
     {
-      float scalex = sukru->width / (player.box.mMax.x - player.box.mMin.x),
-            scaley = sukru->height / (player.box.mMax.y - player.box.mMin.y),
-            scalez = sukru->width / (player.box.mMax.z - player.box.mMin.z);
+      float scalex = p->width / (player.box.mMax.x - player.box.mMin.x),
+            scaley = p->height / (player.box.mMax.y - player.box.mMin.y),
+            scalez = p->width / (player.box.mMax.z - player.box.mMin.z);
 
       vec3 scale = {scalex, scaley, scalez};
 
@@ -43,7 +43,7 @@ player *create_player(camera *fp_camera, float speed, float jumpspeed, float air
     }
     else
     {
-      float scaley = sukru->height / (player.box.mMax.y - player.box.mMin.y);
+      float scaley = p->height / (player.box.mMax.y - player.box.mMin.y);
 
       vec3 scale = {scaley, scaley, scaley};
 
@@ -54,13 +54,13 @@ player *create_player(camera *fp_camera, float speed, float jumpspeed, float air
       }
     }
 
-    prepare_render_br_object_manager(sukru->model);
+    prepare_render_br_object_manager(p->model);
 
     free_model(player_model);
     free(player.meshes);
     free(player.textures);
   }
-  return sukru;
+  return p;
 }
 
 void delete_player(player *p)
@@ -139,6 +139,14 @@ void run_input_player(player *p, GLFWwindow *window, double framems, unsigned ch
   else
   {
     glm_vec3_copy(move, moven);
+    if (glm_vec3_norm2(move) == 0)
+    {
+      p->horizontalcontrol = 0;
+    }
+    else
+    {
+      p->horizontalcontrol = 1;
+    }
     glm_vec3_scale(move, p->speed, move);
     if (!is_supported_jolt(p->phy))
     {
@@ -150,10 +158,12 @@ void run_input_player(player *p, GLFWwindow *window, double framems, unsigned ch
     }
     if (get_key_pressed(GLFW_KEY_SPACE) && is_supported_jolt(p->phy))
     {
+      p->jumping = 1;
       move[1] = p->jumpspeed;
     }
-    else
+    else if (is_supported_jolt(p->phy) == 0)
     {
+      p->jumping = 0;
       vec3 old;
       get_linear_velocity_player_jolt(p->phy, old);
       move[1] = old[1];
@@ -192,7 +202,7 @@ void run_input_player(player *p, GLFWwindow *window, double framems, unsigned ch
     }
     else
     {
-      if (glm_vec3_norm2(moven) != 0)
+      if (p->horizontalcontrol == 1)
       {
         set_rotation_br_object_all(p->model, glm_deg(-atan2f(moven[2], moven[0])), axis);
       }

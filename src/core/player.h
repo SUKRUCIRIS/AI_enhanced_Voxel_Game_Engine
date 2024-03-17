@@ -15,6 +15,7 @@ typedef struct player
   float height;
   unsigned char jumping;
   unsigned char onland;
+  unsigned char horizontalcontrol;
   int **hm;
   int dimensionx;
   int dimensionz;
