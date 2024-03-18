@@ -68,6 +68,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	${MY_SOURCES}
 	${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/src/glad.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/core/jolt_physics.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/core/threading.cpp
 	)
 
 	find_package(OpenGL REQUIRED)

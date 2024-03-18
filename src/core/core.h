@@ -2,7 +2,10 @@
 #ifdef _MSC_VER
 #pragma warning(disable : 4324) // stupid struct padding warning
 #endif
-
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 #include "../../third_party/opengl/include/glad/glad.h"
 #include "../../third_party/glfw/include/GLFW/glfw3.h"
 #include "../../third_party/stb/stb_image.h"
@@ -30,3 +33,7 @@
 #include "world_batch.h"
 #include "world_instanced.h"
 #include "chunk.h"
+#include "threading.h"
+#ifdef __cplusplus
+}
+#endif

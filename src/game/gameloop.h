@@ -1,4 +1,6 @@
 #pragma once
 #include "../core/core.h"
 
-void gameloop(GLFWwindow *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz);
+void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz);
+
+void loadmenu(void *window, unsigned char usetexture);
