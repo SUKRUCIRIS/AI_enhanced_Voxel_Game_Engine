@@ -40,7 +40,7 @@ typedef struct lighting
 	float fog_start;
 	float fog_end;
 	vec3 fog_color;
-	GLuint gbufferFBO, gPosition, gNormal, gTexCoord, gdepth, quadvbo, quadvao, quadebo;
+	GLuint gbufferFBO, gPosition, gNormal, gTexCoord, gdepth, quadvbo, quadvao, quadebo, gTexCoordcopy;
 	GLuint ssaofbo, ssaobuffer, ssaoblurfbo, ssaoblurbuffer;
 	vec3 ssaoKernel[64];
 	vec3 ssaoNoise[16];
@@ -62,7 +62,7 @@ void use_lighting_shadowpass(lighting *l, GLuint program);
 
 void use_lighting_forward(lighting *l, GLuint program);
 
-void use_lighting_gbuffer(lighting *l, GLuint program);
+void use_lighting_gbuffer(lighting *l, GLuint program, unsigned char clear);
 
 void use_lighting_deferred(lighting *l, GLuint program);
 
@@ -73,3 +73,5 @@ void use_lighting_ssao(lighting *l, GLuint program);
 void use_lighting_ssao_blur(lighting *l, GLuint program);
 
 void delete_lighting(lighting *l);
+
+void lighting_set_uniforms(lighting *l, GLuint program);

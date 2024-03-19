@@ -34,6 +34,7 @@ extern "C"
 #include "world_instanced.h"
 #include "chunk.h"
 #include "threading.h"
+#include "water.h"
 #ifdef __cplusplus
 }
 #endif

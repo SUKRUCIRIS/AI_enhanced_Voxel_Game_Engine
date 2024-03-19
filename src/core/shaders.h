@@ -36,3 +36,5 @@ GLuint get_def_post_process_program(void);
 GLuint get_def_text_program(void);
 
 GLuint get_def_skybox_program(void);
+
+GLuint get_def_water_program(void);

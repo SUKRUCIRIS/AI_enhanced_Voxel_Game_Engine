@@ -156,6 +156,7 @@ void run_input_player(player *p, GLFWwindow *window, double framems, unsigned ch
     {
       glm_vec3_scale(move, p->boostspeedfactor, move);
     }
+    p->jumping = 0;
     if (get_key_pressed(GLFW_KEY_SPACE) && is_supported_jolt(p->phy))
     {
       p->jumping = 1;
@@ -163,7 +164,6 @@ void run_input_player(player *p, GLFWwindow *window, double framems, unsigned ch
     }
     else if (is_supported_jolt(p->phy) == 0)
     {
-      p->jumping = 0;
       vec3 old;
       get_linear_velocity_player_jolt(p->phy, old);
       move[1] = old[1];

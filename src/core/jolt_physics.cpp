@@ -17,6 +17,7 @@
 #include <Jolt/Physics/Collision/Shape/RotatedTranslatedShape.h>
 #include "../../third_party/jolt/Jolt/Physics/Collision/Shape/StaticCompoundShape.h"
 #include "../../third_party/jolt/Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "../../third_party/glfw/include/GLFW/glfw3.h"
 
 // Disable common warnings triggered by Jolt, you can use JPH_SUPPRESS_WARNING_PUSH / JPH_SUPPRESS_WARNING_POP to store and restore the warning state
 JPH_SUPPRESS_WARNINGS
@@ -147,6 +148,41 @@ public:
   }
 };
 
+class WaterCollector : public CollideShapeBodyCollector
+{
+public:
+  WaterCollector(PhysicsSystem *inSystem, RVec3Arg inSurfacePosition, Vec3Arg inSurfaceNormal,
+                 float inDeltaTime, float inBuoyancy, float inLinearDrag, float inAngularDrag)
+      : mSystem(inSystem), mSurfacePosition(inSurfacePosition), mSurfaceNormal(inSurfaceNormal),
+        mDeltaTime(inDeltaTime), inBuoyancy(inBuoyancy), inLinearDrag(inLinearDrag), inAngularDrag(inAngularDrag) {}
+
+  virtual void AddHit(const BodyID &inBodyID) override
+  {
+    BodyLockWrite lock(mSystem->GetBodyLockInterface(), inBodyID);
+    Body &body = lock.GetBody();
+    if (body.IsActive())
+    {
+      body.ApplyBuoyancyImpulse(mSurfacePosition, mSurfaceNormal, inBuoyancy, inLinearDrag,
+                                inAngularDrag, Vec3::sZero(), mSystem->GetGravity(), mDeltaTime);
+    }
+  }
+
+  void setdeltatime(float inDeltaTime)
+  {
+    this->mDeltaTime = inDeltaTime;
+  }
+
+  PhysicsSystem *mSystem;
+  RVec3 mSurfacePosition;
+  Vec3 mSurfaceNormal;
+  float mDeltaTime;
+  float inBuoyancy;
+  float inLinearDrag;
+  float inAngularDrag;
+};
+WaterCollector *collector = 0;
+AABox water_box;
+
 PhysicsSystem physics_system;
 
 const float cOriginDeltaTime = 1.0f / 60.0f;
@@ -221,6 +257,10 @@ extern "C" void init_jolt(float *gravity)
 
 extern "C" void deinit_jolt(void)
 {
+  if (collector != 0)
+  {
+    delete collector;
+  }
   delete temp_allocator;
   delete job_system;
   temp_allocator = 0;
@@ -238,6 +278,11 @@ extern "C" void run_jolt(float cDeltaTime)
   if (cDeltaTime < cOriginDeltaTime)
   {
     cDeltaTime = cOriginDeltaTime;
+  }
+  if (collector != 0)
+  {
+    collector->setdeltatime(cDeltaTime);
+    physics_system.GetBroadPhaseQuery().CollideAABox(water_box, *collector, SpecifiedBroadPhaseLayerFilter(BroadPhaseLayers::MOVING), SpecifiedObjectLayerFilter(Layers::MOVING));
   }
   physics_system.Update(cDeltaTime, (int)(cDeltaTime / cOriginDeltaTime), temp_allocator, job_system);
 }
@@ -654,6 +699,11 @@ unsigned char is_supported_jolt(playerid *id)
   return id->x->IsSupported();
 }
 
+float mapValue(float value, float inMin, float inMax, float outMin, float outMax)
+{
+  return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
+}
+
 void update_player_jolt(playerid *id, float deltatime, unsigned char enablesticktofloor, unsigned char enablewalkstairs,
                         float *input_velocity, float gravity_factor)
 {
@@ -669,6 +719,20 @@ void update_player_jolt(playerid *id, float deltatime, unsigned char enablestick
   {
     velocity = Vec3(input_velocity[0], input_velocity[1], input_velocity[2]) +
                deltatime * physics_system.GetGravity() * gravity_factor;
+  }
+  if (collector != 0)
+  {
+    auto charaab = id->x->GetShape()->GetWorldSpaceBounds(id->x->GetCenterOfMassTransform(), Vec3::sReplicate(1.0f));
+    if (charaab.Overlaps(water_box))
+    {
+      auto inter = charaab.Intersect(water_box);
+      float wave = sinf((float)glfwGetTime());
+      wave = mapValue(wave, -1, 1, 0.7f, 1);
+      if (inter.GetVolume() * 2 >= charaab.GetVolume() * wave)
+      {
+        velocity.SetY(0.5f);
+      }
+    }
   }
   id->x->SetLinearVelocity(velocity);
   CharacterVirtual::ExtendedUpdateSettings update_settings;
@@ -691,4 +755,16 @@ void update_player_jolt(playerid *id, float deltatime, unsigned char enablestick
   id->x->ExtendedUpdate(deltatime, -id->x->GetUp() * physics_system.GetGravity().Length() * gravity_factor, update_settings,
                         physics_system.GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
                         physics_system.GetDefaultLayerFilter(Layers::MOVING), {}, {}, *temp_allocator);
+}
+
+void create_water_jolt(float waterlevel, float inBuoyancy, float inLinearDrag, float inAngularDrag)
+{
+  if (collector != 0)
+  {
+    delete collector;
+  }
+  RVec3 surface_point = RVec3(0, waterlevel, 0);
+  water_box = AABox(-Vec3(FLT_MAX, FLT_MAX, FLT_MAX), Vec3(FLT_MAX, 0, FLT_MAX));
+  water_box.Translate(Vec3(surface_point));
+  collector = new WaterCollector(&physics_system, surface_point, Vec3::sAxisY(), 0, inBuoyancy, inLinearDrag, inAngularDrag);
 }

@@ -18,6 +18,7 @@ GLuint def_ssao_blur_program = 0;
 GLuint def_post_process_program = 0;
 GLuint def_text_program = 0;
 GLuint def_skybox_program = 0;
+GLuint def_water_program = 0;
 
 char *get_shader_content(const char *fileName)
 {
@@ -99,6 +100,7 @@ void init_programs(void)
 	def_post_process_program = compile_program("./shaders/post_process.fs", "./shaders/deferred_br.vs", 0);
 	def_text_program = compile_program("./shaders/text.fs", "./shaders/text.vs", 0);
 	def_skybox_program = compile_program("./shaders/skybox.fs", "./shaders/skybox.vs", 0);
+	def_water_program = compile_program("./shaders/water.fs", "./shaders/water.vs", 0);
 }
 
 void destroy_programs(void)
@@ -119,6 +121,7 @@ void destroy_programs(void)
 	glDeleteProgram(def_post_process_program);
 	glDeleteProgram(def_text_program);
 	glDeleteProgram(def_skybox_program);
+	glDeleteProgram(def_water_program);
 }
 
 GLuint get_def_program(void)
@@ -199,4 +202,9 @@ GLuint get_def_text_program(void)
 GLuint get_def_skybox_program(void)
 {
 	return def_skybox_program;
+}
+
+GLuint get_def_water_program(void)
+{
+	return def_water_program;
 }

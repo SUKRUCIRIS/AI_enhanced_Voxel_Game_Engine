@@ -77,6 +77,8 @@ extern "C"
   void update_player_jolt(playerid *id, float deltatime, unsigned char enablesticktofloor, unsigned char enablewalkstairs,
                           float *input_velocity, float gravity_factor);
 
+  void create_water_jolt(float waterlevel, float inBuoyancy, float inLinearDrag, float inAngularDrag);
+
 #ifdef __cplusplus
 }
 #endif
