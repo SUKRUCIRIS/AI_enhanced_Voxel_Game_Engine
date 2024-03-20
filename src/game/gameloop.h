@@ -1,6 +1,5 @@
 #pragma once
 #include "../core/core.h"
 
-void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz, float sealevel);
-
-void loadmenu(void *window, unsigned char usetexture, float sealevel);
+void loadmenu(void *window, unsigned char usetexture, float sealevel,
+              int chunk_range, int chunk_size, int dimensionx, int dimensionz, int seedx, int seedz);

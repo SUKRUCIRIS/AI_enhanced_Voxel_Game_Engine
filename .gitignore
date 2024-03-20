@@ -3,3 +3,5 @@
 /build
 *.exe
 *.pdb
+/aimodels/*
+**/__pycache__
