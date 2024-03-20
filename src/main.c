@@ -3,7 +3,9 @@
 
 int main(void)
 {
-	GLFWwindow *window = create_window(0, 0, 1, 1, 0);
+	int windoww = 0;
+	int windowh = 0;
+	GLFWwindow *window = create_window(windoww, windowh, 1, 1, 0);
 	if (window == 0)
 	{
 		return -1;
@@ -14,7 +16,7 @@ int main(void)
 	unsigned char usetexture = 1;
 	float sealevel = 5.3f;
 	int chunk_size = 16;
-	int chunk_range = 16;
+	int chunk_range = 32;
 	int dimensionx = 2048;
 	int dimensionz = 2048;
 	int seedx = 1453;
