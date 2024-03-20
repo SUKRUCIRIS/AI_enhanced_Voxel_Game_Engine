@@ -12,8 +12,9 @@ int main(void)
 	init_programs();
 
 	unsigned char usetexture = 1;
+	float sealevel = 5.3f;
 
-	loadmenu(window, usetexture);
+	loadmenu(window, usetexture, sealevel);
 
 	destroy_programs();
 	delete_window(window);

@@ -17,6 +17,7 @@ typedef struct loads
   skybox *s;
   bodyid *hm_boxes;
   water *sea;
+  float sealevel;
 } loads;
 
 void loadres(void *ress)
@@ -86,14 +87,15 @@ void loadres(void *ress)
                            "./textures/skybox/eso/back.png",
                            resss->cam, 0.00005f, rotate_axis);
   resss->hm_boxes = create_hm_voxel_jolt(resss->hm, resss->dimensionx, resss->dimensionz, 0, 0, resss->dimensionx, resss->dimensionz, 0.2f, 0.2f, 1);
-  resss->sea = create_water(5.3f, "./textures/water.png", -1024, -1024, 2048, 2048);
+  resss->sea = create_water(resss->sealevel, "./textures/water.png", -resss->dimensionx / 2, -resss->dimensionz / 2,
+                            resss->dimensionx, resss->dimensionz);
   optimize_jolt();
   free_model(gsu_model);
   glfwMakeContextCurrent(0);
   loading_done = 1;
 }
 
-void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz)
+void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz, float sealevel)
 {
   init_animations();
   float gravity[3] = {0, -10, 0};
@@ -104,6 +106,7 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
   resss.hm = hm;
   resss.dimensionx = dimensionx;
   resss.dimensionz = dimensionz;
+  resss.sealevel = sealevel;
   glfwMakeContextCurrent(0);
   Thread *load_thread = create_thread(loadres, &resss);
 
@@ -263,7 +266,7 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
   deinit_jolt();
 }
 
-void loadmenu(void *window, unsigned char usetexture)
+void loadmenu(void *window, unsigned char usetexture, float sealevel)
 {
   int **hm = 0;
   int seedx = rand();
@@ -290,7 +293,7 @@ void loadmenu(void *window, unsigned char usetexture)
     delete_DA(heights);
   }
 
-  gameloop(window, hm, seedx, seedz, dimensionx, dimensionz);
+  gameloop(window, hm, seedx, seedz, dimensionx, dimensionz, sealevel);
 
   for (int i = 0; i < dimensionx; i++)
   {
