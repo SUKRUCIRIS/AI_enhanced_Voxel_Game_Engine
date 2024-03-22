@@ -30,6 +30,6 @@ void main(){
   float wave=0;
   wave=mapValue(sin(time+crntPos.x+crntPos.y+crntPos.z),-1,1,-0.002,0.002);
   vec4 old=texture(gTexCoordcopy, coord+vec2(wave));
-  vec3 result = vec3(rgb.a) * rgb.rgb + vec3(1.0 - rgb.a) * old.gba;
+  vec3 result = vec3(rgb.a) * rgb.rgb + vec3(1.0 - rgb.a) * old.rgb;
   gTexCoordo=vec4(fogmult,result);
 }
