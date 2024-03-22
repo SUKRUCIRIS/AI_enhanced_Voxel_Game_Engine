@@ -64,4 +64,6 @@ void delete_cpu_memory_br_object_manager(br_object_manager *manager);
 
 void set_position_br_object_all(br_object_manager *manager, vec3 v);
 
+void get_position_br_object_all(br_object_manager *manager, vec3 v);
+
 void set_rotation_br_object_all(br_object_manager *manager, float angle, vec3 axis);

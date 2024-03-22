@@ -10,7 +10,8 @@ void set_gsu_model(struct aiScene *model)
   gsu_model = model;
 }
 
-chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm, int dimensionx, int dimensionz, vec3 lightdir)
+chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm,
+                          int dimensionx, int dimensionz, vec3 lightdir, float sealevel)
 {
   if (dimensionx > 2 * gsu_x && dimensionz > 2 * gsu_z)
   {
@@ -66,8 +67,17 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
   chunk_info *y = get_data_DA(c->chunkinfo);
   for (unsigned int i = 0; i < get_size_DA(c->chunkinfo); i++)
   {
-    world_batch *batch = create_world_batch(c->hm, y[i].startx, y[i].startz,
-                                            c->chunk_size, c->chunk_size, c->dimensionx, c->dimensionz, lightdir);
+    world_batch *batch = 0;
+    if (i == 0)
+    {
+      batch = create_world_batch(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                 c->chunk_size, c->dimensionx, c->dimensionz, lightdir, sealevel, 1);
+    }
+    else
+    {
+      batch = create_world_batch(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                 c->chunk_size, c->dimensionx, c->dimensionz, lightdir, sealevel, 0);
+    }
     batch->chunk_id = i;
     pushback_DA(c->allbatch, &batch);
     if (i == c->centerchunkid && gsu_can_exist)
@@ -120,6 +130,7 @@ void delete_chunk_op(chunk_op *c)
   delete_DA(c->delete_ids);
   free(c);
   delete_world_texture_manager();
+  delete_water_texture_manager();
 }
 
 unsigned char inarray(int x, int *array, int size)
@@ -218,8 +229,17 @@ remove:
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->translation);
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->rotation);
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->scale);
+
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->model);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->normal);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->translation);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->rotation);
+        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->scale);
+
         translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
+        translate_br_object_all(z[index]->w->obj, (vec3){0.0f, -100, 0.0f});
         add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
+        add_animation_translate_br_manager(z[index]->w->obj, (vec3){0.0f, 100, 0.0f}, 1500);
       }
     }
     else
@@ -238,6 +258,7 @@ remove:
       {
         pushback_DA(c->delete_ids, &(c->previous_ids[i]));
         add_animation_translate_br_manager(z[c->previous_ids[i]]->obj_manager, (vec3){0.0f, -100, 0.0f}, 1500);
+        add_animation_translate_br_manager(z[c->previous_ids[i]]->w->obj, (vec3){0.0f, -100, 0.0f}, 1500);
       }
     }
   }
@@ -254,7 +275,7 @@ remove:
   c->previous_chunkid = current_id;
 }
 
-void use_chunk_op(chunk_op *c, GLuint program, camera *cam)
+void use_chunk_op(chunk_op *c, GLuint program, camera *cam, unsigned char land0_water1)
 {
   calculate_camera(cam, cam->nearPlane, cam->farPlane);
   world_batch **x = get_data_DA(c->batch);
@@ -275,7 +296,14 @@ void use_chunk_op(chunk_op *c, GLuint program, camera *cam)
     if (glm_aabb_frustum(box2, planes) ||
         glm_vec3_distance((vec3){cam->position[0], 0, cam->position[2]}, (vec3){center[0], 0, center[2]}) <= (float)c->chunk_size * 4.0f)
     {
-      use_world_batch(x[i], program);
+      if (land0_water1 == 0)
+      {
+        use_world_batch_land(x[i], program);
+      }
+      else
+      {
+        use_world_batch_water(x[i], program);
+      }
     }
   }
 }

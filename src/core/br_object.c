@@ -311,10 +311,10 @@ void use_br_object_manager(br_object_manager *manager, GLuint program)
 			pushback_DA(manager->uniforms, &uniform);
 		}
 		GLint *uniforms = get_data_DA(manager->uniforms);
-		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2], 1, GL_FALSE, manager->model[0]);
 		glm_mat4_mulN((mat4 *[]){&manager->translation, &manager->rotation, &manager->scale}, 3, manager->model);
 		glm_mat4_inv(manager->model, manager->normal);
 		glm_mat4_transpose(manager->normal);
+		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2], 1, GL_FALSE, manager->model[0]);
 		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2 + 1], 1, GL_FALSE, manager->normal[0]);
 
 		if (manager->subdata == 1)
@@ -350,6 +350,11 @@ void delete_cpu_memory_br_object_manager(br_object_manager *manager)
 void set_position_br_object_all(br_object_manager *manager, vec3 v)
 {
 	glm_translate_make(manager->translation, v);
+}
+
+void get_position_br_object_all(br_object_manager *manager, vec3 v)
+{
+	glm_vec3_copy(manager->translation[3], v);
 }
 
 void set_rotation_br_object_all(br_object_manager *manager, float angle, vec3 axis)

@@ -16,7 +16,6 @@ typedef struct loads
   text_manager *t;
   skybox *s;
   bodyid *hm_boxes;
-  water *sea;
   float sealevel;
   int chunk_range;
   int chunk_size;
@@ -67,7 +66,7 @@ void loadres(void *ress)
   float startpos[3] = {150, (float)resss->hm[resss->dimensionx / 2 + 150][resss->dimensionz / 2] + 5.0f, 0};
   resss->p = create_player(resss->cam, 3, 5, 0.75f, 2, 0.8f, 2, resss->hm, resss->dimensionx, resss->dimensionz, "./models/player.fbx", startpos, 80, 100, 70, 1);
 
-  resss->chunks = create_chunk_op(resss->chunk_size, resss->chunk_range, resss->p, resss->hm, resss->dimensionx, resss->dimensionz, 0);
+  resss->chunks = create_chunk_op(resss->chunk_size, resss->chunk_range, resss->p, resss->hm, resss->dimensionx, resss->dimensionz, 0, resss->sealevel);
 
   resss->t = create_text_manager("./fonts/arial.ttf", 16, 1920, 1080, GL_LINEAR, GL_LINEAR);
 
@@ -87,8 +86,6 @@ void loadres(void *ress)
                            "./textures/skybox/eso/back.png",
                            resss->cam, 0.00005f, rotate_axis);
   resss->hm_boxes = create_hm_voxel_jolt(resss->hm, resss->dimensionx, resss->dimensionz, 0, 0, resss->dimensionx, resss->dimensionz, 0.2f, 0.2f, 1);
-  resss->sea = create_water(resss->sealevel, "./textures/water.png", -resss->dimensionx / 2, -resss->dimensionz / 2,
-                            resss->dimensionx, resss->dimensionz);
   optimize_jolt();
   free_model(gsu_model);
   glfwMakeContextCurrent(0);
@@ -212,17 +209,17 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
 
     glUseProgram(get_def_shadowmap_br_program());
     use_lighting_shadowpass(resss.light, get_def_shadowmap_br_program());
-    use_chunk_op(resss.chunks, get_def_shadowmap_br_program(), resss.cam);
+    use_chunk_op(resss.chunks, get_def_shadowmap_br_program(), resss.cam, 0);
     render_player(resss.p, get_def_shadowmap_br_program());
 
     glUseProgram(get_def_gbuffer_br_program());
     use_lighting_gbuffer(resss.light, get_def_gbuffer_br_program(), 1);
-    use_chunk_op(resss.chunks, get_def_gbuffer_br_program(), resss.cam);
+    use_chunk_op(resss.chunks, get_def_gbuffer_br_program(), resss.cam, 0);
     render_player(resss.p, get_def_gbuffer_br_program());
 
     glUseProgram(get_def_water_program());
     use_lighting_gbuffer(resss.light, get_def_water_program(), 0);
-    use_water(resss.sea, get_def_water_program());
+    use_chunk_op(resss.chunks, get_def_water_program(), resss.cam, 1);
 
     glUseProgram(get_def_skybox_program());
     use_skybox(resss.s, get_def_skybox_program());
@@ -262,7 +259,6 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
   delete_animations();
   delete_text_manager(resss.t);
   delete_skybox(resss.s);
-  delete_water(resss.sea);
 
   delete_body_jolt(resss.hm_boxes);
   delete_player(resss.p);

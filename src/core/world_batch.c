@@ -199,7 +199,9 @@ void create_surfaces(br_object_manager *x, int i, int i2, int i3, int dimensionx
 	}
 }
 
-world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz, int dimensionx, int dimensionz, vec3 lightdir)
+world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, int widthz,
+																int dimensionx, int dimensionz, vec3 lightdir, float sealevel,
+																unsigned char create_water_physic)
 {
 	if (startx >= dimensionx || startz >= dimensionz)
 	{
@@ -230,6 +232,9 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6);
 	}
 
+	x->w = create_water(sealevel, "./textures/water.png", startx - (int)(dimensionx / 2), startz - (int)(dimensionz / 2),
+											widthx, widthz, create_water_physic);
+
 	// objects
 	for (int i = startx; i < startx + widthx; i++)
 	{
@@ -256,15 +261,21 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 	return x;
 }
 
-void use_world_batch(world_batch *w, GLuint program)
+void use_world_batch_land(world_batch *w, GLuint land_program)
 {
-	use_br_texture_manager(tex_manager, program);
-	use_br_object_manager(w->obj_manager, program);
+	use_br_texture_manager(tex_manager, land_program);
+	use_br_object_manager(w->obj_manager, land_program);
+}
+
+void use_world_batch_water(world_batch *w, GLuint water_program)
+{
+	use_water(w->w, water_program);
 }
 
 void delete_world_batch(world_batch *w)
 {
 	delete_br_object_manager(w->obj_manager);
+	delete_water(w->w);
 	free(w);
 }
 
