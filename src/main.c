@@ -22,7 +22,9 @@ int main(void)
 	int seedx = 1453;
 	int seedz = 1071;
 
-	loadmenu(window, usetexture, sealevel, chunk_range, chunk_size, dimensionx, dimensionz, seedx, seedz);
+	unsigned char loadgsu = 0;
+
+	loadmenu(window, usetexture, sealevel, chunk_range, chunk_size, dimensionx, dimensionz, seedx, seedz, loadgsu);
 
 	destroy_programs();
 	delete_window(window);

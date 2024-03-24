@@ -13,7 +13,7 @@ void set_gsu_model(struct aiScene *model)
 chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm,
                           int dimensionx, int dimensionz, vec3 lightdir, float sealevel)
 {
-  if (dimensionx > 2 * gsu_x && dimensionz > 2 * gsu_z)
+  if (dimensionx > 2 * gsu_x && dimensionz > 2 * gsu_z && gsu_model != 0)
   {
     gsu_can_exist = 1;
   }
@@ -229,17 +229,18 @@ remove:
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->translation);
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->rotation);
         glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->scale);
-
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->model);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->normal);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->translation);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->rotation);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->scale);
-
         translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
-        translate_br_object_all(z[index]->w->obj, (vec3){0.0f, -100, 0.0f});
         add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
-        add_animation_translate_br_manager(z[index]->w->obj, (vec3){0.0f, 100, 0.0f}, 1500);
+        if (z[index]->w != 0)
+        {
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->model);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->normal);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->translation);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->rotation);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->scale);
+          translate_br_object_all(z[index]->w->obj, (vec3){0.0f, -100, 0.0f});
+          add_animation_translate_br_manager(z[index]->w->obj, (vec3){0.0f, 100, 0.0f}, 1500);
+        }
       }
     }
     else
@@ -258,7 +259,10 @@ remove:
       {
         pushback_DA(c->delete_ids, &(c->previous_ids[i]));
         add_animation_translate_br_manager(z[c->previous_ids[i]]->obj_manager, (vec3){0.0f, -100, 0.0f}, 1500);
-        add_animation_translate_br_manager(z[c->previous_ids[i]]->w->obj, (vec3){0.0f, -100, 0.0f}, 1500);
+        if (z[c->previous_ids[i]]->w != 0)
+        {
+          add_animation_translate_br_manager(z[c->previous_ids[i]]->w->obj, (vec3){0.0f, -100, 0.0f}, 1500);
+        }
       }
     }
   }

@@ -19,6 +19,7 @@ typedef struct loads
   float sealevel;
   int chunk_range;
   int chunk_size;
+  unsigned char loadgsu;
 } loads;
 
 void loadres(void *ress)
@@ -60,8 +61,12 @@ void loadres(void *ress)
   resss->light->fxaa = 1;
   resss->light->vignette_pp = 1;
 
-  struct aiScene *gsu_model = load_model("./models/gsu.fbx", 1);
-  set_gsu_model(gsu_model);
+  struct aiScene *gsu_model = 0;
+  if (resss->loadgsu)
+  {
+    gsu_model = load_model("./models/gsu.fbx", 1);
+    set_gsu_model(gsu_model);
+  }
 
   float startpos[3] = {150, (float)resss->hm[resss->dimensionx / 2 + 150][resss->dimensionz / 2] + 5.0f, 0};
   resss->p = create_player(resss->cam, 3, 5, 0.75f, 2, 0.8f, 2, resss->hm, resss->dimensionx, resss->dimensionz, "./models/player.fbx", startpos, 80, 100, 70, 1);
@@ -93,7 +98,7 @@ void loadres(void *ress)
 }
 
 void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz,
-              float sealevel, int chunk_range, int chunk_size)
+              float sealevel, int chunk_range, int chunk_size, unsigned char loadgsu)
 {
   init_animations();
   float gravity[3] = {0, -10, 0};
@@ -107,6 +112,7 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
   resss.sealevel = sealevel;
   resss.chunk_range = chunk_range;
   resss.chunk_size = chunk_size;
+  resss.loadgsu = loadgsu;
   glfwMakeContextCurrent(0);
   Thread *load_thread = create_thread(loadres, &resss);
 
@@ -266,7 +272,7 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
 }
 
 void loadmenu(void *window, unsigned char usetexture, float sealevel, int chunk_range, int chunk_size,
-              int dimensionx, int dimensionz, int seedx, int seedz)
+              int dimensionx, int dimensionz, int seedx, int seedz, unsigned char loadgsu)
 {
   int **hm = 0;
   if (usetexture)
@@ -290,7 +296,7 @@ void loadmenu(void *window, unsigned char usetexture, float sealevel, int chunk_
     delete_DA(heights);
   }
 
-  gameloop(window, hm, seedx, seedz, dimensionx, dimensionz, sealevel, chunk_range, chunk_size);
+  gameloop(window, hm, seedx, seedz, dimensionx, dimensionz, sealevel, chunk_range, chunk_size, loadgsu);
 
   for (int i = 0; i < dimensionx; i++)
   {

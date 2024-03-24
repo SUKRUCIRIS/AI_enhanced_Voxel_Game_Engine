@@ -232,8 +232,15 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6);
 	}
 
-	x->w = create_water(sealevel, "./textures/water.png", startx - (int)(dimensionx / 2), startz - (int)(dimensionz / 2),
-											widthx, widthz, create_water_physic);
+	if (sealevel > 0)
+	{
+		x->w = create_water(sealevel, "./textures/water.png", startx - (int)(dimensionx / 2), startz - (int)(dimensionz / 2),
+												widthx, widthz, create_water_physic);
+	}
+	else
+	{
+		x->w = 0;
+	}
 
 	// objects
 	for (int i = startx; i < startx + widthx; i++)
@@ -269,14 +276,23 @@ void use_world_batch_land(world_batch *w, GLuint land_program)
 
 void use_world_batch_water(world_batch *w, GLuint water_program)
 {
-	use_water(w->w, water_program);
+	if (w->w != 0)
+	{
+		use_water(w->w, water_program);
+	}
 }
 
 void delete_world_batch(world_batch *w)
 {
-	delete_br_object_manager(w->obj_manager);
-	delete_water(w->w);
-	free(w);
+	if (w != 0)
+	{
+		delete_br_object_manager(w->obj_manager);
+		if (w->w != 0)
+		{
+			delete_water(w->w);
+		}
+		free(w);
+	}
 }
 
 br_texture_manager *get_world_texture_manager(void)
@@ -286,6 +302,9 @@ br_texture_manager *get_world_texture_manager(void)
 
 void delete_world_texture_manager(void)
 {
-	delete_br_texture_manager(tex_manager);
-	tex_manager = 0;
+	if (tex_manager != 0)
+	{
+		delete_br_texture_manager(tex_manager);
+		tex_manager = 0;
+	}
 }
