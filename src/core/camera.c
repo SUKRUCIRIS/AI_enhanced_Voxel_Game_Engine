@@ -112,7 +112,7 @@ void run_input_free_camera(camera *cam, GLFWwindow *window)
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 	{
-		cam->speed = 0.4f;
+		cam->speed = 1;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
 	{
