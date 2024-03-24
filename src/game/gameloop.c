@@ -68,7 +68,7 @@ void loadres(void *ress)
     set_gsu_model(gsu_model);
   }
 
-  float startpos[3] = {150, (float)resss->hm[resss->dimensionx / 2 + 150][resss->dimensionz / 2] + 5.0f, 0};
+  float startpos[3] = {0, max((float)resss->hm[resss->dimensionx / 2][resss->dimensionz / 2], resss->sealevel) + 5.0f, 0};
   resss->p = create_player(resss->cam, 3, 5, 0.75f, 2, 0.8f, 2, resss->hm, resss->dimensionx, resss->dimensionz, "./models/player.fbx", startpos, 80, 100, 70, 1);
 
   resss->chunks = create_chunk_op(resss->chunk_size, resss->chunk_range, resss->p, resss->hm, resss->dimensionx, resss->dimensionz, 0, resss->sealevel);
