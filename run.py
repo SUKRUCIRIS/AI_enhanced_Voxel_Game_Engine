@@ -66,7 +66,7 @@ lbl.grid(column=0, row=2)
 Sealevel = Entry(
     window, width=150, validate="all", validatecommand=(floatregister, "%P")
 )
-Sealevel.insert(0, "5.3")
+Sealevel.insert(0, "25.2")
 Sealevel.grid(column=1, row=2)
 lbl = Label(window, text="Enter 0 for no water", bg="#26242f", fg="white")
 lbl.grid(column=2, row=2)
@@ -217,7 +217,7 @@ def replace(source_text, modified_text, text_filename):
             sys.stdout.write(line)
 
 
-hm_generator = genhm.hm_ai()
+hm_generator = genhm.hm_ai(True)
 
 
 def replacing_jobs():
@@ -268,6 +268,7 @@ def replacing_jobs():
             while os.path.exists(".\\heightmaps\\test" + add + ".jpeg"):
                 add = add + "_"
             os.rename(".\\heightmaps\\test.jpeg", ".\\heightmaps\\test" + add + ".jpeg")
+        image = image.convert("L", colors=8)
         image.save(".\\heightmaps\\test.jpeg")
     else:
         replace(

@@ -14,7 +14,7 @@ int main(void)
 	init_programs();
 
 	unsigned char usetexture = 1;
-	float sealevel = 5.3f;
+	float sealevel = 25.2f;
 	int chunk_size = 16;
 	int chunk_range = 32;
 	int dimensionx = 2048;

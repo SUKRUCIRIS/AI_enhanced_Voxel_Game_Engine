@@ -3,8 +3,8 @@
 python ./run.py
 ```
 You can change various settings of the demo game of the game engine on this menu and compile with a button.
+
 You have to install Visual Studio Build Tools and set the path to vcvarsall.bat in the GUI to be able to compile.
-You have to create a folder named ./aimodels and put an AI model named hm.safetensors in it to be able to generate heightmaps with AI. I used [this model](https://civitai.com/models/16826/game-landscape-heightmap-genrator) on my computer.
 
 ## Compiling without Python GUI on Windows
 
