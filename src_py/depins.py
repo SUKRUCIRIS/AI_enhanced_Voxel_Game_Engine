@@ -30,6 +30,7 @@ def install_dependencies():
             stream=True,
             headers={"User-agent": "Mozilla/5.0"},
         )
+        os.makedirs(os.path.dirname("aimodels/hm.safetensors"), exist_ok=True)
         if response.status_code == 200:
             with open("aimodels/hm.safetensors", "wb") as f:
                 response.raw.decode_content = True
