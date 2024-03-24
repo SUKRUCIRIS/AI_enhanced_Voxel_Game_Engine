@@ -233,7 +233,7 @@ def replacing_jobs():
     )
     replace(
         "float sealevel",
-        "float sealevel = " + Sealevel.get() + "f;",
+        "float sealevel = " + Sealevel.get() + ";",
         ".\\src\\main.c",
     )
     replace(

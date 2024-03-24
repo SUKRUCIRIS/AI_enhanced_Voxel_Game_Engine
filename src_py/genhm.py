@@ -19,6 +19,12 @@ class hm_ai:
                 ).to("cuda")
             )
             self.pipeline.load_lora_weights("aimodels/", weight_name="hm.safetensors")
+
+        def dummy(images: list, **kwargs):
+            false_list = [False] * images.__len__()
+            return images, false_list
+
+        self.pipeline.safety_checker = dummy
         self.pipeline.to("cuda")
 
     def use(self, prompt: str, neg_prompt: str = None) -> PIL.Image.Image:
