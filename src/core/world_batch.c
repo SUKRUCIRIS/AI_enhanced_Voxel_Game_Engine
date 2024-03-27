@@ -208,19 +208,19 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 	if (tex_manager == 0)
 	{
 		tex_manager = create_br_texture_manager();
-		create_br_texture(tex_manager, "./textures/side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 0);
-		create_br_texture(tex_manager, "./textures/dirt_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 1);
-		create_br_texture(tex_manager, "./textures/dirt.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 2);
-		create_br_texture(tex_manager, "./textures/grass_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 3);
-		create_br_texture(tex_manager, "./textures/grass.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 4);
-		create_br_texture(tex_manager, "./textures/snow_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 5);
-		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6);
+		create_br_texture(tex_manager, "./textures/side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 0, GL_REPEAT, GL_REPEAT);
+		create_br_texture(tex_manager, "./textures/dirt_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 1, GL_REPEAT, GL_CLAMP_TO_EDGE);
+		create_br_texture(tex_manager, "./textures/dirt.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 2, GL_REPEAT, GL_REPEAT);
+		create_br_texture(tex_manager, "./textures/grass_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 3, GL_REPEAT, GL_CLAMP_TO_EDGE);
+		create_br_texture(tex_manager, "./textures/grass.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 4, GL_REPEAT, GL_REPEAT);
+		create_br_texture(tex_manager, "./textures/snow_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 5, GL_REPEAT, GL_CLAMP_TO_EDGE);
+		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6, GL_REPEAT, GL_REPEAT);
 	}
 
 	if (sealevel > 0)
 	{
-		x->w = create_water(sealevel, "./textures/water.png", startx - (int)(dimensionx / 2), startz - (int)(dimensionz / 2),
-												widthx, widthz, create_water_physic);
+		x->w = create_water(sealevel, hm, "./textures/water.png", startx - (int)(dimensionx / 2), startz - (int)(dimensionz / 2),
+												widthx, widthz, dimensionx, dimensionz, create_water_physic);
 	}
 	else
 	{
@@ -915,19 +915,19 @@ world_batch *create_world_batch_facemerged(int **hm, int startx, int startz, int
 	if (tex_manager == 0)
 	{
 		tex_manager = create_br_texture_manager();
-		create_br_texture(tex_manager, "./textures/side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 0);
-		create_br_texture(tex_manager, "./textures/dirt_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 1);
-		create_br_texture(tex_manager, "./textures/dirt.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 2);
-		create_br_texture(tex_manager, "./textures/grass_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 3);
-		create_br_texture(tex_manager, "./textures/grass.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 4);
-		create_br_texture(tex_manager, "./textures/snow_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 5);
-		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6);
+		create_br_texture(tex_manager, "./textures/side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 0, GL_REPEAT, GL_REPEAT);
+		create_br_texture(tex_manager, "./textures/dirt_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 1, GL_REPEAT, GL_CLAMP_TO_EDGE);
+		create_br_texture(tex_manager, "./textures/dirt.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 2, GL_REPEAT, GL_REPEAT);
+		create_br_texture(tex_manager, "./textures/grass_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 3, GL_REPEAT, GL_CLAMP_TO_EDGE);
+		create_br_texture(tex_manager, "./textures/grass.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 4, GL_REPEAT, GL_REPEAT);
+		create_br_texture(tex_manager, "./textures/snow_side.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 5, GL_REPEAT, GL_CLAMP_TO_EDGE);
+		create_br_texture(tex_manager, "./textures/snow.png", GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 6, GL_REPEAT, GL_REPEAT);
 	}
 
 	if (sealevel > 0)
 	{
-		x->w = create_water(sealevel, "./textures/water.png", startx - (int)(dimensionx / 2), startz - (int)(dimensionz / 2),
-												widthx, widthz, create_water_physic);
+		x->w = create_water(sealevel, hm, "./textures/water.png", startx - (int)(dimensionx / 2), startz - (int)(dimensionz / 2),
+												widthx, widthz, dimensionx, dimensionz, create_water_physic);
 	}
 	else
 	{

@@ -66,7 +66,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 						data[j * 4 + 3] = scene->mTextures[k]->pcData[j].a;
 					}
 					res.textures[i] = create_br_texture_memory(text_manager, data, width, height, GL_TEXTURE_2D, GL_NEAREST,
-																										 GL_NEAREST, (int)texture_start_index + (int)i);
+																										 GL_NEAREST, (int)texture_start_index + (int)i, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 					free(data);
 					break;
 				}
@@ -75,7 +75,8 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			{
 				char ext_path[1024] = {0};
 				sprintf(ext_path, "./models/%s", texturePath.data);
-				res.textures[i] = create_br_texture(text_manager, ext_path, GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST, (int)texture_start_index + (int)i);
+				res.textures[i] = create_br_texture(text_manager, ext_path, GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST,
+																						(int)texture_start_index + (int)i, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 			}
 		}
 		else if (aiGetMaterialColor(scene->mMaterials[i], AI_MATKEY_COLOR_DIFFUSE, &diffuseColor) == AI_SUCCESS)
@@ -86,7 +87,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			data[2] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.b * 256.0f)));
 			data[3] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.a * 256.0f)));
 			res.textures[i] = create_br_texture_memory(text_manager, data, 1, 1, GL_TEXTURE_2D, GL_NEAREST,
-																								 GL_NEAREST, (int)texture_start_index + (int)i);
+																								 GL_NEAREST, (int)texture_start_index + (int)i, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 		}
 	}
 	for (unsigned int i = 0; i < scene->mNumMeshes; i++)

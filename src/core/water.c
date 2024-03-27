@@ -15,15 +15,15 @@ GLuint indices[] = {
 
 br_texture_manager *water_texture = 0;
 
-water *create_water(float sealevel, const char *texture_path, int startx,
-                    int startz, int widthx, int widthz, unsigned char create_physic)
+water *create_water(float sealevel, int **hm, const char *texture_path, int startx,
+                    int startz, int widthx, int widthz, int dimensionx, int dimensionz, unsigned char create_physic)
 {
   water *w = malloc(sizeof(water));
   w->obj = create_br_object_manager();
   if (water_texture == 0)
   {
     water_texture = create_br_texture_manager();
-    create_br_texture(water_texture, texture_path, GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 0);
+    create_br_texture(water_texture, texture_path, GL_TEXTURE_2D, GL_LINEAR_MIPMAP_LINEAR, GL_NEAREST, 0, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
   }
   vertices[1] = sealevel;
   vertices[10] = sealevel;
@@ -33,6 +33,11 @@ water *create_water(float sealevel, const char *texture_path, int startx,
   {
     for (int i2 = startz; i2 < startz + widthz; i2++)
     {
+      if (i + (int)(dimensionx / 2) < dimensionx && i2 + (int)(dimensionz / 2) < dimensionz &&
+          hm[i + (int)(dimensionx / 2)][i2 + (int)(dimensionz / 2)] > (int)floorf(sealevel - 0.5f))
+      {
+        continue;
+      }
       br_object *tmp = create_br_object(w->obj, vertices, 4, indices, 6, 0, 0, 0, 0, 0, 0);
       translate_br_object(tmp, (vec3){(float)i, 0, (float)i2}, 0);
     }

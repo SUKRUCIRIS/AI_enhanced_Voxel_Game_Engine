@@ -7,8 +7,8 @@ typedef struct water
   br_object_manager *obj;
 } water;
 
-water *create_water(float sealevel, const char *texture_path, int startx,
-                    int startz, int widthx, int widthz, unsigned char create_physic);
+water *create_water(float sealevel, int **hm, const char *texture_path, int startx,
+                    int startz, int widthx, int widthz, int dimensionx, int dimensionz, unsigned char create_physic);
 
 void delete_water(water *w);
 

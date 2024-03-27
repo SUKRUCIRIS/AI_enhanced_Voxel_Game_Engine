@@ -15,7 +15,7 @@ br_texture_manager *create_br_texture_manager(void)
 }
 
 br_texture *create_br_texture(br_texture_manager *manager, const char *path, GLenum texType,
-							  GLint min_filter, GLint mag_filter, int index)
+															GLint min_filter, GLint mag_filter, int index, int wraps, int wrapt)
 {
 	if (get_size_DA(manager->textures) >= 32)
 	{
@@ -48,8 +48,8 @@ br_texture *create_br_texture(br_texture_manager *manager, const char *path, GLe
 	glBindTexture(texType, tex->id);
 	glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, min_filter);
 	glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, mag_filter);
-	glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(texType, GL_TEXTURE_WRAP_S, wraps);
+	glTexParameteri(texType, GL_TEXTURE_WRAP_T, wrapt);
 	glTexImage2D(texType, 0, GL_RGBA, widthImg, heightImg, 0, format, GL_UNSIGNED_BYTE, bytes);
 	glGenerateMipmap(texType);
 	stbi_image_free(bytes);
@@ -62,7 +62,7 @@ br_texture *create_br_texture(br_texture_manager *manager, const char *path, GLe
 }
 
 br_texture *create_br_texture_memory(br_texture_manager *manager, unsigned char *data, int width, int height, GLenum texType,
-									 GLint min_filter, GLint mag_filter, int index)
+																		 GLint min_filter, GLint mag_filter, int index, int wraps, int wrapt)
 {
 	if (get_size_DA(manager->textures) >= 32)
 	{
@@ -75,8 +75,8 @@ br_texture *create_br_texture_memory(br_texture_manager *manager, unsigned char 
 	glBindTexture(texType, tex->id);
 	glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, min_filter);
 	glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, mag_filter);
-	glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(texType, GL_TEXTURE_WRAP_S, wraps);
+	glTexParameteri(texType, GL_TEXTURE_WRAP_T, wrapt);
 	glTexImage2D(texType, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(texType);
 	glBindTexture(texType, 0);
