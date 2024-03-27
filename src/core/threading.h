@@ -5,17 +5,23 @@ extern "C"
 {
 #endif
 
-  // Forward declaration of the thread handle
   typedef struct Thread Thread;
 
-  // Function pointer type for thread functions
+  typedef struct Mutex Mutex;
+
   typedef void (*ThreadFunction)(void *);
 
-  // Function to create a new thread
   Thread *create_thread(ThreadFunction func, void *arg);
 
-  // Function to join a thread
   void join_thread(Thread *thread);
+
+  Mutex *create_mutex(void);
+
+  void destroy_mutex(Mutex *m);
+
+  void lock_mutex(Mutex *m);
+
+  void unlock_mutex(Mutex *m);
 
 #ifdef __cplusplus
 }

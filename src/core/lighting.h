@@ -56,7 +56,7 @@ void calculate_lighting_projection(lighting *l, int step);
 
 lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
 													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end,
-													vec3 fog_color, unsigned char deferred);
+													vec3 fog_color, unsigned char deferred, unsigned char ssao);
 
 void use_lighting_shadowpass(lighting *l, GLuint program);
 

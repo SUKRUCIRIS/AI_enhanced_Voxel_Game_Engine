@@ -11,7 +11,7 @@ void set_gsu_model(struct aiScene *model)
 }
 
 chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm,
-                          int dimensionx, int dimensionz, vec3 lightdir, float sealevel)
+                          int dimensionx, int dimensionz, vec3 lightdir, float sealevel, unsigned char facemerged)
 {
   if (dimensionx > 2 * gsu_x && dimensionz > 2 * gsu_z && gsu_model != 0)
   {
@@ -68,15 +68,31 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
   for (unsigned int i = 0; i < get_size_DA(c->chunkinfo); i++)
   {
     world_batch *batch = 0;
-    if (i == 0)
+    if (facemerged)
     {
-      batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
-                                            c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 1);
+      if (i == 0)
+      {
+        batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                              c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 1);
+      }
+      else
+      {
+        batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                              c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 0);
+      }
     }
     else
     {
-      batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
-                                            c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 0);
+      if (i == 0)
+      {
+        batch = create_world_batch(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                   c->chunk_size, c->dimensionx, c->dimensionz, lightdir, sealevel, 1);
+      }
+      else
+      {
+        batch = create_world_batch(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                   c->chunk_size, c->dimensionx, c->dimensionz, lightdir, sealevel, 0);
+      }
     }
     batch->chunk_id = i;
     pushback_DA(c->allbatch, &batch);
@@ -145,7 +161,7 @@ unsigned char inarray(int x, int *array, int size)
   return 0;
 }
 
-void update_chunk_op(chunk_op *c)
+void update_chunk_op(chunk_op *c, unsigned char animation)
 {
   // remove deleted chunks after remove animation
   world_batch **z = get_data_DA(c->allbatch);
@@ -224,22 +240,25 @@ remove:
       if (inarray(index, c->previous_ids, c->renderedchunkcount) == 0)
       {
         pushback_DA(c->batch, &(z[index]));
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->model);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->normal);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->translation);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->rotation);
-        glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->scale);
-        translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
-        add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
-        if (z[index]->w != 0)
+        if (animation)
         {
-          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->model);
-          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->normal);
-          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->translation);
-          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->rotation);
-          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->scale);
-          translate_br_object_all(z[index]->w->obj, (vec3){0.0f, -100, 0.0f});
-          add_animation_translate_br_manager(z[index]->w->obj, (vec3){0.0f, 100, 0.0f}, 1500);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->model);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->normal);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->translation);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->rotation);
+          glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->obj_manager->scale);
+          translate_br_object_all(z[index]->obj_manager, (vec3){0.0f, -100, 0.0f});
+          add_animation_translate_br_manager(z[index]->obj_manager, (vec3){0.0f, 100, 0.0f}, 1500);
+          if (z[index]->w != 0)
+          {
+            glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->model);
+            glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->normal);
+            glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->translation);
+            glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->rotation);
+            glm_mat4_copy(GLM_MAT4_IDENTITY, z[index]->w->obj->scale);
+            translate_br_object_all(z[index]->w->obj, (vec3){0.0f, -100, 0.0f});
+            add_animation_translate_br_manager(z[index]->w->obj, (vec3){0.0f, 100, 0.0f}, 1500);
+          }
         }
       }
     }
@@ -258,10 +277,13 @@ remove:
           c->previous_ids[i] >= 0 && c->previous_ids[i] < (int)get_size_DA(c->chunkinfo))
       {
         pushback_DA(c->delete_ids, &(c->previous_ids[i]));
-        add_animation_translate_br_manager(z[c->previous_ids[i]]->obj_manager, (vec3){0.0f, -100, 0.0f}, 1500);
-        if (z[c->previous_ids[i]]->w != 0)
+        if (animation)
         {
-          add_animation_translate_br_manager(z[c->previous_ids[i]]->w->obj, (vec3){0.0f, -100, 0.0f}, 1500);
+          add_animation_translate_br_manager(z[c->previous_ids[i]]->obj_manager, (vec3){0.0f, -100, 0.0f}, 1500);
+          if (z[c->previous_ids[i]]->w != 0)
+          {
+            add_animation_translate_br_manager(z[c->previous_ids[i]]->w->obj, (vec3){0.0f, -100, 0.0f}, 1500);
+          }
         }
       }
     }

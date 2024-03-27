@@ -32,11 +32,11 @@ typedef struct chunk_info
 } chunk_info;
 
 chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm,
-                          int dimensionx, int dimensionz, vec3 lightdir, float sealevel);
+                          int dimensionx, int dimensionz, vec3 lightdir, float sealevel, unsigned char facemerged);
 
 void delete_chunk_op(chunk_op *c);
 
-void update_chunk_op(chunk_op *c);
+void update_chunk_op(chunk_op *c, unsigned char animation);
 
 void use_chunk_op(chunk_op *c, GLuint program, camera *cam, unsigned char land0_water1);
 

@@ -73,7 +73,7 @@ void calculate_lighting_projection(lighting *l, int step)
 
 lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth, GLuint shadowMapHeight, float cascade0range,
 													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end,
-													vec3 fog_color, unsigned char deferred)
+													vec3 fog_color, unsigned char deferred, unsigned char ssao)
 {
 	lighting *l = malloc(sizeof(lighting));
 	l->programs = create_DA(sizeof(GLuint));
@@ -211,60 +211,63 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		glGenFramebuffers(1, &l->ssaofbo);
-		glGenFramebuffers(1, &l->ssaoblurfbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, l->ssaofbo);
-
-		glGenTextures(1, &l->ssaobuffer);
-		glBindTexture(GL_TEXTURE_2D, l->ssaobuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, clampColor);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, l->ssaobuffer, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, l->ssaoblurfbo);
-		glGenTextures(1, &l->ssaoblurbuffer);
-		glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, clampColor);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, l->ssaoblurbuffer, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		for (unsigned int i = 0; i < 64; ++i)
+		if (ssao)
 		{
-			l->ssaoKernel[i][0] = random_float(0, 1) * 2 - 1;
-			l->ssaoKernel[i][1] = random_float(0, 1) * 2 - 1;
-			l->ssaoKernel[i][2] = random_float(0, 1);
-			glm_normalize(l->ssaoKernel[i]);
-			glm_vec3_scale(l->ssaoKernel[i], random_float(0, 1), l->ssaoKernel[i]);
-			float scale = (float)i / 64.0f;
-			scale = glm_lerp(0.1f, 1.0f, scale * scale);
-			glm_vec3_scale(l->ssaoKernel[i], scale, l->ssaoKernel[i]);
-		}
-		for (unsigned int i = 0; i < 16; i++)
-		{
-			l->ssaoNoise[i][0] = random_float(0, 1) * 2 - 1;
-			l->ssaoNoise[i][1] = random_float(0, 1) * 2 - 1;
-			l->ssaoNoise[i][2] = 0;
-		}
-		glGenTextures(1, &l->noiseTexture);
-		glBindTexture(GL_TEXTURE_2D, l->noiseTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &l->ssaoNoise[0]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glGenFramebuffers(1, &l->ssaofbo);
+			glGenFramebuffers(1, &l->ssaoblurfbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, l->ssaofbo);
 
-		l->noiseScale[0] = l->windowwidth / 4.0f;
-		l->noiseScale[1] = l->windowheight / 4.0f;
+			glGenTextures(1, &l->ssaobuffer);
+			glBindTexture(GL_TEXTURE_2D, l->ssaobuffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, clampColor);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, l->ssaobuffer, 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, l->ssaoblurfbo);
+			glGenTextures(1, &l->ssaoblurbuffer);
+			glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+			glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, clampColor);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, l->ssaoblurbuffer, 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			for (unsigned int i = 0; i < 64; ++i)
+			{
+				l->ssaoKernel[i][0] = random_float(0, 1) * 2 - 1;
+				l->ssaoKernel[i][1] = random_float(0, 1) * 2 - 1;
+				l->ssaoKernel[i][2] = random_float(0, 1);
+				glm_normalize(l->ssaoKernel[i]);
+				glm_vec3_scale(l->ssaoKernel[i], random_float(0, 1), l->ssaoKernel[i]);
+				float scale = (float)i / 64.0f;
+				scale = glm_lerp(0.1f, 1.0f, scale * scale);
+				glm_vec3_scale(l->ssaoKernel[i], scale, l->ssaoKernel[i]);
+			}
+			for (unsigned int i = 0; i < 16; i++)
+			{
+				l->ssaoNoise[i][0] = random_float(0, 1) * 2 - 1;
+				l->ssaoNoise[i][1] = random_float(0, 1) * 2 - 1;
+				l->ssaoNoise[i][2] = 0;
+			}
+			glGenTextures(1, &l->noiseTexture);
+			glBindTexture(GL_TEXTURE_2D, l->noiseTexture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &l->ssaoNoise[0]);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+			l->noiseScale[0] = l->windowwidth / 4.0f;
+			l->noiseScale[1] = l->windowheight / 4.0f;
+		}
 		l->has_ssao = 0;
 
 		glGenFramebuffers(1, &l->deferredfbo);

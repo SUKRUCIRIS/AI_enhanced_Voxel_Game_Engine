@@ -20,6 +20,8 @@ typedef struct loads
   int chunk_range;
   int chunk_size;
   unsigned char loadgsu;
+  unsigned char ssao;
+  unsigned char facemerged;
 } loads;
 
 void loadres(void *ress)
@@ -57,7 +59,7 @@ void loadres(void *ress)
   resss->cam = create_camera(window_w, window_h, cam_pos, 60, 0.1f, render_distance, 1, 100, -90, angle_axis);
 
   resss->light = create_lighting((GLFWwindow *)resss->window, resss->cam, 4096, 4096, render_distance / 64, render_distance / 16,
-                                 render_distance / 4, render_distance, fog_start, fog_end, dark_fog_color, 1);
+                                 render_distance / 4, render_distance, fog_start, fog_end, dark_fog_color, 1, resss->ssao);
   resss->light->fxaa = 1;
   resss->light->vignette_pp = 1;
 
@@ -69,9 +71,11 @@ void loadres(void *ress)
   }
 
   float startpos[3] = {0, max((float)resss->hm[resss->dimensionx / 2][resss->dimensionz / 2], resss->sealevel) + 5.0f, 0};
-  resss->p = create_player(resss->cam, 3, 5, 0.75f, 2, 0.8f, 2, resss->hm, resss->dimensionx, resss->dimensionz, "./models/player.fbx", startpos, 80, 100, 70, 1);
+  resss->p = create_player(resss->cam, 3, 5, 0.75f, 2, 0.8f, 2, resss->hm, resss->dimensionx, resss->dimensionz,
+                           "./models/player.fbx", startpos, 80, 100, 70, 1);
 
-  resss->chunks = create_chunk_op(resss->chunk_size, resss->chunk_range, resss->p, resss->hm, resss->dimensionx, resss->dimensionz, 0, resss->sealevel);
+  resss->chunks = create_chunk_op(resss->chunk_size, resss->chunk_range, resss->p, resss->hm,
+                                  resss->dimensionx, resss->dimensionz, 0, resss->sealevel, resss->facemerged);
 
   resss->t = create_text_manager("./fonts/arial.ttf", 16, 1920, 1080, GL_LINEAR, GL_LINEAR);
 
@@ -90,7 +94,8 @@ void loadres(void *ress)
                            "./textures/skybox/eso/front.png",
                            "./textures/skybox/eso/back.png",
                            resss->cam, 0.00005f, rotate_axis);
-  resss->hm_boxes = create_hm_voxel_jolt(resss->hm, resss->dimensionx, resss->dimensionz, 0, 0, resss->dimensionx, resss->dimensionz, 0.2f, 0.2f, 1);
+  resss->hm_boxes = create_hm_voxel_jolt(resss->hm, resss->dimensionx, resss->dimensionz, 0, 0,
+                                         resss->dimensionx, resss->dimensionz, 0.2f, 0.2f, 1);
   optimize_jolt();
   free_model(gsu_model);
   glfwMakeContextCurrent(0);
@@ -98,7 +103,8 @@ void loadres(void *ress)
 }
 
 void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int dimensionz,
-              float sealevel, int chunk_range, int chunk_size, unsigned char loadgsu)
+              float sealevel, int chunk_range, int chunk_size, unsigned char loadgsu, unsigned char ssao,
+              unsigned char facemerged, unsigned char chunkanimations)
 {
   init_animations();
   float gravity[3] = {0, -10, 0};
@@ -113,6 +119,8 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
   resss.chunk_range = chunk_range;
   resss.chunk_size = chunk_size;
   resss.loadgsu = loadgsu;
+  resss.ssao = ssao;
+  resss.facemerged = facemerged;
   glfwMakeContextCurrent(0);
   Thread *load_thread = create_thread(loadres, &resss);
 
@@ -181,7 +189,7 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
     glfwPollEvents();
     poll_events((GLFWwindow *)window);
 
-    update_chunk_op(resss.chunks);
+    update_chunk_op(resss.chunks, chunkanimations);
     play_animations();
 
     if (get_key_pressed(GLFW_KEY_K) == 1)
@@ -230,11 +238,14 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
     glUseProgram(get_def_skybox_program());
     use_skybox(resss.s, get_def_skybox_program());
 
-    glUseProgram(get_def_ssao_program());
-    use_lighting_ssao(resss.light, get_def_ssao_program());
+    if (ssao)
+    {
+      glUseProgram(get_def_ssao_program());
+      use_lighting_ssao(resss.light, get_def_ssao_program());
 
-    glUseProgram(get_def_ssao_blur_program());
-    use_lighting_ssao_blur(resss.light, get_def_ssao_blur_program());
+      glUseProgram(get_def_ssao_blur_program());
+      use_lighting_ssao_blur(resss.light, get_def_ssao_blur_program());
+    }
 
     glUseProgram(get_def_deferred_br_program());
     use_lighting_deferred(resss.light, get_def_deferred_br_program());
@@ -253,7 +264,7 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
     }
 
     run_jolt((float)get_frame_timems() / 1000.0f);
-    end_game_loop_targetms(16.5);
+    end_game_loop();
   }
 
   delete_camera(resss.cam);
@@ -272,7 +283,8 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
 }
 
 void loadmenu(void *window, unsigned char usetexture, float sealevel, int chunk_range, int chunk_size,
-              int dimensionx, int dimensionz, int seedx, int seedz, unsigned char loadgsu)
+              int dimensionx, int dimensionz, int seedx, int seedz, unsigned char loadgsu, unsigned char ssao,
+              unsigned char facemerged, unsigned char chunkanimations)
 {
   int **hm = 0;
   if (usetexture)
@@ -296,7 +308,8 @@ void loadmenu(void *window, unsigned char usetexture, float sealevel, int chunk_
     delete_DA(heights);
   }
 
-  gameloop(window, hm, seedx, seedz, dimensionx, dimensionz, sealevel, chunk_range, chunk_size, loadgsu);
+  gameloop(window, hm, seedx, seedz, dimensionx, dimensionz, sealevel, chunk_range,
+           chunk_size, loadgsu, ssao, facemerged, chunkanimations);
 
   for (int i = 0; i < dimensionx; i++)
   {
