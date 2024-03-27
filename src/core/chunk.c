@@ -70,13 +70,13 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
     world_batch *batch = 0;
     if (i == 0)
     {
-      batch = create_world_batch(c->hm, y[i].startx, y[i].startz, c->chunk_size,
-                                 c->chunk_size, c->dimensionx, c->dimensionz, lightdir, sealevel, 1);
+      batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                            c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 1);
     }
     else
     {
-      batch = create_world_batch(c->hm, y[i].startx, y[i].startz, c->chunk_size,
-                                 c->chunk_size, c->dimensionx, c->dimensionz, lightdir, sealevel, 0);
+      batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
+                                            c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 0);
     }
     batch->chunk_id = i;
     pushback_DA(c->allbatch, &batch);
