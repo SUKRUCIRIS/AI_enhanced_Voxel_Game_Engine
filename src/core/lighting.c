@@ -92,7 +92,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 	l->lightDir[0] = 20;
 	l->lightDir[1] = 50;
 	l->lightDir[2] = 20;
-	l->specularStrength = 0.5f;
+	l->specularStrength = 0.2f;
 
 	l->center[0] = 0;
 	l->center[1] = 0;
@@ -140,7 +140,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 		glGenTextures(1, &l->gPosition);
 		glBindTexture(GL_TEXTURE_2D, l->gPosition);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, l->windowwidth, l->windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, l->windowwidth, l->windowheight, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -150,7 +150,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 		glGenTextures(1, &l->gNormal);
 		glBindTexture(GL_TEXTURE_2D, l->gNormal);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, l->windowwidth, l->windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, l->windowwidth, l->windowheight, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -160,7 +160,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 		glGenTextures(1, &l->gTexCoord);
 		glBindTexture(GL_TEXTURE_2D, l->gTexCoord);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, l->windowwidth, l->windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, l->windowwidth, l->windowheight, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -170,7 +170,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 		glGenTextures(1, &l->gTexCoordcopy);
 		glBindTexture(GL_TEXTURE_2D, l->gTexCoordcopy);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, l->windowwidth, l->windowheight, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, l->windowwidth, l->windowheight, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -217,7 +217,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 		glGenTextures(1, &l->ssaobuffer);
 		glBindTexture(GL_TEXTURE_2D, l->ssaobuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -228,7 +228,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 		glBindFramebuffer(GL_FRAMEBUFFER, l->ssaoblurfbo);
 		glGenTextures(1, &l->ssaoblurbuffer);
 		glBindTexture(GL_TEXTURE_2D, l->ssaoblurbuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, l->windowwidth, l->windowheight, 0, GL_RED, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -257,7 +257,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 		}
 		glGenTextures(1, &l->noiseTexture);
 		glBindTexture(GL_TEXTURE_2D, l->noiseTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 4, 4, 0, GL_RGB, GL_FLOAT, &l->ssaoNoise[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, &l->ssaoNoise[0]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -272,7 +272,7 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 
 		glGenTextures(1, &l->deferredtexture);
 		glBindTexture(GL_TEXTURE_2D, l->deferredtexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, l->windowwidth, l->windowheight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, l->windowwidth, l->windowheight, 0, GL_RGB, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);

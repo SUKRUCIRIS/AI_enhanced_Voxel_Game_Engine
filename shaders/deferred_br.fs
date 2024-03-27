@@ -13,6 +13,12 @@ uniform vec4 lightColor;
 uniform float ambient;
 uniform vec3 fog_color;
 
+uniform vec3 lightDir;
+uniform float specularStrength;
+uniform vec3 camPos;
+uniform float fog_start;
+uniform float fog_end;
+
 uniform mat4 view;
 uniform mat4 lightProjection[4];
 uniform float cascade0range;
@@ -33,16 +39,39 @@ void main(){
 		AmbientOcclusion=texture(ssao, TexCoords).r;
 	}
 
-  vec3 rgb=gtex.yzw;
+  vec3 rgb=gtex.xyz;
   vec3 normal=gnorm.xyz;
   vec3 crntPos=gpos.xyz;
-  float specular=gpos.w;
-  float diffuse=gnorm.w;
-  float fogmult=gtex.x;
+  float specular=0;
+  float diffuse=0;
+  float fogmult=0;
 
 	if(length(normal)==0){
 		FragColor=vec4(rgb,1);
 		return;
+	}
+
+	vec3 lightDirection = normalize(lightDir);
+	diffuse = max(dot(normal, lightDirection), 0.0f);
+
+	if(diffuse!=0){
+		vec3 viewDirection = normalize(camPos - crntPos);
+		vec3 reflectionDirection = reflect(-lightDirection, normal);
+		float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 2);
+		specular = specAmount * specularStrength;
+	}
+	float dist = distance(vec3(crntPos.x,0,crntPos.z), vec3(camPos.x,0,camPos.z));
+
+	if(dist >= fog_start){
+		if(dist >= fog_end){
+			fogmult = 1;
+		}
+		else{
+			fogmult = (dist - fog_start) / (fog_end - fog_start);
+		}
+	}
+	else{
+		fogmult = 0;
 	}
 
 	float depthValue = abs((view*vec4(crntPos,1.0f)).z);
