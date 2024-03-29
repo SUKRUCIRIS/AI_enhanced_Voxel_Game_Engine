@@ -147,6 +147,8 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
   float width, height;
   vec4 red = {1, 0, 0, 1};
 
+  unsigned char wireframe = 0;
+
   while (!glfwWindowShouldClose((GLFWwindow *)window))
   {
     start_game_loop();
@@ -168,20 +170,20 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
 
       if (seedx != -1 || seedz != -1)
       {
-        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\nPress R to disable/enable wireframe render\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
                                get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
         width = 0;
         height = 1080 - height;
-        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\nPress R to disable/enable wireframe render\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
                           get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
       }
       else
       {
-        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\nPress R to disable/enable wireframe render\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
                                get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
         width = 0;
         height = 1080 - height;
-        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\nPress R to disable/enable wireframe render\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
                           get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
       }
     }
@@ -220,11 +222,27 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
     {
       run_input_free_camera(resss.cam, (GLFWwindow *)window);
     }
+    if (get_key_pressed(GLFW_KEY_R))
+    {
+      if (wireframe == 0)
+      {
+        wireframe = 1;
+      }
+      else
+      {
+        wireframe = 0;
+      }
+    }
 
     glUseProgram(get_def_shadowmap_br_program());
     use_lighting_shadowpass(resss.light, get_def_shadowmap_br_program());
     use_chunk_op(resss.chunks, get_def_shadowmap_br_program(), resss.cam, 0);
     render_player(resss.p, get_def_shadowmap_br_program());
+
+    if (wireframe == 1)
+    {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
 
     glUseProgram(get_def_gbuffer_br_program());
     use_lighting_gbuffer(resss.light, get_def_gbuffer_br_program(), 1);
@@ -237,6 +255,11 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
 
     glUseProgram(get_def_skybox_program());
     use_skybox(resss.s, get_def_skybox_program());
+
+    if (wireframe == 1)
+    {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     if (ssao)
     {
