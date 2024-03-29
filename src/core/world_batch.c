@@ -254,13 +254,8 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 }
 
 void merge_top(br_object_manager *x, int **hm, int startx, int startz, int widthx, int widthz,
-							 int dimensionx, int dimensionz)
+							 int dimensionx, int dimensionz, unsigned char **done)
 {
-	unsigned char **done = (unsigned char **)calloc(widthz, sizeof(unsigned char *));
-	for (int i = 0; i < widthz; i++)
-	{
-		done[i] = (unsigned char *)calloc(widthx, sizeof(unsigned char));
-	}
 	float texture_i = 0;
 	for (int i = startx; i < startx + widthx; i++)
 	{
@@ -338,21 +333,11 @@ void merge_top(br_object_manager *x, int **hm, int startx, int startz, int width
 			}
 		}
 	}
-	for (int i = 0; i < widthz; i++)
-	{
-		free(done[i]);
-	}
-	free(done);
 }
 
 void merge_front(br_object_manager *x, int **hm, int startx, int startz, int widthx, int widthz,
-								 int dimensionx, int dimensionz)
+								 int dimensionx, int dimensionz, unsigned char **done)
 {
-	unsigned char **done = (unsigned char **)calloc(widthz, sizeof(unsigned char *));
-	for (int i = 0; i < widthz; i++)
-	{
-		done[i] = (unsigned char *)calloc(widthx, sizeof(unsigned char));
-	}
 	float texture_i = 0;
 	for (int i = startx; i < startx + widthx; i++)
 	{
@@ -451,21 +436,11 @@ void merge_front(br_object_manager *x, int **hm, int startx, int startz, int wid
 			}
 		}
 	}
-	for (int i = 0; i < widthz; i++)
-	{
-		free(done[i]);
-	}
-	free(done);
 }
 
 void merge_back(br_object_manager *x, int **hm, int startx, int startz, int widthx, int widthz,
-								int dimensionx, int dimensionz)
+								int dimensionx, int dimensionz, unsigned char **done)
 {
-	unsigned char **done = (unsigned char **)calloc(widthz, sizeof(unsigned char *));
-	for (int i = 0; i < widthz; i++)
-	{
-		done[i] = (unsigned char *)calloc(widthx, sizeof(unsigned char));
-	}
 	float texture_i = 0;
 	for (int i = startx; i < startx + widthx; i++)
 	{
@@ -564,21 +539,11 @@ void merge_back(br_object_manager *x, int **hm, int startx, int startz, int widt
 			}
 		}
 	}
-	for (int i = 0; i < widthz; i++)
-	{
-		free(done[i]);
-	}
-	free(done);
 }
 
 void merge_left(br_object_manager *x, int **hm, int startx, int startz, int widthx, int widthz,
-								int dimensionx, int dimensionz)
+								int dimensionx, int dimensionz, unsigned char **done)
 {
-	unsigned char **done = (unsigned char **)calloc(widthz, sizeof(unsigned char *));
-	for (int i = 0; i < widthz; i++)
-	{
-		done[i] = (unsigned char *)calloc(widthx, sizeof(unsigned char));
-	}
 	float texture_i = 0;
 	for (int i = startx; i < startx + widthx; i++)
 	{
@@ -677,21 +642,11 @@ void merge_left(br_object_manager *x, int **hm, int startx, int startz, int widt
 			}
 		}
 	}
-	for (int i = 0; i < widthz; i++)
-	{
-		free(done[i]);
-	}
-	free(done);
 }
 
 void merge_right(br_object_manager *x, int **hm, int startx, int startz, int widthx, int widthz,
-								 int dimensionx, int dimensionz)
+								 int dimensionx, int dimensionz, unsigned char **done)
 {
-	unsigned char **done = (unsigned char **)calloc(widthz, sizeof(unsigned char *));
-	for (int i = 0; i < widthz; i++)
-	{
-		done[i] = (unsigned char *)calloc(widthx, sizeof(unsigned char));
-	}
 	float texture_i = 0;
 	for (int i = startx; i < startx + widthx; i++)
 	{
@@ -790,11 +745,6 @@ void merge_right(br_object_manager *x, int **hm, int startx, int startz, int wid
 			}
 		}
 	}
-	for (int i = 0; i < widthz; i++)
-	{
-		free(done[i]);
-	}
-	free(done);
 }
 
 void merge_vertical(br_object_manager *x, int **hm, int startx, int startz, int widthx, int widthz,
@@ -893,7 +843,7 @@ void merge_vertical(br_object_manager *x, int **hm, int startx, int startz, int 
 
 world_batch *create_world_batch_facemerged(int **hm, int startx, int startz, int widthx, int widthz,
 																					 int dimensionx, int dimensionz, float sealevel,
-																					 unsigned char create_water_physic)
+																					 unsigned char create_water_physic, unsigned char **done)
 {
 	if (startx >= dimensionx || startz >= dimensionz)
 	{
@@ -934,11 +884,31 @@ world_batch *create_world_batch_facemerged(int **hm, int startx, int startz, int
 		x->w = 0;
 	}
 
-	merge_top(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz);
-	merge_front(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz);
-	merge_back(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz);
-	merge_left(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz);
-	merge_right(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz);
+	for (int i = 0; i < widthx; i++)
+	{
+		memset(done[i], 0, sizeof(unsigned char) * widthz);
+	}
+	merge_top(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz, done);
+	for (int i = 0; i < widthx; i++)
+	{
+		memset(done[i], 0, sizeof(unsigned char) * widthz);
+	}
+	merge_front(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz, done);
+	for (int i = 0; i < widthx; i++)
+	{
+		memset(done[i], 0, sizeof(unsigned char) * widthz);
+	}
+	merge_back(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz, done);
+	for (int i = 0; i < widthx; i++)
+	{
+		memset(done[i], 0, sizeof(unsigned char) * widthz);
+	}
+	merge_left(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz, done);
+	for (int i = 0; i < widthx; i++)
+	{
+		memset(done[i], 0, sizeof(unsigned char) * widthz);
+	}
+	merge_right(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz, done);
 	merge_vertical(x->obj_manager, hm, startx, startz, widthx, widthz, dimensionx, dimensionz);
 
 	prepare_render_br_object_manager(x->obj_manager);

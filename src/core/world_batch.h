@@ -16,7 +16,7 @@ world_batch *create_world_batch(int **hm, int startx, int startz, int widthx, in
 
 world_batch *create_world_batch_facemerged(int **hm, int startx, int startz, int widthx, int widthz,
 																					 int dimensionx, int dimensionz, float sealevel,
-																					 unsigned char create_water_physic);
+																					 unsigned char create_water_physic, unsigned char **done);
 
 void use_world_batch_land(world_batch *w, GLuint land_program);
 

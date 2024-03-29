@@ -24,6 +24,8 @@ Make sure that you use x64 native tools command prompt for vs.
 msbuild voxel_engine.sln /p:Configuration=Release /p:Platform=x64
 ```
 
+Then run the ./voxel_engine.exe
+
 ## Şükrü Çiriş
 
 All rights reserved.

@@ -68,6 +68,11 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
   }
   trim_DA(c->chunkinfo);
   chunk_info *y = get_data_DA(c->chunkinfo);
+  unsigned char **done = (unsigned char **)calloc(c->chunk_size, sizeof(unsigned char *));
+  for (unsigned int i2 = 0; i2 < c->chunk_size; i2++)
+  {
+    done[i2] = (unsigned char *)calloc(c->chunk_size, sizeof(unsigned char));
+  }
   for (unsigned int i = 0; i < get_size_DA(c->chunkinfo); i++)
   {
     world_batch *batch = 0;
@@ -76,12 +81,12 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       if (i == 0)
       {
         batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
-                                              c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 1);
+                                              c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 1, done);
       }
       else
       {
         batch = create_world_batch_facemerged(c->hm, y[i].startx, y[i].startz, c->chunk_size,
-                                              c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 0);
+                                              c->chunk_size, c->dimensionx, c->dimensionz, sealevel, 0, done);
       }
     }
     else
@@ -125,6 +130,11 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
     delete_cpu_memory_br_object_manager(batch->obj_manager);
     delete_cpu_memory_br_object_manager(batch->w->obj);
   }
+  for (unsigned int i2 = 0; i2 < c->chunk_size; i2++)
+  {
+    free(done[i2]);
+  }
+  free(done);
   trim_DA(c->allbatch);
   c->previous_ids = 0;
   c->current_ids = malloc(sizeof(int) * c->renderedchunkcount);
