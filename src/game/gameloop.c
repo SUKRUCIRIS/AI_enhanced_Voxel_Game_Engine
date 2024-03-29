@@ -28,8 +28,10 @@ void loadres(void *ress)
 {
   loads *resss = (loads *)ress;
   glfwMakeContextCurrent((GLFWwindow *)resss->window);
+  int window_w = 0, window_h = 0;
+  glfwGetWindowSize((GLFWwindow *)resss->window, &window_w, &window_h);
   {
-    text_manager *t = create_text_manager("./fonts/arial.ttf", 128, 1920, 1080, GL_LINEAR, GL_LINEAR);
+    text_manager *t = create_text_manager("./fonts/arial.ttf", 128, 1920, 1080, window_w, window_h, GL_LINEAR, GL_LINEAR);
     float width, height;
     vec4 red = {1, 1, 1, 1};
     get_text_size(t, 1, "Loading...", &width, &height);
@@ -52,8 +54,6 @@ void loadres(void *ress)
   // vec3 fair_fog_color = {0.718f, 0.702f, 0.671f};
   vec3 dark_fog_color = {0.0718f, 0.0702f, 0.0671f};
 
-  int window_w = 0, window_h = 0;
-  glfwGetWindowSize((GLFWwindow *)resss->window, &window_w, &window_h);
   vec3 cam_pos = {0.0f, 5, 60.0f};
   vec3 angle_axis = {0, 1, 0};
   resss->cam = create_camera(window_w, window_h, cam_pos, 60, 0.1f, render_distance, 1, 100, -90, angle_axis);
@@ -77,7 +77,7 @@ void loadres(void *ress)
   resss->chunks = create_chunk_op(resss->chunk_size, resss->chunk_range, resss->p, resss->hm,
                                   resss->dimensionx, resss->dimensionz, 0, resss->sealevel, resss->facemerged);
 
-  resss->t = create_text_manager("./fonts/arial.ttf", 16, 1920, 1080, GL_LINEAR, GL_LINEAR);
+  resss->t = create_text_manager("./fonts/arial.ttf", 16, 1920, 1080, window_w, window_h, GL_LINEAR, GL_LINEAR);
 
   float width, height;
   vec4 red = {1, 0, 0, 1};
@@ -168,21 +168,21 @@ void gameloop(void *window, int **hm, int seedx, int seedz, int dimensionx, int 
 
       if (seedx != -1 || seedz != -1)
       {
-        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
-                               get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+                               get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
         width = 0;
         height = 1080 - height;
-        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
-                          get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nSeedx: %d\nSeedz: %d\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+                          get_frame_timems(), seedx, seedz, get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
       }
       else
       {
-        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
-                               get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+        get_text_size_variadic(resss.t, 1, &width, &height, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+                               get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
         width = 0;
         height = 1080 - height;
-        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA",
-                          get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2]);
+        add_text_variadic(resss.t, width, height, 1, 1, red, "Frame: %.2lf ms\nUsing heightmap texture\n\nJolt Body Count: %d\nJolt Active Body Count: %d\nJolt Gravity: {%.2lf | %.2lf | %.2lf}\n\nPress K to change camera\nPress F to disable/enable FXAA\n\nWhole world triangle count: %d\nCurrently rendering triangle count: %d",
+                          get_frame_timems(), get_body_count_jolt(), get_active_body_count_jolt(), gravity[0], gravity[1], gravity[2], get_world_triangle_count(), get_rendered_triangle_count());
       }
     }
 

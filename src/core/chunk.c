@@ -5,6 +5,9 @@ struct aiScene *gsu_model = 0;
 int gsu_x = 64, gsu_z = 32, gsu_y = 50, gsu_h = 16;
 unsigned char gsu_can_exist = 0;
 
+int worldtrianglecount = 0;
+int currenttrianglecount = 0;
+
 void set_gsu_model(struct aiScene *model)
 {
   gsu_model = model;
@@ -117,7 +120,10 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       free(gsu.textures);
       free(gsu.meshes);
     }
+    worldtrianglecount += batch->obj_manager->indice_number / 3;
+    worldtrianglecount += batch->w->obj->indice_number / 3;
     delete_cpu_memory_br_object_manager(batch->obj_manager);
+    delete_cpu_memory_br_object_manager(batch->w->obj);
   }
   trim_DA(c->allbatch);
   c->previous_ids = 0;
@@ -163,6 +169,7 @@ unsigned char inarray(int x, int *array, int size)
 
 void update_chunk_op(chunk_op *c, unsigned char animation)
 {
+  currenttrianglecount = 0;
   // remove deleted chunks after remove animation
   world_batch **z = get_data_DA(c->allbatch);
 remove:
@@ -325,11 +332,23 @@ void use_chunk_op(chunk_op *c, GLuint program, camera *cam, unsigned char land0_
       if (land0_water1 == 0)
       {
         use_world_batch_land(x[i], program);
+        currenttrianglecount += x[i]->obj_manager->indice_number / 3;
       }
       else
       {
         use_world_batch_water(x[i], program);
+        currenttrianglecount += x[i]->w->obj->indice_number / 3;
       }
     }
   }
+}
+
+int get_world_triangle_count(void)
+{
+  return worldtrianglecount;
+}
+
+int get_rendered_triangle_count(void)
+{
+  return currenttrianglecount;
 }

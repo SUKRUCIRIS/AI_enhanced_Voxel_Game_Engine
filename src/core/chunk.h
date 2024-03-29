@@ -41,3 +41,7 @@ void update_chunk_op(chunk_op *c, unsigned char animation);
 void use_chunk_op(chunk_op *c, GLuint program, camera *cam, unsigned char land0_water1);
 
 void set_gsu_model(struct aiScene *model);
+
+int get_world_triangle_count(void);
+
+int get_rendered_triangle_count(void);

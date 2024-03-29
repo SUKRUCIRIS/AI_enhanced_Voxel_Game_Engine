@@ -4,22 +4,49 @@ import os
 
 
 def install(package: str):
-    listx = [sys.executable, "-m", "pip", "install", "--upgrade"]
+    listx = [sys.executable, "-m", "pip", "install"]
     listx.extend(package.split(" "))
     subprocess.check_call(listx)
 
 
 def install_dependencies():
-    install(
-        "torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118"
-    )
-    install("diffusers")
-    install("accelerate")
-    install("transformers")
-    install("safetensors")
-    install("peft")
-    install("tk")
-    install("requests")
+    try:
+        import torch
+
+        if not torch.cuda.is_available():
+            raise Exception("no cuda")
+    except:
+        install(
+            "--upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118"
+        )
+    try:
+        import diffusers
+    except:
+        install("diffusers")
+    try:
+        import accelerate
+    except:
+        install("accelerate")
+    try:
+        import transformers
+    except:
+        install("transformers")
+    try:
+        import safetensors
+    except:
+        install("safetensors")
+    try:
+        import peft
+    except:
+        install("peft")
+    try:
+        import tk
+    except:
+        install("tk")
+    try:
+        import requests
+    except:
+        install("requests")
     if not os.path.exists(".\\aimodels\\hm.safetensors"):
         import requests
         import shutil

@@ -206,7 +206,35 @@ ai_button.invoke()
 
 
 lblb = Label(window, text="", bg="#26242f", fg="white")
-lblb.grid(column=1, row=15)
+lblb.grid(column=1, row=20)
+
+vsyncvar = IntVar()
+vsync = Checkbutton(window, text="Vsync", variable=vsyncvar, onvalue=1, offvalue=0)
+vsync.grid(column=1, row=11, pady=5)
+
+fullscreenvar = IntVar()
+fullscreen = Checkbutton(
+    window, text="Fullscreen", variable=fullscreenvar, onvalue=1, offvalue=0
+)
+fullscreenvar.set(1)
+fullscreen.grid(column=1, row=12, pady=5)
+
+ssaovar = IntVar()
+ssao = Checkbutton(window, text="SSAO", variable=ssaovar, onvalue=1, offvalue=0)
+ssao.grid(column=1, row=13, pady=5)
+
+facemergedvar = IntVar()
+facemerged = Checkbutton(
+    window, text="Greedy Meshing", variable=facemergedvar, onvalue=1, offvalue=0
+)
+facemergedvar.set(1)
+facemerged.grid(column=1, row=14, pady=5)
+
+chunkanimvar = IntVar()
+chunkanim = Checkbutton(
+    window, text="Chunk Load Animations", variable=chunkanimvar, onvalue=1, offvalue=0
+)
+chunkanim.grid(column=1, row=15, pady=5)
 
 
 def replace(source_text, modified_text, text_filename):
@@ -254,6 +282,31 @@ def replacing_jobs():
     replace(
         "int dimensionz",
         "int dimensionz = " + Worldsizez.get() + ";",
+        ".\\src\\main.c",
+    )
+    replace(
+        "unsigned char vsync",
+        "unsigned char vsync = " + vsyncvar.get().__str__() + ";",
+        ".\\src\\main.c",
+    )
+    replace(
+        "unsigned char fullscreen",
+        "unsigned char fullscreen = " + fullscreenvar.get().__str__() + ";",
+        ".\\src\\main.c",
+    )
+    replace(
+        "unsigned char ssao",
+        "unsigned char ssao = " + ssaovar.get().__str__() + ";",
+        ".\\src\\main.c",
+    )
+    replace(
+        "unsigned char facemerged",
+        "unsigned char facemerged = " + facemergedvar.get().__str__() + ";",
+        ".\\src\\main.c",
+    )
+    replace(
+        "unsigned char chunkanimations",
+        "unsigned char chunkanimations = " + chunkanimvar.get().__str__() + ";",
         ".\\src\\main.c",
     )
     if switch_variable.get() == "AI":
@@ -318,7 +371,7 @@ btn = Button(
     window, text="Compile", command=lambda: threading.Thread(target=clicked).start()
 )
 
-btn.grid(column=1, row=14, pady=10)
+btn.grid(column=1, row=19, pady=10)
 
 
 window.mainloop()

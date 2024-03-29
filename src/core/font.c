@@ -6,7 +6,8 @@
 #include <Windows.h>
 #endif
 
-text_manager *create_text_manager(const char *font_file, int height, int screenwidth, int screenheight, GLint min_filter, GLint mag_filter)
+text_manager *create_text_manager(const char *font_file, int height, int screenwidth, int screenheight,
+                                  int realsw, int realsh, GLint min_filter, GLint mag_filter)
 {
   FT_Library ft;
   if (FT_Init_FreeType(&ft))
@@ -49,6 +50,8 @@ text_manager *create_text_manager(const char *font_file, int height, int screenw
     f->theight = max(f->theight, face->glyph->bitmap.rows);
   }
 
+  f->twidth += 95; // extra 1 pixel between textures
+
   glGenTextures(1, &f->font_textures);
   glBindTexture(GL_TEXTURE_2D, f->font_textures);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -56,8 +59,8 @@ text_manager *create_text_manager(const char *font_file, int height, int screenw
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, f->twidth, f->theight, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
-  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   float clampColor[] = {1.0f, 1.0f, 1.0f, 0};
   glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, clampColor);
@@ -75,13 +78,15 @@ text_manager *create_text_manager(const char *font_file, int height, int screenw
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, face->glyph->bitmap.width, face->glyph->bitmap.rows,
                     GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
     f->xoffset[c - 32] = (float)x / (float)f->twidth;
-    x += face->glyph->bitmap.width;
+    x += face->glyph->bitmap.width + 1;
   }
 
   FT_Done_Face(face);
   FT_Done_FreeType(ft);
   f->screenwidth = screenwidth;
   f->screenheight = screenheight;
+  f->realsw = realsw;
+  f->realsh = realsh;
   glm_ortho(0.0f, (float)screenwidth, 0.0f, (float)screenheight, -100.0f, 100.0f, f->projection);
   f->VAO = 0;
   f->VBO = 0;
@@ -239,7 +244,7 @@ void use_text_manager(text_manager *f, GLuint program)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, f->screenwidth, f->screenheight);
+    glViewport(0, 0, f->realsw, f->realsh);
     glClear(GL_DEPTH_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE31);
     glBindTexture(GL_TEXTURE_2D, f->font_textures);

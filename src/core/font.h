@@ -21,10 +21,12 @@ typedef struct text_manager
   DA *uniforms;
   unsigned char newdata;
   int screenwidth, screenheight;
+  int realsw, realsh;
   unsigned int twidth, theight;
 } text_manager;
 
-text_manager *create_text_manager(const char *font_file, int height, int screenwidth, int screenheight, GLint min_filter, GLint mag_filter);
+text_manager *create_text_manager(const char *font_file, int height, int screenwidth, int screenheight,
+                                  int realsw, int realsh, GLint min_filter, GLint mag_filter);
 
 void delete_text_manager(text_manager *f);
 
