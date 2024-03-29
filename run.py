@@ -362,9 +362,15 @@ def clicked():
     os.chdir("..")
     lblb.configure(text="Running...")
     lblb.update()
-    subprocess.run(".\\voxel_engine.exe", shell=True)
+    subprocess.Popen(
+        [".\\voxel_engine.exe"],
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     lblb.configure(text="")
     lblb.update()
+    os._exit(os.EX_OK)
 
 
 btn = Button(
