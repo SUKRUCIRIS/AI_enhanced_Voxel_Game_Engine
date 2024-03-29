@@ -1,6 +1,7 @@
 #include "skybox.h"
 #include "stdlib.h"
 #include "../../third_party/stb/stb_image.h"
+#include "timing.h"
 
 float skyboxVertices[] =
     {
@@ -37,7 +38,7 @@ unsigned int skyboxIndices[] =
 
 skybox *create_skybox(const char *right_texture, const char *left_texture, const char *top_texture,
                       const char *bottom_texture, const char *front_texture, const char *back_texture,
-                      camera *cam, float rotate_frame, vec3 rotate_axis)
+                      camera *cam, float rotate_frame_ms, vec3 rotate_axis)
 {
   skybox *s = malloc(sizeof(skybox));
   glGenVertexArrays(1, &s->VAO);
@@ -237,7 +238,7 @@ skybox *create_skybox(const char *right_texture, const char *left_texture, const
   }
   glm_vec3_copy(rotate_axis, s->rotate_axis);
   glm_normalize(s->rotate_axis);
-  s->rotate_frame = rotate_frame;
+  s->rotate_frame = rotate_frame_ms;
   s->rotate_full = 0;
   return s;
 }
@@ -261,7 +262,7 @@ void use_skybox(skybox *s, GLuint program)
   glm_mat4_identity(s->result);
   glm_mat4_ins3(x, s->result);
   glm_mat4_mul(s->cam->projection, s->result, s->result);
-  s->rotate_full += s->rotate_frame;
+  s->rotate_full += s->rotate_frame * (float)get_frame_timems();
   s->rotate_full = fmodf(s->rotate_full, 360.0f);
   glm_rotate(s->result, s->rotate_full, s->rotate_axis);
   if (get_index_DA(s->programs, &program) == UINT_MAX)

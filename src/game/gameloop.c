@@ -93,7 +93,7 @@ void loadres(void *ress)
                            "./textures/skybox/eso/bottom.png",
                            "./textures/skybox/eso/front.png",
                            "./textures/skybox/eso/back.png",
-                           resss->cam, 0.00005f, rotate_axis);
+                           resss->cam, 0.000001f, rotate_axis);
   resss->hm_boxes = create_hm_voxel_jolt(resss->hm, resss->dimensionx, resss->dimensionz, 0, 0,
                                          resss->dimensionx, resss->dimensionz, 0.2f, 0.2f, 1);
   optimize_jolt();

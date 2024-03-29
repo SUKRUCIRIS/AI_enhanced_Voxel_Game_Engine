@@ -15,7 +15,7 @@ typedef struct skybox
 
 skybox *create_skybox(const char *right_texture, const char *left_texture, const char *top_texture,
                       const char *bottom_texture, const char *front_texture, const char *back_texture,
-                      camera *cam, float rotate_frame, vec3 rotate_axis);
+                      camera *cam, float rotate_frame_ms, vec3 rotate_axis);
 
 void delete_skybox(skybox *s);
 
