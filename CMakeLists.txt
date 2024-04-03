@@ -33,10 +33,16 @@ set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
 
+set(SOLOUD_STATIC ON CACHE BOOL "" FORCE)
+set(SOLOUD_C_API ON CACHE BOOL "" FORCE)
+set(SOLOUD_BACKEND_SDL2 OFF CACHE BOOL "" FORCE)
+
 set(OVERRIDE_CXX_FLAGS ON CACHE BOOL "" FORCE)
 set(OVERRIDE_C_FLAGS ON CACHE BOOL "" FORCE)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+
+	set(SOLOUD_BACKEND_XAUDIO2 ON CACHE BOOL "" FORCE)
 
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 	set(CMAKE_GENERATOR_PLATFORM x64)
@@ -51,6 +57,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	add_subdirectory(third_party/assimp)
 	add_subdirectory(third_party/freetype)
 	add_subdirectory(third_party/jolt/Build)
+	add_subdirectory(third_party/soloud/contrib)
 
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/cglm/include)
@@ -61,6 +68,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/build/third_party/assimp/include)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype/include)
 	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/jolt)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/soloud/include)
 
 	FILE(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 	add_executable(
@@ -72,7 +80,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 	)
 
 	find_package(OpenGL REQUIRED)
-	target_link_libraries(voxel_engine cglm glfw assimp freetype Jolt msvcrt OpenGL::GL)
+	target_link_libraries(voxel_engine cglm glfw assimp freetype Jolt msvcrt OpenGL::GL soloud)
 	target_compile_options(voxel_engine PUBLIC /MT)
 
 	set_target_properties(voxel_engine PROPERTIES WIN32_EXECUTABLE TRUE)
