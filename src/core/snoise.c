@@ -144,6 +144,7 @@ int **create_heightmap(int dimensionx, int dimensionz, int seedx, int seedz, flo
 	float fractal_res = 0;
 	float param1 = 0, param2 = 0;
 	float amplitude2 = amplitude;
+	float slopex = 1, slopez = 1;
 	for (int i = 0; i < dimensionx; i++)
 	{
 		hm[i] = malloc(sizeof(int) * dimensionz);
@@ -156,7 +157,16 @@ int **create_heightmap(int dimensionx, int dimensionz, int seedx, int seedz, flo
 			for (int i3 = 0; i3 < octaves; i3++)
 			{
 				simple_res = (snoise2(param1, param2) + 1) / 2.0f;
-				fractal_res += simple_res * amplitude2;
+				if (i3 == 0)
+				{
+					slopex = (snoise2(param1 + 1, param2) + 1) / 2.0f - simple_res;
+					slopez = (snoise2(param1, param2 + 1) + 1) / 2.0f - simple_res;
+					fractal_res += simple_res * amplitude2;
+				}
+				else
+				{
+					fractal_res += simple_res * amplitude2 * (1 - ((slopex + slopez) / 2));
+				}
 				param1 *= lacunarity;
 				param2 *= lacunarity;
 				amplitude2 *= persistence;

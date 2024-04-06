@@ -41,8 +41,8 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       chunk_info x = {
           .startx = i * c->chunk_size,
           .startz = i2 * c->chunk_size,
-          .minz = -200,
-          .maxz = 200,
+          .minz = -1000,
+          .maxz = 1000,
           .minxy = {
               (float)(i * c->chunk_size) - (int)(dimensionx / 2),
               (float)(i2 * c->chunk_size) - (int)(dimensionz / 2)},

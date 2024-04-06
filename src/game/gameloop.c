@@ -325,7 +325,7 @@ void loadmenu(void *window, unsigned char usetexture, float sealevel, int chunk_
     int tmpi[] = {0, 35, 36, 47, 50, 50, 50, 52, 57, 64, 75, 85, 91, 93, 94, 94, 96, 100};
     pushback_many_DA(heights, tmpi, 18);
 
-    hm = create_heightmap(dimensionx, dimensionz, seedx, seedz, 600, 0, 0, 0, 3, 2, 3, 0.3f, 30);
+    hm = create_heightmap(dimensionx, dimensionz, seedx, seedz, 1000, 0, 0, 0, 3, 2, 3, 0.3f, 30);
 
     delete_DA(points);
     delete_DA(heights);
