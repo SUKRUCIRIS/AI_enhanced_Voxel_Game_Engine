@@ -63,8 +63,9 @@ void use_texture(texture *tex, GLuint program)
 		pushback_DA(tex->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(tex->uniforms);
-	glUniform1f(uniforms[get_index_DA(tex->programs, &program) * 2], tex->shininess);
-	glUniform1i(uniforms[get_index_DA(tex->programs, &program) * 2 + 1], 0);
+	unsigned int index = get_index_DA(tex->programs, &program);
+	glUniform1f(uniforms[index * 2], tex->shininess);
+	glUniform1i(uniforms[index * 2 + 1], 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(tex->type, tex->id);
 }

@@ -265,8 +265,9 @@ void use_text_manager(text_manager *f, GLuint program)
       pushback_DA(f->uniforms, &uniform);
     }
     GLint *uniforms = get_data_DA(f->uniforms);
-    glUniformMatrix4fv(uniforms[get_index_DA(f->programs, &program) * 2], 1, GL_FALSE, f->projection[0]);
-    glUniform1i(uniforms[get_index_DA(f->programs, &program) * 2 + 1], 31);
+    unsigned int index = get_index_DA(f->programs, &program);
+    glUniformMatrix4fv(uniforms[index * 2], 1, GL_FALSE, f->projection[0]);
+    glUniform1i(uniforms[index * 2 + 1], 31);
 
     glBindVertexArray(f->VAO);
     glDrawElements(GL_TRIANGLES, get_size_DA(f->indices), GL_UNSIGNED_INT, 0);

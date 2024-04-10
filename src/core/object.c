@@ -49,8 +49,8 @@ void translate_object(object *obj, vec3 v, unsigned char effect_physic)
 }
 
 object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usage, GLuint *indices,
-					  unsigned int indice_number, unsigned char is_tex_vertex, unsigned char is_norm_vertex, unsigned char has_physics,
-					  unsigned char priority, float mass, float friction, float bounce)
+											unsigned int indice_number, unsigned char is_tex_vertex, unsigned char is_norm_vertex, unsigned char has_physics,
+											unsigned char priority, float mass, float friction, float bounce)
 {
 	if (vertices == 0 || vertex_number == 0)
 	{
@@ -270,10 +270,11 @@ void use_object(object *obj, GLuint program)
 		pushback_DA(obj->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(obj->uniforms);
-	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2], 1, GL_FALSE, obj->model[0]);
+	unsigned int index = get_index_DA(obj->programs, &program);
+	glUniformMatrix4fv(uniforms[index * 2], 1, GL_FALSE, obj->model[0]);
 	glm_mat4_inv(obj->model, obj->normal);
 	glm_mat4_transpose(obj->normal);
-	glUniformMatrix4fv(uniforms[get_index_DA(obj->programs, &program) * 2 + 1], 1, GL_FALSE, obj->normal[0]);
+	glUniformMatrix4fv(uniforms[index * 2 + 1], 1, GL_FALSE, obj->normal[0]);
 	glBindVertexArray(obj->VAO);
 	if (obj->indice_number == 0)
 	{
@@ -305,7 +306,7 @@ object *create_object_copy(object *obj, unsigned char has_physics)
 	if (has_physics)
 	{
 		obj_new->phy = create_physic(obj->phy->first_minaabb, obj->phy->first_maxaabb, obj->phy->priority,
-									 obj->phy->mass, obj->phy->friction, obj->phy->bounce, obj_new, 0);
+																 obj->phy->mass, obj->phy->friction, obj->phy->bounce, obj_new, 0);
 	}
 	if (objects == 0)
 	{

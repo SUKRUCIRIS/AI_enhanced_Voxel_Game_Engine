@@ -314,8 +314,9 @@ void use_br_object_manager(br_object_manager *manager, GLuint program)
 		glm_mat4_mulN((mat4 *[]){&manager->translation, &manager->rotation, &manager->scale}, 3, manager->model);
 		glm_mat4_inv(manager->model, manager->normal);
 		glm_mat4_transpose(manager->normal);
-		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2], 1, GL_FALSE, manager->model[0]);
-		glUniformMatrix4fv(uniforms[get_index_DA(manager->programs, &program) * 2 + 1], 1, GL_FALSE, manager->normal[0]);
+		unsigned int index = get_index_DA(manager->programs, &program);
+		glUniformMatrix4fv(uniforms[index * 2], 1, GL_FALSE, manager->model[0]);
+		glUniformMatrix4fv(uniforms[index * 2 + 1], 1, GL_FALSE, manager->normal[0]);
 
 		if (manager->subdata == 1)
 		{

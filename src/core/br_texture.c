@@ -134,5 +134,6 @@ void use_br_texture_manager(br_texture_manager *manager, GLuint program)
 		pushback_DA(manager->uniforms, &uniform);
 	}
 	GLint *uniforms = get_data_DA(manager->uniforms);
-	glUniform1iv(uniforms[get_index_DA(manager->programs, &program)], 32, manager->indices);
+	unsigned int index = get_index_DA(manager->programs, &program);
+	glUniform1iv(uniforms[index], 32, manager->indices);
 }

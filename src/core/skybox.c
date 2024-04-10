@@ -274,8 +274,9 @@ void use_skybox(skybox *s, GLuint program)
     pushback_DA(s->uniforms, &uniform);
   }
   GLint *uniforms = get_data_DA(s->uniforms);
-  glUniformMatrix4fv(uniforms[get_index_DA(s->programs, &program) * 2], 1, GL_FALSE, s->result[0]);
-  glUniform1i(uniforms[get_index_DA(s->programs, &program) * 2 + 1], 0);
+  unsigned int index = get_index_DA(s->programs, &program);
+  glUniformMatrix4fv(uniforms[index * 2], 1, GL_FALSE, s->result[0]);
+  glUniform1i(uniforms[index * 2 + 1], 0);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_CUBE_MAP, s->cubemap);
   glBindVertexArray(s->VAO);
