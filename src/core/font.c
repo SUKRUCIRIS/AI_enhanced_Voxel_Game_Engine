@@ -59,15 +59,20 @@ text_manager *create_text_manager(const char *font_file, int height, int screenw
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, f->twidth, f->theight, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
-  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-  float clampColor[] = {1.0f, 1.0f, 1.0f, 0};
-  glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, clampColor);
+  if (min_filter == GL_NEAREST_MIPMAP_NEAREST ||
+      min_filter == GL_LINEAR_MIPMAP_NEAREST ||
+      min_filter == GL_NEAREST_MIPMAP_LINEAR ||
+      min_filter == GL_LINEAR_MIPMAP_LINEAR)
+  {
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
 
   int x = 0;
 
-  for (unsigned char c = 32; c < 128; c++)
+  for (unsigned char c = 32; c < 127; c++)
   {
     if (FT_Load_Char(face, c, FT_LOAD_RENDER))
     {
@@ -75,8 +80,11 @@ text_manager *create_text_manager(const char *font_file, int height, int screenw
       MessageBox(0, "FT_Load_Char Error", "Error", 0);
 #endif
     }
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, face->glyph->bitmap.width, face->glyph->bitmap.rows,
-                    GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+    if (face->glyph->bitmap.buffer != 0)
+    {
+      glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, face->glyph->bitmap.width, face->glyph->bitmap.rows,
+                      GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+    }
     f->xoffset[c - 32] = (float)x / (float)f->twidth;
     x += face->glyph->bitmap.width + 1;
   }

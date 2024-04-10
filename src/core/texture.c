@@ -36,7 +36,13 @@ texture *load_texture(const char *path, GLenum texType, GLenum pixelType, GLint 
 	glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexImage2D(texType, 0, GL_RGBA, widthImg, heightImg, 0, format, pixelType, bytes);
-	glGenerateMipmap(texType);
+	if (min_filter == GL_NEAREST_MIPMAP_NEAREST ||
+			min_filter == GL_LINEAR_MIPMAP_NEAREST ||
+			min_filter == GL_NEAREST_MIPMAP_LINEAR ||
+			min_filter == GL_LINEAR_MIPMAP_LINEAR)
+	{
+		glGenerateMipmap(texType);
+	}
 	stbi_image_free(bytes);
 	glBindTexture(texType, 0);
 	tex->type = texType;

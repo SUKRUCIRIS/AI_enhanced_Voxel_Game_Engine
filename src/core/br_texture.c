@@ -51,7 +51,13 @@ br_texture *create_br_texture(br_texture_manager *manager, const char *path, GLe
 	glTexParameteri(texType, GL_TEXTURE_WRAP_S, wraps);
 	glTexParameteri(texType, GL_TEXTURE_WRAP_T, wrapt);
 	glTexImage2D(texType, 0, GL_RGBA, widthImg, heightImg, 0, format, GL_UNSIGNED_BYTE, bytes);
-	glGenerateMipmap(texType);
+	if (min_filter == GL_NEAREST_MIPMAP_NEAREST ||
+			min_filter == GL_LINEAR_MIPMAP_NEAREST ||
+			min_filter == GL_NEAREST_MIPMAP_LINEAR ||
+			min_filter == GL_LINEAR_MIPMAP_LINEAR)
+	{
+		glGenerateMipmap(texType);
+	}
 	stbi_image_free(bytes);
 	glBindTexture(texType, 0);
 	tex->type = texType;
