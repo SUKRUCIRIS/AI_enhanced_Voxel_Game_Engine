@@ -2,6 +2,13 @@
 #include "../../third_party/assimp/include/assimp/cimport.h"
 #include "../../third_party/assimp/include/assimp/postprocess.h"
 
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
 struct aiScene *load_model(const char *path, unsigned char flip_order)
 {
 	if (flip_order == 0)
@@ -82,10 +89,10 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 		else if (aiGetMaterialColor(scene->mMaterials[i], AI_MATKEY_COLOR_DIFFUSE, &diffuseColor) == AI_SUCCESS)
 		{
 			unsigned char data[4];
-			data[0] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.r * 256.0f)));
-			data[1] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.g * 256.0f)));
-			data[2] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.b * 256.0f)));
-			data[3] = (unsigned char)__max(0, __min(255, (int)floorf(diffuseColor.a * 256.0f)));
+			data[0] = (unsigned char)max(0, min(255, (int)floorf(diffuseColor.r * 256.0f)));
+			data[1] = (unsigned char)max(0, min(255, (int)floorf(diffuseColor.g * 256.0f)));
+			data[2] = (unsigned char)max(0, min(255, (int)floorf(diffuseColor.b * 256.0f)));
+			data[3] = (unsigned char)max(0, min(255, (int)floorf(diffuseColor.a * 256.0f)));
 			res.textures[i] = create_br_texture_memory(text_manager, data, 1, 1, GL_TEXTURE_2D, GL_NEAREST,
 																								 GL_NEAREST, (int)texture_start_index + (int)i, GL_REPEAT, GL_REPEAT);
 		}

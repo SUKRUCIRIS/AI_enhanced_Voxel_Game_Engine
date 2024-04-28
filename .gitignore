@@ -5,3 +5,4 @@
 *.pdb
 **/__pycache__
 /aimodels/*
+voxel_engine

@@ -6,6 +6,13 @@
 #include <Windows.h>
 #endif
 
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
 text_manager *create_text_manager(const char *font_file, int height, int screenwidth, int screenheight,
                                   int realsw, int realsh, GLint min_filter, GLint mag_filter)
 {

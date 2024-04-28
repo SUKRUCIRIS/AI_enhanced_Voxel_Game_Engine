@@ -85,8 +85,47 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 
 	set_target_properties(voxel_engine PROPERTIES WIN32_EXECUTABLE TRUE)
 
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+
+	set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "" FORCE)
+
+	set(CMAKE_C_FLAGS_RELEASE "-O3 -flto")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
+	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -s")
+
+	add_subdirectory(third_party/glfw)
+	add_subdirectory(third_party/cglm)
+	add_subdirectory(third_party/assimp)
+	add_subdirectory(third_party/freetype)
+	add_subdirectory(third_party/jolt/Build)
+	add_subdirectory(third_party/soloud/contrib)
+
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/cglm/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/assimp/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/build/third_party/assimp/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/freetype/include)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/jolt)
+	include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/soloud/include)
+
+	FILE(GLOB_RECURSE MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+	add_executable(
+	voxel_engine
+	${MY_SOURCES}
+	${CMAKE_CURRENT_SOURCE_DIR}/third_party/opengl/src/glad.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/core/jolt_physics.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/core/threading.cpp
+	)
+
+	set(OpenGL_GL_PREFERENCE GLVND)
+	find_package(OpenGL REQUIRED)
+	target_link_libraries(voxel_engine cglm glfw assimp freetype Jolt OpenGL::GL soloud)
+
 else()
 
-  message(FATAL_ERROR "You can compile this with MSVC on x64 windows computer only.")
+  message(FATAL_ERROR "You can compile this with MSVC on x64 windows computer or GNU on x64 ubuntu computer.")
 	
 endif()
