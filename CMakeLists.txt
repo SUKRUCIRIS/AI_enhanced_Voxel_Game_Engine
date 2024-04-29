@@ -9,7 +9,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+	set(CMAKE_BUILD_TYPE Release)
 endif()
 message(STATUS "Setting build type to '${CMAKE_BUILD_TYPE}'")
 
@@ -49,9 +49,9 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 	set(CMAKE_GENERATOR_PLATFORM x64)
-  set(CMAKE_C_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
+	set(CMAKE_C_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
-  set(CMAKE_EXE_LINKER_FLAGS "/LTCG /machine:x64 /INCREMENTAL:NO /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup
+	set(CMAKE_EXE_LINKER_FLAGS "/LTCG /machine:x64 /INCREMENTAL:NO /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup
 	/NODEFAULTLIB:MSVCRT /NODEFAULTLIB:LIBCMT")
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
@@ -135,6 +135,6 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
 
 else()
 
-  message(FATAL_ERROR "You can compile this with MSVC on x64 windows computer or GNU on x64 ubuntu computer.")
+	message(FATAL_ERROR "You can compile this with MSVC on x64 windows computer or GNU on x64 ubuntu computer.")
 	
 endif()
