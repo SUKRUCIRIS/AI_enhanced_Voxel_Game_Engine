@@ -2,17 +2,12 @@
 #include "dynamic.h"
 #include "object.h"
 #include "br_object.h"
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
+#include "macro.h"
 
 DA *physic_objects = 0;
 
 physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float mass,
-					  float friction, float bounce, void *obj, unsigned char is_br_object)
+											float friction, float bounce, void *obj, unsigned char is_br_object)
 {
 	physic *ph = calloc(1, sizeof(physic));
 	ph->priority = priority;
@@ -25,8 +20,8 @@ physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float 
 	glm_vec3_copy(minaabb, ph->first_minaabb);
 	glm_vec3_copy(maxaabb, ph->first_maxaabb);
 	glm_aabb_center((vec3[2]){{ph->minaabb[0], ph->minaabb[1], ph->minaabb[2]},
-							  {ph->maxaabb[0], ph->maxaabb[1], ph->maxaabb[2]}},
-					ph->center);
+														{ph->maxaabb[0], ph->maxaabb[1], ph->maxaabb[2]}},
+									ph->center);
 	ph->shouldmove[0] = 0;
 	ph->shouldmove[1] = 0;
 	ph->shouldmove[2] = 0;
@@ -176,9 +171,9 @@ void delete_physic(physic *ph)
 unsigned char detect_collision_physic(physic *x, physic *y)
 {
 	return glm_aabb_aabb((vec3[2]){{x->minaabb[0], x->minaabb[1], x->minaabb[2]},
-								   {x->maxaabb[0], x->maxaabb[1], x->maxaabb[2]}},
-						 (vec3[2]){{y->minaabb[0], y->minaabb[1], y->minaabb[2]},
-								   {y->maxaabb[0], y->maxaabb[1], y->maxaabb[2]}});
+																 {x->maxaabb[0], x->maxaabb[1], x->maxaabb[2]}},
+											 (vec3[2]){{y->minaabb[0], y->minaabb[1], y->minaabb[2]},
+																 {y->maxaabb[0], y->maxaabb[1], y->maxaabb[2]}});
 }
 
 void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
@@ -188,11 +183,11 @@ void solve_collision_physic(physic *x, physic *y, unsigned char effect_velocity)
 		return;
 	}
 	glm_aabb_center((vec3[2]){{x->minaabb[0], x->minaabb[1], x->minaabb[2]},
-							  {x->maxaabb[0], x->maxaabb[1], x->maxaabb[2]}},
-					x->center);
+														{x->maxaabb[0], x->maxaabb[1], x->maxaabb[2]}},
+									x->center);
 	glm_aabb_center((vec3[2]){{y->minaabb[0], y->minaabb[1], y->minaabb[2]},
-							  {y->maxaabb[0], y->maxaabb[1], y->maxaabb[2]}},
-					y->center);
+														{y->maxaabb[0], y->maxaabb[1], y->maxaabb[2]}},
+									y->center);
 	vec3 overlap;
 	overlap[0] = (x->maxaabb[0] - x->minaabb[0]) / 2.0f + (y->maxaabb[0] - y->minaabb[0]) / 2.0f - fabsf(x->center[0] - y->center[0]);
 	overlap[1] = (x->maxaabb[1] - x->minaabb[1]) / 2.0f + (y->maxaabb[1] - y->minaabb[1]) / 2.0f - fabsf(x->center[1] - y->center[1]);

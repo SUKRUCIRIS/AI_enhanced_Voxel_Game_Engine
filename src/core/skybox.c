@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "../../third_party/stb/stb_image.h"
 #include "timing.h"
+#include "macro.h"
 
 float skyboxVertices[] =
     {
@@ -40,7 +41,8 @@ skybox *create_skybox(const char *right_texture, const char *left_texture, const
                       const char *bottom_texture, const char *front_texture, const char *back_texture,
                       camera *cam, float rotate_frame_ms, vec3 rotate_axis)
 {
-  skybox *s = malloc(sizeof(skybox));
+  skybox *s = 0;
+  malloc32(s, sizeof(skybox));
   glGenVertexArrays(1, &s->VAO);
   glGenBuffers(1, &s->VBO);
   glGenBuffers(1, &s->EBO);
@@ -251,7 +253,7 @@ void delete_skybox(skybox *s)
   glDeleteTextures(1, &(s->cubemap));
   delete_DA(s->programs);
   delete_DA(s->uniforms);
-  free(s);
+  free32(s);
 }
 
 void use_skybox(skybox *s, GLuint program)

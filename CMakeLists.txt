@@ -51,8 +51,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
 
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 	set(CMAKE_GENERATOR_PLATFORM x64)
-	set(CMAKE_C_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
-	set(CMAKE_CXX_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
+	set(CMAKE_C_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy /arch:AVX2")
+	set(CMAKE_CXX_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy /arch:AVX2")
 	set(CMAKE_EXE_LINKER_FLAGS "/LTCG /machine:x64 /INCREMENTAL:NO /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup
 	/NODEFAULTLIB:MSVCRT /NODEFAULTLIB:LIBCMT")
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -94,15 +94,15 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
 
 	set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "" FORCE)
 
-	set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0")
-	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0")
+	set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0 -mavx2")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0 -mavx2")
 	if(CMAKE_BUILD_TYPE STREQUAL "Release")
 		set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -s")
 	endif()
 	set(CMAKE_BUILD_PARALLEL_LEVEL "$(nproc)")
 
-	set(CMAKE_C_FLAGS_DEBUG "-Wall -ggdb3")
-	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -ggdb3")
+	set(CMAKE_C_FLAGS_DEBUG "-Wall -ggdb3 -mavx2")
+	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -ggdb3 -mavx2")
 
 	add_subdirectory(third_party/glfw)
 	add_subdirectory(third_party/cglm)

@@ -1,13 +1,7 @@
 #include "load_object.h"
 #include "../../third_party/assimp/include/assimp/cimport.h"
 #include "../../third_party/assimp/include/assimp/postprocess.h"
-
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
+#include "macro.h"
 
 struct aiScene *load_model(const char *path, unsigned char flip_order)
 {

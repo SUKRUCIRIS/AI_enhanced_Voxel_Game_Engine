@@ -2,13 +2,7 @@
 #include "float.h"
 #include "random.h"
 #include "core.h"
-
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
+#include "macro.h"
 
 void calculate_lighting_projection(lighting *l, int step)
 {
@@ -75,7 +69,8 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 													float cascade1range, float cascade2range, float cascade3range, float fog_start, float fog_end,
 													vec3 fog_color, unsigned char deferred, unsigned char ssao)
 {
-	lighting *l = malloc(sizeof(lighting));
+	lighting *l = 0;
+	malloc32(l, sizeof(lighting));
 	l->programs = create_DA(sizeof(GLuint));
 	l->uniforms = create_DA(sizeof(GLint));
 
@@ -528,5 +523,5 @@ void delete_lighting(lighting *l)
 	glDeleteTextures(1, &(l->noiseTexture));
 	delete_DA(l->programs);
 	delete_DA(l->uniforms);
-	free(l);
+	free32(l);
 }

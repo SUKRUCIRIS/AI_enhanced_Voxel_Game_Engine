@@ -5,13 +5,7 @@
 #ifdef _MSC_VER
 #include <Windows.h>
 #endif
-
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
+#include "macro.h"
 
 text_manager *create_text_manager(const char *font_file, int height, int screenwidth, int screenheight,
                                   int realsw, int realsh, GLint min_filter, GLint mag_filter)
@@ -37,7 +31,8 @@ text_manager *create_text_manager(const char *font_file, int height, int screenw
 #endif
   }
 
-  text_manager *f = malloc(sizeof(text_manager));
+  text_manager *f = 0;
+  malloc32(f, sizeof(text_manager));
   f->twidth = 0, f->theight = 0;
   for (unsigned char c = 32; c < 127; c++)
   {
@@ -124,7 +119,7 @@ void delete_text_manager(text_manager *f)
   glDeleteVertexArrays(1, &(f->VAO));
   glDeleteBuffers(1, &(f->VBO));
   glDeleteBuffers(1, &(f->EBO));
-  free(f);
+  free32(f);
 }
 
 void add_text(text_manager *f, float startx, float starty, float z, int scale, vec4 rgba, const char *text)

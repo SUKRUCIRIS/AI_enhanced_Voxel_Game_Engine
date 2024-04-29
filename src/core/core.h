@@ -36,6 +36,7 @@ extern "C"
 #include "chunk.h"
 #include "threading.h"
 #include "water.h"
+#include "macro.h"
 #ifdef __cplusplus
 }
 #endif

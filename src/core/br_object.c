@@ -1,4 +1,5 @@
 #include "br_object.h"
+#include "macro.h"
 
 void prepare_render_br_object_manager(br_object_manager *manager)
 {
@@ -33,7 +34,8 @@ void prepare_render_br_object_manager(br_object_manager *manager)
 
 br_object_manager *create_br_object_manager(void)
 {
-	br_object_manager *x = malloc(sizeof(br_object_manager));
+	br_object_manager *x = 0;
+	malloc32(x, sizeof(br_object_manager));
 	x->VAO = 0;
 	x->VBO = 0;
 	x->EBO = 0;
@@ -72,7 +74,7 @@ void delete_br_object_manager(br_object_manager *manager)
 	glDeleteVertexArrays(1, &(manager->VAO));
 	glDeleteBuffers(1, &(manager->VBO));
 	glDeleteBuffers(1, &(manager->EBO));
-	free(manager);
+	free32(manager);
 }
 
 br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsigned int vertex_number, GLuint *indices,
@@ -94,7 +96,8 @@ br_object *create_br_object(br_object_manager *manager, GLfloat *vertices, unsig
 		}
 		indices = noindice;
 	}
-	br_object *x = malloc(sizeof(br_object));
+	br_object *x = 0;
+	malloc32(x, sizeof(br_object));
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->model);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->normal);
 	x->manager = manager;
@@ -198,7 +201,7 @@ void delete_br_object(br_object *obj)
 		}
 	}
 	remove_DA(obj->manager->objects, index);
-	free(obj);
+	free32(obj);
 }
 
 void update_br_physic(br_object *obj)

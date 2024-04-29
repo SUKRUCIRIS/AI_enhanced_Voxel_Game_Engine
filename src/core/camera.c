@@ -1,9 +1,11 @@
 #include "camera.h"
+#include "macro.h"
 
 camera *create_camera(int width, int height, vec3 position, float FOVdeg, float nearPlane, float farPlane, float speed,
 											float sensitivity, float angle, vec3 angle_axis)
 {
-	camera *cam = calloc(1, sizeof(camera));
+	camera *cam = 0;
+	malloc32(cam, sizeof(camera));
 	cam->orientation[0] = 0;
 	cam->orientation[1] = 0;
 	cam->orientation[2] = -1;
@@ -33,7 +35,7 @@ void delete_camera(camera *cam)
 {
 	delete_DA(cam->programs);
 	delete_DA(cam->uniforms);
-	free(cam);
+	free32(cam);
 }
 
 void run_input_fp_camera(camera *cam, GLFWwindow *window)
