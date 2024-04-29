@@ -8,7 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(CMAKE_BUILD_TYPE Release)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "Setting build type to '${CMAKE_BUILD_TYPE}'")
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
@@ -89,9 +92,15 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
 
 	set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "" FORCE)
 
-	set(CMAKE_C_FLAGS_RELEASE "-O3 -flto")
-	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
-	set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -s")
+	set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0")
+	if(CMAKE_BUILD_TYPE STREQUAL "Release")
+		set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -s")
+	endif()
+	set(CMAKE_BUILD_PARALLEL_LEVEL "$(nproc)")
+
+	set(CMAKE_C_FLAGS_DEBUG "-Wall -ggdb3")
+	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -ggdb3")
 
 	add_subdirectory(third_party/glfw)
 	add_subdirectory(third_party/cglm)

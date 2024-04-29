@@ -16,7 +16,7 @@ cd build
 cmake .. -DCMAKE_VERBOSE_MAKEFILE=1
 ```
 
-### Compile with MSVC on x64 windows:
+### Compile with MSVC on x64 Windows:
 
 Make sure that you use x64 native tools command prompt for vs.
 
@@ -26,7 +26,7 @@ msbuild voxel_engine.sln /p:Configuration=Release /p:Platform=x64
 
 Then run the ./voxel_engine.exe
 
-## Compiling with GNU on x64 ubuntu:
+## Compiling with GNU on x64 Ubuntu:
 
 Prerequisites:
 
@@ -50,6 +50,23 @@ mkdir build
 cd build
 cmake .. -DCMAKE_VERBOSE_MAKEFILE=1
 make
+```
+
+Debugging:
+
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=Debug
+make
+cd ..
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         --verbose \
+         --log-file=valgrind-out.txt \
+         ./voxel_engine 
+gdb ./voxel_engine 
 ```
 
 ## Şükrü Çiriş

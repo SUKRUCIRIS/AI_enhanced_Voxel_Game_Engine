@@ -6,3 +6,4 @@
 **/__pycache__
 /aimodels/*
 voxel_engine
+valgrind-out.txt
