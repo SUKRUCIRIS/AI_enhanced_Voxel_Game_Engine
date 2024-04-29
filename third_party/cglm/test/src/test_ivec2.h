@@ -54,6 +54,34 @@ TEST_IMPL(GLM_PREFIX, ivec2_one) {
   TEST_SUCCESS
 }
 
+TEST_IMPL(GLM_PREFIX, ivec2_dot) {
+  ivec2 a = {2, 3};
+  ivec2 b = {4, 4};
+  int dot1, dot2;
+
+  dot1 = GLM(ivec2_dot)(a, b);
+  dot2 = a[0] * b[0] + a[1] * b[1];
+
+  ASSERT(dot1 == dot2)
+  ASSERT(dot1 == 20)
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_cross) {
+  ivec2 a = {10, 9};
+  ivec2 b = {1, 2};
+  int cross1, cross2;
+
+  cross1 = GLM(ivec2_cross)(a, b);
+  cross2 = a[0] * b[1] - a[1] * b[0];
+
+  ASSERT(cross1 == cross2)
+  ASSERT(cross1 == 11)
+
+  TEST_SUCCESS
+}
+
 TEST_IMPL(GLM_PREFIX, ivec2_add) {
   ivec2 a = {14, 3};
   ivec2 b = {-3, 2};
@@ -126,6 +154,274 @@ TEST_IMPL(GLM_PREFIX, ivec2_scale) {
   TEST_SUCCESS
 }
 
+TEST_IMPL(GLM_PREFIX, ivec2_div) {
+  ivec2 v1 = {6, 5},
+        v2 = {-2, 4},
+        v3;
+  
+  GLM(ivec2_div)(v1, v2, v3);
+
+  ASSERT(v1[0] / v2[0] == v3[0])
+  ASSERT(v1[1] / v2[1] == v3[1])
+  ASSERT(v3[0] == -3)
+  ASSERT(v3[1] == 1)
+  
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_divs) {
+  ivec2  v1 = {16, -8}, v2;
+  int s  = 4;
+  
+  GLM(ivec2_divs)(v1, s, v2);
+
+  ASSERT(v1[0] / s == v2[0])
+  ASSERT(v1[1] / s == v2[1])
+  ASSERT(v2[0] == 4)
+  ASSERT(v2[1] == -2)
+  
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_mod) {
+  ivec2 a = {16, -8};
+  ivec2 b = {3, 5};
+  ivec2 dest;
+
+  GLM(ivec2_mod)(a, b, dest);
+
+  ASSERT(a[0] % b[0] == dest[0])
+  ASSERT(a[1] % b[1] == dest[1])
+  ASSERT(dest[0] == 1)
+  ASSERT(dest[1] == -3)
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_addadd) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_addadd)(a, b, c);
+
+  ASSERT(d[0] + a[0] + b[0] == c[0])
+  ASSERT(d[1] + a[1] + b[1] == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_addadds) {
+  ivec2 a = {2, -3},
+        c = {1, 2},
+        d = {1, 2};
+  int s = 9;
+
+  GLM(ivec2_addadds)(a, s, c);
+
+  ASSERT(d[0] + a[0] + s == c[0])
+  ASSERT(d[1] + a[1] + s == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_subadd) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_subadd)(a, b, c);
+
+  ASSERT(d[0] + (a[0] - b[0]) == c[0])
+  ASSERT(d[1] + (a[1] - b[1]) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_subadds) {
+  ivec2 a = {2, -3},
+        c = {1, 2},
+        d = {1, 2};
+  int s = 9;
+
+  GLM(ivec2_subadds)(a, s, c);
+
+  ASSERT(d[0] + a[0] - s == c[0])
+  ASSERT(d[1] + a[1] - s == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_muladd) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_muladd)(a, b, c);
+
+  ASSERT(d[0] + a[0] * b[0] == c[0])
+  ASSERT(d[1] + a[1] * b[1] == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_muladds) {
+  ivec2 a = {2, -3},
+        c = {1, 2},
+        d = {1, 2};
+  int s = 9;
+
+  GLM(ivec2_muladds)(a, s, c);
+
+  ASSERT(d[0] + a[0] * s == c[0])
+  ASSERT(d[1] + a[1] * s == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_maxadd) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_maxadd)(a, b, c);
+  
+  ASSERT(d[0] += glm_imax(a[0], b[0]) == c[0])
+  ASSERT(d[1] += glm_imax(a[1], b[1]) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_minadd) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_minadd)(a, b, c);
+  
+  ASSERT(d[0] += glm_imin(a[0], b[0]) == c[0])
+  ASSERT(d[1] += glm_imin(a[1], b[1]) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_subsub) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_subsub)(a, b, c);
+
+  ASSERT(d[0] - (a[0] - b[0]) == c[0])
+  ASSERT(d[1] - (a[1] - b[1]) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_subsubs) {
+  ivec2 a = {2, -3},
+        c = {1, 2},
+        d = {1, 2};
+  int s = 9;
+
+  GLM(ivec2_subsubs)(a, s, c);
+
+  ASSERT(d[0] - (a[0] - s) == c[0])
+  ASSERT(d[1] - (a[1] - s) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_addsub) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_addsub)(a, b, c);
+
+  ASSERT(d[0] - (a[0] + b[0]) == c[0])
+  ASSERT(d[1] - (a[1] + b[1]) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_addsubs) {
+  ivec2 a = {2, -3},
+        c = {1, 2},
+        d = {1, 2};
+  int s = 9;
+
+  GLM(ivec2_addsubs)(a, s, c);
+
+  ASSERT(d[0] - (a[0] + s) == c[0])
+  ASSERT(d[1] - (a[1] + s) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_mulsub) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_mulsub)(a, b, c);
+
+  ASSERT(d[0] - a[0] * b[0] == c[0])
+  ASSERT(d[1] - a[1] * b[1] == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_mulsubs) {
+  ivec2 a = {2, -3},
+        c = {1, 2},
+        d = {1, 2};
+  int s = 9;
+
+  GLM(ivec2_mulsubs)(a, s, c);
+
+  ASSERT(d[0] - a[0] * s == c[0])
+  ASSERT(d[1] - a[1] * s == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_maxsub) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_maxsub)(a, b, c);
+  
+  ASSERT(d[0] -= glm_imax(a[0], b[0]) == c[0])
+  ASSERT(d[1] -= glm_imax(a[1], b[1]) == c[1])
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_minsub) {
+  ivec2 a = {2, -3},
+        b = {-3, 4},
+        c = {1, 2},
+        d = {1, 2};
+
+  GLM(ivec2_minsub)(a, b, c);
+
+  ASSERT(d[0] -= glm_imin(a[0], b[0]) == c[0])
+  ASSERT(d[1] -= glm_imin(a[1], b[1]) == c[1])
+
+  TEST_SUCCESS
+}
+
 TEST_IMPL(GLM_PREFIX, ivec2_distance2) {
   ivec2 a = {-1, 3};
   ivec2 b = {5, 4};
@@ -144,6 +440,42 @@ TEST_IMPL(GLM_PREFIX, ivec2_distance) {
 
   v = GLM(ivec2_distance)(a, b);
   ASSERT(test_eq(v, 5.8309518948f))
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_fill) {
+  ivec2 v1;
+  ivec2 v2 = {-1, 3};
+
+  GLM(ivec2_fill)(v1, 1);
+  GLM(ivec2_fill)(v2, 2);
+
+  ASSERT(GLM(ivec2_eq)(v1, 1))
+  ASSERT(GLM(ivec2_eq)(v2, 2))
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_eq) {
+  ivec2 v1 = {-1, 2};
+
+  GLM(ivec2_fill)(v1, 2);
+
+  ASSERT(GLM(ivec2_eq)(v1, 2))
+
+  TEST_SUCCESS
+}
+
+TEST_IMPL(GLM_PREFIX, ivec2_eqv) {
+  ivec2 v1, v2, v3;
+
+  GLM(ivec2_fill)(v1, 1);
+  GLM(ivec2_fill)(v2, 2);
+  GLM(ivec2_fill)(v3, 1);
+
+  ASSERT(GLM(ivec2_eqv)(v1, v3))
+  ASSERT(!GLM(ivec2_eqv)(v1, v2))
 
   TEST_SUCCESS
 }

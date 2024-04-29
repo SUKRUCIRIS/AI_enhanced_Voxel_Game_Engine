@@ -12,9 +12,9 @@
 
  Functions:
    CGLM_INLINE mat2x3s glms_mat2x3_zero(void);
-   CGLM_INLINE mat2x3s glms_mat2x3_make(float * __restrict src);
+   CGLM_INLINE mat2x3s glms_mat2x3_make(const float * __restrict src);
    CGLM_INLINE mat2s   glms_mat2x3_mul(mat2x3s m1, mat3x2s m2);
-   CGLM_INLINE vec2s   glms_mat2x3_mulv(mat2x3s m, vec3s v);
+   CGLM_INLINE vec3s   glms_mat2x3_mulv(mat2x3s m, vec2s v);
    CGLM_INLINE mat3x2s glms_mat2x3_transpose(mat2x3s m);
    CGLM_INLINE mat2x3s glms_mat2x3_scale(mat2x3s m, float s);
  */
@@ -55,7 +55,7 @@ glms_mat2x3_(zero)(void) {
  */
 CGLM_INLINE
 mat2x3s
-glms_mat2x3_(make)(float * __restrict src) {
+glms_mat2x3_(make)(const float * __restrict src) {
   mat2x3s r;
   glm_mat2x3_make(src, r.raw);
   return r;
@@ -64,20 +64,18 @@ glms_mat2x3_(make)(float * __restrict src) {
 /*!
  * @brief multiply m1 and m2 to dest
  *
- * m1, m2 and dest matrices can be same matrix, it is possible to write this:
- *
  * @code
- * glm_mat2x3_mul(m, m, m);
+ * r = glms_mat2x3_mul(mat2x3s, mat3x2s);
  * @endcode
  *
- * @param[in]  m1   left matrix
- * @param[in]  m2   right matrix
- * @param[out] dest destination matrix
+ * @param[in]  m1   left matrix (mat2x3s)
+ * @param[in]  m2   right matrix (mat3x2s)
+ * @returns destination matrix (mat2s)
  */
 CGLM_INLINE
-mat2s
+mat3s
 glms_mat2x3_(mul)(mat2x3s m1, mat3x2s m2) {
-  mat2s r;
+  mat3s r;
   glm_mat2x3_mul(m1.raw, m2.raw, r.raw);
   return r;
 }
@@ -87,12 +85,12 @@ glms_mat2x3_(mul)(mat2x3s m1, mat3x2s m2) {
  *
  * @param[in]  m    matrix (left)
  * @param[in]  v    vector (right, column vector)
- * @param[out] dest result vector
+ * @returns destination vector (vec3s)
  */
 CGLM_INLINE
-vec2s
-glms_mat2x3_(mulv)(mat2x3s m, vec3s v) {
-  vec2s r;
+vec3s
+glms_mat2x3_(mulv)(mat2x3s m, vec2s v) {
+  vec3s r;
   glm_mat2x3_mulv(m.raw, v.raw, r.raw);
   return r;
 }

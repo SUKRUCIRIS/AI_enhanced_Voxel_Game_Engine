@@ -21,12 +21,17 @@ Functions:
 #. :c:func:`glm_ivec2_copy`
 #. :c:func:`glm_ivec2_zero`
 #. :c:func:`glm_ivec2_one`
+#. :c:func:`glm_ivec2_dot`
+#. :c:func:`glm_ivec2_cross`
 #. :c:func:`glm_ivec2_add`
 #. :c:func:`glm_ivec2_adds`
 #. :c:func:`glm_ivec2_sub`
 #. :c:func:`glm_ivec2_subs`
 #. :c:func:`glm_ivec2_mul`
 #. :c:func:`glm_ivec2_scale`
+#. :c:func:`glm_ivec2_div`
+#. :c:func:`glm_ivec2_divs`
+#. :c:func:`glm_ivec2_mod`
 #. :c:func:`glm_ivec2_distance2`
 #. :c:func:`glm_ivec2_distance`
 #. :c:func:`glm_ivec2_maxv`
@@ -66,6 +71,30 @@ Functions documentation
 
     Parameters:
       | *[out]* **v** vector
+
+.. c:function:: int glm_ivec2_dot(ivec2 a, ivec2 b)
+
+    dot product of ivec2
+
+    Parameters:
+      | *[in]*  **a**  vector1
+      | *[in]*  **b**  vector2
+
+    Returns:
+      dot product
+
+.. c:function:: int glm_ivec2_cross(ivec2 a, ivec2 b)
+
+    cross product of two vector (RH)
+
+    | ref: http://allenchou.net/2013/07/cross-product-of-2d-vectors/
+
+    Parameters:
+      | *[in]*  **a**     vector 1
+      | *[in]*  **b**     vector 2
+
+    Returns:
+      Z component of cross product
 
 .. c:function:: void glm_ivec2_add(ivec2 a, ivec2 b, ivec2 dest)
 
@@ -121,6 +150,33 @@ Functions documentation
       | *[in]*  **s**    scalar
       | *[out]* **dest** destination
 
+.. c:function:: void glm_ivec2_div(ivec2 a, ivec2 b, ivec2 dest)
+
+    div vector with another component-wise division: d = a / b
+
+    Parameters:
+      | *[in]*  **a**     vector 1
+      | *[in]*  **b**     vector 2
+      | *[out]* **dest**  result = (a[0] / b[0], a[1] / b[1], a[2] / b[2])
+
+.. c:function:: void glm_ivec2_divs(ivec2 v, int s, ivec2 dest)
+
+    div vector with scalar: d = v / s
+
+    Parameters:
+      | *[in]*  **v**     vector
+      | *[in]*  **s**     scalar
+      | *[out]* **dest**  result = (a[0] / s, a[1] / s, a[2] / s)
+
+.. c:function:: void glm_ivec2_mod(ivec2 a, ivec2 b, ivec2 dest)
+
+    mod vector with another component-wise modulo: d = a % b
+
+    Parameters:
+      | *[in]*  **a**     vector
+      | *[in]*  **b**     scalar
+      | *[out]* **dest**  result = (a[0] % b[0], a[1] % b[1])
+
 .. c:function:: int glm_ivec2_distance2(ivec2 a, ivec2 b)
 
     squared distance between two vectors
@@ -142,6 +198,31 @@ Functions documentation
     
     Returns:
         distance
+
+.. c:function:: void  glm_ivec2_fill(ivec2 v, int val)
+
+    fill a vector with specified value
+
+    Parameters:
+      | *[out]*  **v**    vector
+      | *[in]*   **val**  value
+
+.. c:function:: bool  glm_ivec2_eq(ivec2 v, int val)
+
+    check if vector is equal to value
+
+    Parameters:
+      | *[in]*  **v**    vector
+      | *[in]*  **val**  value
+
+.. c:function:: bool  glm_ivec2_eqv(ivec2 v1, ivec2 v2)
+
+    check if vector is equal to another vector
+
+    Parameters:
+      | *[in]*  **vec**   vector 1
+      | *[in]*  **vec**   vector 2
+
 
 .. c:function:: void glm_ivec2_maxv(ivec2 a, ivec2 b, ivec2 dest)
 

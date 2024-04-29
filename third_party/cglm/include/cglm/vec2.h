@@ -36,11 +36,18 @@
    CGLM_INLINE void  glm_vec2_muladds(vec2 a, float s, vec2 dest)
    CGLM_INLINE void  glm_vec2_maxadd(vec2 a, vec2 b, vec2 dest)
    CGLM_INLINE void  glm_vec2_minadd(vec2 a, vec2 b, vec2 dest)
+   CGLM_INLINE void  glm_vec2_subsub(vec2 a, vec2 b, vec2 dest)
+   CGLM_INLINE void  glm_vec2_addsub(vec2 a, vec2 b, vec2 dest)
+   CGLM_INLINE void  glm_vec2_mulsub(vec2 a, vec2 b, vec2 dest)
+   CGLM_INLINE void  glm_vec2_mulsubs(vec2 a, float s, vec2 dest)
+   CGLM_INLINE void  glm_vec2_maxsub(vec2 a, vec2 b, vec2 dest)
+   CGLM_INLINE void  glm_vec2_minsub(vec2 a, vec2 b, vec2 dest)
    CGLM_INLINE void  glm_vec2_negate_to(vec2 v, vec2 dest)
    CGLM_INLINE void  glm_vec2_negate(vec2 v)
    CGLM_INLINE void  glm_vec2_normalize(vec2 v)
    CGLM_INLINE void  glm_vec2_normalize_to(vec2 vec, vec2 dest)
    CGLM_INLINE void  glm_vec2_rotate(vec2 v, float angle, vec2 dest)
+   CGLM_INLINE void  glm_vec2_center(vec2 a, vec2 b, vec2 dest)
    CGLM_INLINE float glm_vec2_distance2(vec2 a, vec2 b)
    CGLM_INLINE float glm_vec2_distance(vec2 a, vec2 b)
    CGLM_INLINE void  glm_vec2_maxv(vec2 v1, vec2 v2, vec2 dest)
@@ -48,7 +55,8 @@
    CGLM_INLINE void  glm_vec2_clamp(vec2 v, float minVal, float maxVal)
    CGLM_INLINE void  glm_vec2_lerp(vec2 from, vec2 to, float t, vec2 dest)
    CGLM_INLINE void  glm_vec2_make(float * restrict src, vec2 dest)
-
+   CGLM_INLINE void  glm_vec2_reflect(vec2 v, vec2 n, vec2 dest)
+   CGLM_INLINE void  glm_vec2_refract(vec2 v, vec2 n, float eta, vec2 dest)
  */
 
 #ifndef cglm_vec2_h
@@ -147,7 +155,7 @@ glm_vec2_cross(vec2 a, vec2 b) {
  * @brief norm * norm (magnitude) of vec
  *
  * we can use this func instead of calling norm * norm, because it would call
- * sqrtf fuction twice but with this func we can avoid func call, maybe this is
+ * sqrtf function twice but with this func we can avoid func call, maybe this is
  * not good name for this func
  *
  * @param[in] v vector
@@ -270,7 +278,7 @@ glm_vec2_scale_as(vec2 v, float s, vec2 dest) {
   float norm;
   norm = glm_vec2_norm(v);
 
-  if (norm == 0.0f) {
+  if (CGLM_UNLIKELY(norm < FLT_EPSILON)) {
     glm_vec2_zero(dest);
     return;
   }
@@ -403,6 +411,102 @@ glm_vec2_minadd(vec2 a, vec2 b, vec2 dest) {
 }
 
 /*!
+ * @brief sub two vectors and sub result to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @param[out] dest dest -= (a - b)
+ */
+CGLM_INLINE
+void
+glm_vec2_subsub(vec2 a, vec2 b, vec2 dest) {
+  dest[0] -= a[0] - b[0];
+  dest[1] -= a[1] - b[1];
+}
+
+/*!
+ * @brief add two vectors and sub result to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @param[out] dest dest -= (a + b)
+ */
+CGLM_INLINE
+void
+glm_vec2_addsub(vec2 a, vec2 b, vec2 dest) {
+  dest[0] -= a[0] + b[0];
+  dest[1] -= a[1] + b[1];
+}
+
+/*!
+ * @brief mul two vectors and sub result to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @param[out] dest dest -= (a * b)
+ */
+CGLM_INLINE
+void
+glm_vec2_mulsub(vec2 a, vec2 b, vec2 dest) {
+  dest[0] -= a[0] * b[0];
+  dest[1] -= a[1] * b[1];
+}
+
+/*!
+ * @brief mul vector with scalar and sub result to sum
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector
+ * @param[in]  s    scalar
+ * @param[out] dest dest -= (a * b)
+ */
+CGLM_INLINE
+void
+glm_vec2_mulsubs(vec2 a, float s, vec2 dest) {
+  dest[0] -= a[0] * s;
+  dest[1] -= a[1] * s;
+}
+
+/*!
+ * @brief sub max of two vectors to result/dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @param[out] dest dest -= max(a, b)
+ */
+CGLM_INLINE
+void
+glm_vec2_maxsub(vec2 a, vec2 b, vec2 dest) {
+  dest[0] -= glm_max(a[0], b[0]);
+  dest[1] -= glm_max(a[1], b[1]);
+}
+
+/*!
+ * @brief sub min of two vectors to result/dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @param[out] dest dest -= min(a, b)
+ */
+CGLM_INLINE
+void
+glm_vec2_minsub(vec2 a, vec2 b, vec2 dest) {
+  dest[0] -= glm_min(a[0], b[0]);
+  dest[1] -= glm_min(a[1], b[1]);
+}
+
+/*!
  * @brief negate vector components and store result in dest
  *
  * @param[in]   v     vector
@@ -438,7 +542,7 @@ glm_vec2_normalize(vec2 v) {
 
   norm = glm_vec2_norm(v);
 
-  if (norm == 0.0f) {
+  if (CGLM_UNLIKELY(norm < FLT_EPSILON)) {
     v[0] = v[1] = 0.0f;
     return;
   }
@@ -459,7 +563,7 @@ glm_vec2_normalize_to(vec2 v, vec2 dest) {
 
   norm = glm_vec2_norm(v);
 
-  if (norm == 0.0f) {
+  if (CGLM_UNLIKELY(norm < FLT_EPSILON)) {
     glm_vec2_zero(dest);
     return;
   }
@@ -491,6 +595,20 @@ glm_vec2_rotate(vec2 v, float angle, vec2 dest) {
 
   dest[0] = c * x1 - s * y1;
   dest[1] = s * x1 + c * y1;
+}
+
+/**
+ * @brief find center point of two vector
+ *
+ * @param[in]  a    vector1
+ * @param[in]  b    vector2
+ * @param[out] dest center point
+ */
+CGLM_INLINE
+void
+glm_vec2_center(vec2 a, vec2 b, vec2 dest) {
+  glm_vec2_add(a, b, dest);
+  glm_vec2_scale(dest, 0.5f, dest);
 }
 
 /**
@@ -591,8 +709,56 @@ glm_vec2_lerp(vec2 from, vec2 to, float t, vec2 dest) {
  */
 CGLM_INLINE
 void
-glm_vec2_make(float * __restrict src, vec2 dest) {
+glm_vec2_make(const float * __restrict src, vec2 dest) {
   dest[0] = src[0]; dest[1] = src[1];
+}
+
+/*!
+ * @brief reflection vector using an incident ray and a surface normal
+ *
+ * @param[in]  v    incident vector
+ * @param[in]  n    normalized normal vector
+ * @param[out] dest destination vector for the reflection result
+ */
+CGLM_INLINE
+void
+glm_vec2_reflect(vec2 v, vec2 n, vec2 dest) {
+  vec2 temp;
+  glm_vec2_scale(n, 2.0f * glm_vec2_dot(v, n), temp);
+  glm_vec2_sub(v, temp, dest);
+}
+
+/*!
+ * @brief computes refraction vector for an incident vector and a surface normal.
+ *
+ * calculates the refraction vector based on Snell's law. If total internal reflection
+ * occurs (angle too great given eta), dest is set to zero and returns false.
+ * Otherwise, computes refraction vector, stores it in dest, and returns true.
+ *
+ * @param[in]  v    normalized incident vector
+ * @param[in]  n    normalized normal vector
+ * @param[in]  eta  ratio of indices of refraction (incident/transmitted)
+ * @param[out] dest refraction vector if refraction occurs; zero vector otherwise
+ *
+ * @returns true if refraction occurs; false if total internal reflection occurs.
+ */
+CGLM_INLINE
+bool
+glm_vec2_refract(vec2 v, vec2 n, float eta, vec2 dest) {
+  float ndi, eni, k;
+
+  ndi = glm_vec2_dot(n, v);
+  eni = eta * ndi;
+  k   = 1.0f + eta * eta - eni * eni;
+
+  if (k < 0.0f) {
+    glm_vec2_zero(dest);
+    return false;
+  }
+
+  glm_vec2_scale(v, eta, dest);
+  glm_vec2_mulsubs(n, eni + sqrtf(k), dest);
+  return true;
 }
 
 #endif /* cglm_vec2_h */

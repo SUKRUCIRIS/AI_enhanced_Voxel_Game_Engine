@@ -5,13 +5,9 @@
 </p>
 <br>
 <p align="center">
-    <a href="https://travis-ci.com/recp/cglm">
-        <img src="https://travis-ci.com/recp/cglm.svg?branch=master"
+    <a href="https://github.com/recp/cglm/actions/workflows/ci.yml">
+        <img src="https://github.com/recp/cglm/actions/workflows/ci.yml/badge.svg"
              alt="Build Status">
-    </a>
-    <a href="https://ci.appveyor.com/project/recp/cglm/branch/master">
-        <img src="https://ci.appveyor.com/api/projects/status/av7l3gc0yhfex8y4/branch/master?svg=true"
-             alt="Windows Build Status">
     </a>
     <a href="http://cglm.readthedocs.io/en/latest/?badge=latest">
         <img src="https://readthedocs.org/projects/cglm/badge/?version=latest"
@@ -66,7 +62,7 @@ you have the latest version
 - **[major change]** by starting v0.5.0, vec3 functions use **glm_vec3_** namespace, it was **glm_vec_** until v0.5.0
 - **[major change]** by starting v0.5.1, built-in alignment is removed from **vec3** and **mat3** types
 - **[major change]** by starting v0.7.3, inline print functions are disabled in release/production mode to eliminate print costs (see options in documentation). Print output also improved. You can disable colors if you need  (see documentation)
-- **[major change]** by starting v0.8.3, **cglm** supports alternative clipspace configuations e.g. Left Handed, Zero-to-One (_zo)... `CGLM_FORCE_DEPTH_ZERO_TO_ONE` and `CGLM_FORCE_LEFT_HANDED` is provided to control clipspace. You should be able to use **cglm** with Vulkan, DirectX and Metal now... see https://cglm.readthedocs.io/en/latest/opt.html#clipspace-option-s
+- **[major change]** by starting v0.8.3, **cglm** supports alternative clipspace configurations e.g. Left Handed, Zero-to-One (_zo)... `CGLM_FORCE_DEPTH_ZERO_TO_ONE` and `CGLM_FORCE_LEFT_HANDED` is provided to control clipspace. You should be able to use **cglm** with Vulkan, DirectX and Metal now... see https://cglm.readthedocs.io/en/latest/opt.html#clipspace-option-s
 
 #### 📌 Note for C++ developers:
 If you are not aware of the original GLM library yet, you may also want to look at:
@@ -108,7 +104,7 @@ https://github.com/g-truc/glm
 
 ## 🚀 Features
 - **scalar** and **simd** (sse, avx, neon...) optimizations
-- option to use different clipspaces e.g. Left Handed, Zero-to-One... (currrently right handed negative-one is default)
+- option to use different clipspaces e.g. Left Handed, Zero-to-One... (currently right handed negative-one is default)
 - array api and struct api, you can use arrays or structs.
 - general purpose matrix operations (mat4, mat3)
 - chain matrix multiplication (square only)
@@ -148,7 +144,7 @@ To call pre-compiled versions, just use `glmc_` (c stands for 'call') instead of
   glm_mul(trans, rot, rt);  /* inline */
   glmc_mul(trans, rot, rt); /* call from library */
 ```
-Most of math functions are optimized manualy with SSE2 if available, if not? Dont worry there are non-sse versions of all operations
+Most of math functions are optimized manually with SSE2 if available, if not? Dont worry there are non-sse versions of all operations
 
 You can pass matrices and vectors as array to functions rather than get address.
 

@@ -10,7 +10,7 @@ Also struct api `s` suffix to namespace e.g. `glms_vec3_add`, `glms_mat4_mul` et
 
 By starting v0.9.0, struct api namespace is configurable. We can omit **glms_** namespace or 
 even change it with custom name to move existing api integrations to **cglm** more easliy...
-We can also add **s** to functin names if we want e.g. `glms_vec3_add()` -> `vec3_add()` or `vec3s_add()`.
+We can also add **s** to function names if we want e.g. `glms_vec3_add()` -> `vec3_add()` or `vec3s_add()`.
 
 By including **cglm/struct.h** header you will include all struct api. It will also include **cglm/cglm.h** too. 
 Since struct apis are inline you don't need to build or link *cglm* against 
@@ -91,6 +91,9 @@ To configure the Struct API namespace, you can define the following macros befor
 - **CGLM_STRUCT_API_NS**:           define name space for struct api, DEFAULT is **glms**
 - **CGLM_STRUCT_API_NAME_SUFFIX**:  define name suffix, DEFAULT is **empty** e.g defining it as #define CGLM_STRUCT_API_NAME_SUFFIX  s will add s suffix to mat4_mul -> mat4s_mul
 
+❗️ IMPORTANT ❗️
+
+It's a good idea to set up your config macros in build settings like CMake, Xcode, or Visual Studio. This is especially important if you're using features like Modules in Xcode, where adding macros directly before the **cglm** headers might not work.
 
 Detailed documentation for Struct API:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

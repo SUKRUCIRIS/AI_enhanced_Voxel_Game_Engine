@@ -1,5 +1,5 @@
 project('cglm', 'c',
-    version : '0.9.1',
+    version : '0.9.5',
     license : 'mit',
     default_options : [
         'c_std=c11',
@@ -87,7 +87,8 @@ cglm_lib = library('cglm',
     dependencies : cglm_deps,
     c_args : [ build_args, cglm_args ],
     version : meson.project_version(),
-    soversion : '0'
+    soversion : '0',
+    build_by_default: not meson.is_subproject()
 )
 
 cglm_dep = declare_dependency(

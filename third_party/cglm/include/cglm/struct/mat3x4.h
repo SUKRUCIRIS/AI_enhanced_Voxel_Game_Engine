@@ -12,9 +12,9 @@
 
  Functions:
    CGLM_INLINE mat3x4s glms_mat3x4_zero(void);
-   CGLM_INLINE mat3x4s glms_mat3x4_make(float * __restrict src);
-   CGLM_INLINE mat3s   glms_mat3x4_mul(mat3x4s m1, mat4x3s m2);
-   CGLM_INLINE vec3s   glms_mat3x4_mulv(mat3x4s m, vec4s v);
+   CGLM_INLINE mat3x4s glms_mat3x4_make(const float * __restrict src);
+   CGLM_INLINE mat4s   glms_mat3x4_mul(mat3x4s m1, mat4x3s m2);
+   CGLM_INLINE vec4s   glms_mat3x4_mulv(mat3x4s m, vec3s v);
    CGLM_INLINE mat4x3s glms_mat3x4_transpose(mat3x4s m);
    CGLM_INLINE mat3x4s glms_mat3x4_scale(mat3x4s m, float s);
  */
@@ -55,7 +55,7 @@ glms_mat3x4_(zero)(void) {
  */
 CGLM_INLINE
 mat3x4s
-glms_mat3x4_(make)(float * __restrict src) {
+glms_mat3x4_(make)(const float * __restrict src) {
   mat3x4s r;
   glm_mat3x4_make(src, r.raw);
   return r;
@@ -64,35 +64,33 @@ glms_mat3x4_(make)(float * __restrict src) {
 /*!
  * @brief multiply m1 and m2 to dest
  *
- * m1, m2 and dest matrices can be same matrix, it is possible to write this:
- *
  * @code
- * glm_mat3x4_mul(m, m, m);
+ * r = glms_mat3x4_mul(mat3x4s, mat4x3s);
  * @endcode
  *
- * @param[in]  m1   left matrix
- * @param[in]  m2   right matrix
- * @param[out] dest destination matrix
+ * @param[in]  m1   left matrix (mat3x4s)
+ * @param[in]  m2   right matrix (mat4x3s)
+ * @returns destination matrix (mat4s)
  */
 CGLM_INLINE
-mat3s
+mat4s
 glms_mat3x4_(mul)(mat3x4s m1, mat4x3s m2) {
-  mat3s r;
+  mat4s r;
   glm_mat3x4_mul(m1.raw, m2.raw, r.raw);
   return r;
 }
 
 /*!
- * @brief multiply matrix with column vector and store in dest vector
+ * @brief multiply matrix with column vector and store in dest column vector
  *
  * @param[in]  m    matrix (left)
  * @param[in]  v    vector (right, column vector)
- * @param[out] dest result vector
+ * @returns destination vector (vec4s)
  */
 CGLM_INLINE
-vec3s
-glms_mat3x4_(mulv)(mat3x4s m, vec4s v) {
-  vec3s r;
+vec4s
+glms_mat3x4_(mulv)(mat3x4s m, vec3s v) {
+  vec4s r;
   glm_mat3x4_mulv(m.raw, v.raw, r.raw);
   return r;
 }

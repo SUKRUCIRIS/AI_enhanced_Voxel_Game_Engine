@@ -69,7 +69,7 @@
 #  include "simd/wasm/mat4.h"
 #endif
 
-#ifdef DEBUG
+#ifndef NDEBUG
 # include <assert.h>
 #endif
 
@@ -376,7 +376,7 @@ void
 glm_mat4_mulN(mat4 * __restrict matrices[], uint32_t len, mat4 dest) {
   uint32_t i;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   assert(len > 1 && "there must be least 2 matrices to go!");
 #endif
 
@@ -537,7 +537,7 @@ glm_mat4_transpose_to(mat4 m, mat4 dest) {
 }
 
 /*!
- * @brief tranpose mat4 and store result in same matrix
+ * @brief transpose mat4 and store result in same matrix
  *
  * @param[in, out] m source and dest
  */
@@ -790,7 +790,7 @@ glm_mat4_rmc(vec4 r, mat4 m, vec4 c) {
  */
 CGLM_INLINE
 void
-glm_mat4_make(float * __restrict src, mat4 dest) {
+glm_mat4_make(const float * __restrict src, mat4 dest) {
   dest[0][0] = src[0];   dest[1][0] = src[4];
   dest[0][1] = src[1];   dest[1][1] = src[5];
   dest[0][2] = src[2];   dest[1][2] = src[6];

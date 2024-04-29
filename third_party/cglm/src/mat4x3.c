@@ -22,19 +22,19 @@ glmc_mat4x3_zero(mat4x3 mat) {
 
 CGLM_EXPORT
 void
-glmc_mat4x3_make(float * __restrict src, mat4x3 dest) {
+glmc_mat4x3_make(const float * __restrict src, mat4x3 dest) {
   glm_mat4x3_make(src, dest);
 }
 
 CGLM_EXPORT
 void
-glmc_mat4x3_mul(mat4x3 m1, mat3x4 m2, mat4 dest) {
+glmc_mat4x3_mul(mat4x3 m1, mat3x4 m2, mat3 dest) {
   glm_mat4x3_mul(m1, m2, dest);
 }
 
 CGLM_EXPORT
 void
-glmc_mat4x3_mulv(mat4x3 m, vec3 v, vec4 dest) {
+glmc_mat4x3_mulv(mat4x3 m, vec4 v, vec3 dest) {
   glm_mat4x3_mulv(m, v, dest);
 }
 

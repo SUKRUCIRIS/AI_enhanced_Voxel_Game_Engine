@@ -201,7 +201,7 @@ glm_mat3_transpose_to(mat3 m, mat3 dest) {
 }
 
 /*!
- * @brief tranpose mat3 and store result in same matrix
+ * @brief transpose mat3 and store result in same matrix
  *
  * @param[in, out] m source and dest
  */
@@ -436,7 +436,7 @@ glm_mat3_rmc(vec3 r, mat3 m, vec3 c) {
  */
 CGLM_INLINE
 void
-glm_mat3_make(float * __restrict src, mat3 dest) {
+glm_mat3_make(const float * __restrict src, mat3 dest) {
   dest[0][0] = src[0];
   dest[0][1] = src[1];
   dest[0][2] = src[2];

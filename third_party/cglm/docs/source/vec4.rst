@@ -60,6 +60,8 @@ Functions:
 #. :c:func:`glm_vec4_lerp`
 #. :c:func:`glm_vec4_cubic`
 #. :c:func:`glm_vec4_make`
+#. :c:func:`glm_vec4_reflect`
+#. :c:func:`glm_vec4_refract`
 
 Functions documentation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,6 +110,13 @@ Functions documentation
     Parameters:
       | *[in, out]*  **v**     vector
 
+.. c:function:: void  glm_vec4_one(vec4 v)
+
+    makes all members one
+
+    Parameters:
+      | *[in, out]*  **v**     vector
+
 .. c:function:: float  glm_vec4_dot(vec4 a, vec4 b)
 
     dot product of vec4
@@ -124,7 +133,7 @@ Functions documentation
     norm * norm (magnitude) of vector
 
     we can use this func instead of calling norm * norm, because it would call
-    sqrtf fuction twice but with this func we can avoid func call, maybe this is
+    sqrtf function twice but with this func we can avoid func call, maybe this is
     not good name for this func
 
     Parameters:
@@ -284,7 +293,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec4_flipsign(vec4 v)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec4_negate`
 
@@ -293,7 +302,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec4_flipsign_to(vec4 v, vec4 dest)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec4_negate_to`
 
@@ -303,7 +312,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec4_inv(vec4 v)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec4_negate`
 
@@ -312,7 +321,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec4_inv_to(vec4 v, vec4 dest)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec4_negate_to`
 
@@ -408,11 +417,42 @@ Functions documentation
       | *[in]*  **s**      parameter
       | *[out]* **dest**   destination
 
-.. c:function:: void glm_vec4_make(float * __restrict src, vec4 dest)
+.. c:function:: void glm_vec4_make(const float * __restrict src, vec4 dest)
 
     Create four dimensional vector from pointer
 
-    | NOTE: **@src** must contain at least 4 elements.
+    .. note:: **@src** must contain at least 4 elements.
+
     Parameters:
       | *[in]*  **src**  pointer to an array of floats
       | *[out]* **dest** destination vector
+
+.. c:function:: bool glm_vec4_reflect(vec4 v, vec4 n, vec4 dest)
+
+    Reflection vector using an incident ray and a surface normal
+
+    Parameters:
+      | *[in]*  **v**     incident vector
+      | *[in]*  **n**     *❗️ normalized ❗️* normal vector
+      | *[out]* **dest**  destination: reflection result
+
+.. c:function:: bool glm_vec4_refract(vec4 v, vec4 n, float eta, vec4 dest)
+
+    computes refraction vector for an incident vector and a surface normal.
+   
+    Calculates the refraction vector based on Snell's law. If total internal reflection
+    occurs (angle too great given eta), dest is set to zero and returns false.
+    Otherwise, computes refraction vector, stores it in dest, and returns true.
+   
+    This implementation does not explicitly preserve the 'w' component of the
+    incident vector 'I' in the output 'dest', users requiring the preservation of
+    the 'w' component should manually adjust 'dest' after calling this function.
+
+    Parameters:
+      | *[in]*  **v**     *❗️ normalized ❗️* incident vector
+      | *[in]*  **n**     *❗️ normalized ❗️* normal vector
+      | *[in]*  **eta**   ratio of indices of refraction (incident/transmitted)
+      | *[out]* **dest**  refraction vector if refraction occurs; zero vector otherwise
+
+    Returns:
+      returns true if refraction occurs; false if total internal reflection occurs.

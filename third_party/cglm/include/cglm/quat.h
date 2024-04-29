@@ -258,7 +258,7 @@ glm_quat_normalize_to(versor q, versor dest) {
   }
 
   glmm_store(dest, wasm_f32x4_div(x0, wasm_f32x4_sqrt(xdot)));
-#elif defined( __SSE2__ ) || defined( __SSE2__ )
+#elif defined( __SSE__ ) || defined( __SSE2__ )
   __m128 xdot, x0;
   float  dot;
 
@@ -703,7 +703,7 @@ glm_quat_nlerp(versor from, versor to, float t, versor dest) {
  *
  * @param[in]   from  from
  * @param[in]   to    to
- * @param[in]   t     amout
+ * @param[in]   t     amount
  * @param[out]  dest  result quaternion
  */
 CGLM_INLINE
@@ -894,7 +894,7 @@ glm_quat_rotate_atm(mat4 m, versor q, vec3 pivot) {
  */
 CGLM_INLINE
 void
-glm_quat_make(float * __restrict src, versor dest) {
+glm_quat_make(const float * __restrict src, versor dest) {
   dest[0] = src[0]; dest[1] = src[1];
   dest[2] = src[2]; dest[3] = src[3];
 }

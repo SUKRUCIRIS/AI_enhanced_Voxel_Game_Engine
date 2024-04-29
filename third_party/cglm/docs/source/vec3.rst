@@ -13,7 +13,7 @@ Header: cglm/vec3.h
 We mostly use vectors in graphics math, to make writing code faster
 and easy to read, some *vec3* functions are aliased in global namespace.
 For instance :c:func:`glm_dot` is alias of :c:func:`glm_vec3_dot`,
-alias means inline wrapper here. There is no call verison of alias functions
+alias means inline wrapper here. There is no call version of alias functions
 
 There are also functions for rotating *vec3* vector. **_m4**, **_m3** prefixes
 rotate *vec3* with matrix.
@@ -80,6 +80,9 @@ Functions:
 #. :c:func:`glm_vec3_clamp`
 #. :c:func:`glm_vec3_lerp`
 #. :c:func:`glm_vec3_make`
+#. :c:func:`glm_vec3_faceforward`
+#. :c:func:`glm_vec3_reflect`
+#. :c:func:`glm_vec3_refract`
 
 Functions documentation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -148,7 +151,7 @@ Functions documentation
     norm * norm (magnitude) of vector
 
     we can use this func instead of calling norm * norm, because it would call
-    sqrtf fuction twice but with this func we can avoid func call, maybe this is
+    sqrtf function twice but with this func we can avoid func call, maybe this is
     not good name for this func
 
     Parameters:
@@ -309,7 +312,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec3_flipsign(vec3 v)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec3_negate`
 
@@ -318,7 +321,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec3_flipsign_to(vec3 v, vec3 dest)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec3_negate_to`
 
@@ -328,7 +331,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec3_inv(vec3 v)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec3_negate`
 
@@ -337,7 +340,7 @@ Functions documentation
 
 .. c:function:: void  glm_vec3_inv_to(vec3 v, vec3 dest)
 
-    **DEPRACATED!**
+    **DEPRECATED!**
 
     use :c:func:`glm_vec3_negate_to`
 
@@ -377,7 +380,7 @@ Functions documentation
 
 .. c:function:: float  glm_vec3_angle(vec3 v1, vec3 v2)
 
-    angle betwen two vector
+    angle between two vector
 
     Parameters:
       | *[in]*  **v1**   vector1
@@ -503,12 +506,49 @@ Functions documentation
       | *[in]*  **t**      interpolant (amount) clamped between 0 and 1
       | *[out]* **dest**   destination
 
-.. c:function:: void glm_vec3_make(float * __restrict src, vec3 dest)
+.. c:function:: void glm_vec3_make(const float * __restrict src, vec3 dest)
 
     Create three dimensional vector from pointer
 
-    | NOTE: **@src** must contain at least 3 elements.
+    .. note::: **@src** must contain at least 3 elements.
 
     Parameters:
       | *[in]*  **src**  pointer to an array of floats
       | *[out]* **dest** destination vector
+
+.. c:function:: void glm_vec3_faceforward(vec3 n, vec3 v, vec3 nref, vec3 dest)
+
+    A vector pointing in the same direction as another
+
+    Parameters:
+      | *[in]*  **n**     vector to orient
+      | *[in]*  **v**     incident vector
+      | *[in]*  **nref**  reference vector
+      | *[out]* **dest**  destination: oriented vector, pointing away from the surface.
+
+.. c:function:: void glm_vec3_reflect(vec3 v, vec3 n, vec3 dest)
+
+    Reflection vector using an incident ray and a surface normal
+
+    Parameters:
+      | *[in]*  **v**     incident vector
+      | *[in]*  **n**     *❗️ normalized ❗️* normal vector
+      | *[out]* **dest**  destination: reflection result
+
+.. c:function:: bool glm_vec3_refract(vec3 v, vec3 n, float eta, vec3 dest)
+
+    
+    Computes refraction vector for an incident vector and a surface normal.
+   
+    Calculates the refraction vector based on Snell's law. If total internal reflection
+    occurs (angle too great given eta), dest is set to zero and returns false.
+    Otherwise, computes refraction vector, stores it in dest, and returns true.
+
+    Parameters:
+      | *[in]*  **v**     *❗️ normalized ❗️* incident vector
+      | *[in]*  **n**     *❗️ normalized ❗️* normal vector
+      | *[in]*  **eta**   ratio of indices of refraction (incident/transmitted)
+      | *[out]* **dest**  refraction vector if refraction occurs; zero vector otherwise
+
+    Returns:
+      returns true if refraction occurs; false if total internal reflection occurs.

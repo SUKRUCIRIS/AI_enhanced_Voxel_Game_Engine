@@ -422,11 +422,11 @@ Functions documentation
       | *[in]*       **q**      quaternion
       | *[in]*       **pivot**  pivot
 
-.. c:function:: void glm_quat_make(float * __restrict src, versor dest)
+.. c:function:: void glm_quat_make(const float * __restrict src, versor dest)
 
     Create quaternion from pointer
 
-    | NOTE: **@src** must contain at least 4 elements. cglm store quaternions as [x, y, z, w].
+    .. note:: **@src** must contain at least 4 elements. cglm store quaternions as [x, y, z, w].
 
     Parameters:
       | *[in]*  **src**  pointer to an array of floats

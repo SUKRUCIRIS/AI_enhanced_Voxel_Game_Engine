@@ -49,7 +49,7 @@ Functions documentation
 
 .. c:function:: void  glm_mat3_identity(mat3 mat)
 
-    copy identity mat3 to mat, or makes mat to identiy
+    copy identity mat3 to mat, or makes mat to identity
 
     Parameters:
       | *[out]* **mat**  matrix
@@ -96,7 +96,7 @@ Functions documentation
 
 .. c:function:: void  glm_mat3_transpose(mat3 m)
 
-    tranpose mat3 and store result in same matrix
+    transpose mat3 and store result in same matrix
 
     Parameters:
       | *[in]*  **mat**   source
@@ -190,11 +190,11 @@ Functions documentation
     Returns:
         scalar value e.g. Matrix1x1
 
-.. c:function:: void glm_mat3_make(float * __restrict src, mat3 dest)
+.. c:function:: void glm_mat3_make(const float * __restrict src, mat3 dest)
 
     Create mat3 matrix from pointer
 
-    | NOTE: **@src** must contain at least 9 elements.
+    .. note:: **@src** must contain at least 9 elements.
 
     Parameters:
       | *[in]*  **src**  pointer to an array of floats

@@ -39,6 +39,7 @@
 #include "../../types-struct.h"
 #include "../../plane.h"
 #include "../../cam.h"
+#include "../../clipspace/persp_lh_zo.h"
 
 /*!
  * @brief set up perspective peprojection matrix
@@ -202,7 +203,7 @@ glms_persp_decomp_x_lh_zo(mat4s proj,
  * @brief decomposes top and bottom values of perspective projection
  *        with a left-hand coordinate system and a
  *        clip-space of [0, 1].
- *        y stands for y axis (top / botom axis)
+ *        y stands for y axis (top / bottom axis)
  *
  * @param[in]  proj   perspective projection matrix
  * @param[out] top    top

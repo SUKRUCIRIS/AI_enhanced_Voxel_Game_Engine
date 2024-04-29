@@ -9,7 +9,7 @@
  NOTE:
   angles must be passed as [X-Angle, Y-Angle, Z-angle] order
   For instance you don't pass angles as [Z-Angle, X-Angle, Y-angle] to
-  glm_euler_zxy funciton, All RELATED functions accept angles same order
+  glm_euler_zxy function, All RELATED functions accept angles same order
   which is [X, Y, Z].
  */
 
@@ -30,12 +30,59 @@
    CGLM_INLINE void glm_euler_by_order(vec3         angles,
                                        glm_euler_seq ord,
                                        mat4         dest);
+   CGLM_INLINE void glm_euler_xyz_quat(vec3 angles, versor dest);
+   CGLM_INLINE void glm_euler_xzy_quat(vec3 angles, versor dest);
+   CGLM_INLINE void glm_euler_yxz_quat(vec3 angles, versor dest);
+   CGLM_INLINE void glm_euler_yzx_quat(vec3 angles, versor dest);
+   CGLM_INLINE void glm_euler_zxy_quat(vec3 angles, versor dest);
+   CGLM_INLINE void glm_euler_zyx_quat(vec3 angles, versor dest);
  */
 
 #ifndef cglm_euler_h
 #define cglm_euler_h
 
 #include "common.h"
+
+#ifdef CGLM_FORCE_LEFT_HANDED
+#  include "handed/euler_to_quat_lh.h"
+#else
+#  include "handed/euler_to_quat_rh.h"
+#endif
+
+
+#ifndef CGLM_CLIPSPACE_INCLUDE_ALL
+#  if CGLM_CONFIG_CLIP_CONTROL == CGLM_CLIP_CONTROL_LH_ZO
+#    include "clipspace/ortho_lh_zo.h"
+#    include "clipspace/persp_lh_zo.h"
+#    include "clipspace/view_lh_zo.h"
+#  elif CGLM_CONFIG_CLIP_CONTROL == CGLM_CLIP_CONTROL_LH_NO
+#    include "clipspace/ortho_lh_no.h"
+#    include "clipspace/persp_lh_no.h"
+#    include "clipspace/view_lh_no.h"
+#  elif CGLM_CONFIG_CLIP_CONTROL == CGLM_CLIP_CONTROL_RH_ZO
+#    include "clipspace/ortho_rh_zo.h"
+#    include "clipspace/persp_rh_zo.h"
+#    include "clipspace/view_rh_zo.h"
+#  elif CGLM_CONFIG_CLIP_CONTROL == CGLM_CLIP_CONTROL_RH_NO
+#    include "clipspace/ortho_rh_no.h"
+#    include "clipspace/persp_rh_no.h"
+#    include "clipspace/view_rh_no.h"
+#  endif
+#else
+#  include "clipspace/ortho_lh_zo.h"
+#  include "clipspace/persp_lh_zo.h"
+#  include "clipspace/ortho_lh_no.h"
+#  include "clipspace/persp_lh_no.h"
+#  include "clipspace/ortho_rh_zo.h"
+#  include "clipspace/persp_rh_zo.h"
+#  include "clipspace/ortho_rh_no.h"
+#  include "clipspace/persp_rh_no.h"
+#  include "clipspace/view_lh_zo.h"
+#  include "clipspace/view_lh_no.h"
+#  include "clipspace/view_rh_zo.h"
+#  include "clipspace/view_rh_no.h"
+#endif
+
 
 /*!
  * if you have axis order like vec3 orderVec = [0, 1, 2] or [0, 2, 1]...
@@ -187,7 +234,6 @@ glm_euler_xzy(vec3 angles, mat4 dest) {
   dest[3][2] =  0.0f;
   dest[3][3] =  1.0f;
 }
-
 
 /*!
  * @brief build rotation matrix from euler angles
@@ -447,5 +493,109 @@ glm_euler_by_order(vec3 angles, glm_euler_seq ord, mat4 dest) {
   dest[3][2] = 0.0f;
   dest[3][3] = 1.0f;
 }
+
+
+/*!
+ * @brief creates NEW quaternion using rotation angles and does
+ *        rotations in x y z order (roll pitch yaw)
+ * 
+ * @param[in]   angles angles x y z (radians)
+ * @param[out]  dest   quaternion
+ */
+CGLM_INLINE
+void
+glm_euler_xyz_quat(vec3 angles, versor dest) {
+#ifdef CGLM_FORCE_LEFT_HANDED
+  glm_euler_xyz_quat_lh(angles, dest);
+#else
+  glm_euler_xyz_quat_rh(angles, dest);
+#endif
+}
+
+/*!
+ * @brief creates NEW quaternion using rotation angles and does
+ *        rotations in x z y order (roll yaw pitch)
+ * 
+ * @param[in]   angles angles x y z (radians)
+ * @param[out]  dest   quaternion
+ */
+CGLM_INLINE
+void
+glm_euler_xzy_quat(vec3 angles, versor dest) {
+#ifdef CGLM_FORCE_LEFT_HANDED
+  glm_euler_xzy_quat_lh(angles, dest);
+#else
+  glm_euler_xzy_quat_rh(angles, dest);
+#endif
+}
+
+/*!
+ * @brief creates NEW quaternion using rotation angles and does
+ *        rotations in y x z order (pitch roll yaw)
+ * 
+ * @param[in]   angles angles x y z (radians)
+ * @param[out]  dest   quaternion
+ */
+CGLM_INLINE
+void
+glm_euler_yxz_quat(vec3 angles, versor dest) {
+#ifdef CGLM_FORCE_LEFT_HANDED
+  glm_euler_yxz_quat_lh(angles, dest);
+#else
+  glm_euler_yxz_quat_rh(angles, dest);
+#endif
+}
+
+/*!
+ * @brief creates NEW quaternion using rotation angles and does
+ *        rotations in y z x order (pitch yaw roll)
+ * 
+ * @param[in]   angles angles x y z (radians)
+ * @param[out]  dest   quaternion
+ */
+CGLM_INLINE
+void
+glm_euler_yzx_quat(vec3 angles, versor dest) {
+#ifdef CGLM_FORCE_LEFT_HANDED
+  glm_euler_yzx_quat_lh(angles, dest);
+#else
+  glm_euler_yzx_quat_rh(angles, dest);
+#endif
+}
+
+/*!
+ * @brief creates NEW quaternion using rotation angles and does
+ *        rotations in z x y order (yaw roll pitch)
+ * 
+ * @param[in]   angles angles x y z (radians)
+ * @param[out]  dest   quaternion
+ */
+CGLM_INLINE
+void
+glm_euler_zxy_quat(vec3 angles, versor dest) {
+#ifdef CGLM_FORCE_LEFT_HANDED
+  glm_euler_zxy_quat_lh(angles, dest);
+#else
+  glm_euler_zxy_quat_rh(angles, dest);
+#endif
+}
+
+/*!
+ * @brief creates NEW quaternion using rotation angles and does
+ *        rotations in z y x order (yaw pitch roll)
+ * 
+ * @param[in]   angles angles x y z (radians)
+ * @param[out]  dest   quaternion
+ */
+CGLM_INLINE
+void
+glm_euler_zyx_quat(vec3 angles, versor dest) {
+#ifdef CGLM_FORCE_LEFT_HANDED
+  glm_euler_zyx_quat_lh(angles, dest);
+#else
+  glm_euler_zyx_quat_rh(angles, dest);
+#endif
+}
+
 
 #endif /* cglm_euler_h */

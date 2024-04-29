@@ -30,6 +30,18 @@ void
 glmc_ivec3_one(ivec3 v);
 
 CGLM_EXPORT
+int
+glmc_ivec3_dot(ivec3 a, ivec3 b);
+
+CGLM_EXPORT
+int
+glmc_ivec3_norm2(ivec3 v);
+
+CGLM_EXPORT
+int
+glmc_ivec3_norm(ivec3 v);
+
+CGLM_EXPORT
 void
 glmc_ivec3_add(ivec3 a, ivec3 b, ivec3 dest);
 
@@ -54,12 +66,100 @@ void
 glmc_ivec3_scale(ivec3 v, int s, ivec3 dest);
 
 CGLM_EXPORT
+void
+glmc_ivec3_div(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT
+void
+glmc_ivec3_divs(ivec3 v, int s, ivec3 dest);
+
+CGLM_EXPORT
+void
+glmc_ivec3_mod(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_addadd(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_addadds(ivec3 a, int s, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_subadd(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_subadds(ivec3 a, int s, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_muladd(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_muladds(ivec3 a, int s, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_maxadd(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_minadd(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_subsub(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_subsubs(ivec3 a, int s, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_addsub(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_addsubs(ivec3 a, int s, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_mulsub(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_mulsubs(ivec3 a, int s, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_maxsub(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT 
+void 
+glmc_ivec3_minsub(ivec3 a, ivec3 b, ivec3 dest);
+
+CGLM_EXPORT
 int
 glmc_ivec3_distance2(ivec3 a, ivec3 b);
 
 CGLM_EXPORT
 float
 glmc_ivec3_distance(ivec3 a, ivec3 b);
+
+CGLM_EXPORT
+void
+glmc_ivec3_fill(ivec3 v, int val);
+
+CGLM_EXPORT
+bool
+glmc_ivec3_eq(ivec3 v, int val);
+
+CGLM_EXPORT
+bool
+glmc_ivec3_eqv(ivec3 a, ivec3 b);
 
 CGLM_EXPORT
 void

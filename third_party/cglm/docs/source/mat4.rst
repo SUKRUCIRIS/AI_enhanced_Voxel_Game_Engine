@@ -34,8 +34,8 @@ Functions:
 #. :c:func:`glm_mat4_mulN`
 #. :c:func:`glm_mat4_mulv`
 #. :c:func:`glm_mat4_mulv3`
-#. :c:func:`glm_mat3_trace`
-#. :c:func:`glm_mat3_trace3`
+#. :c:func:`glm_mat4_trace`
+#. :c:func:`glm_mat4_trace3`
 #. :c:func:`glm_mat4_quat`
 #. :c:func:`glm_mat4_transpose_to`
 #. :c:func:`glm_mat4_transpose`
@@ -70,7 +70,7 @@ Functions documentation
 
 .. c:function:: void  glm_mat4_identity(mat4 mat)
 
-    copy identity mat4 to mat, or makes mat to identiy
+    copy identity mat4 to mat, or makes mat to identity
 
     Parameters:
       | *[out]* **mat**  matrix
@@ -214,7 +214,7 @@ Functions documentation
 
 .. c:function:: void  glm_mat4_transpose(mat4 m)
 
-    tranpose mat4 and store result in same matrix
+    transpose mat4 and store result in same matrix
 
     Parameters:
       | *[in]*  **m**     source
@@ -263,7 +263,7 @@ Functions documentation
     | e.g Newton-Raphson. this should work faster than normal,
     | to get more precise use glm_mat4_inv version.
 
-    | NOTE: You will lose precision, glm_mat4_inv is more accurate
+    .. note:: You will lose precision, glm_mat4_inv is more accurate
 
     Parameters:
       | *[in]*  **mat**   source
@@ -304,11 +304,11 @@ Functions documentation
     Returns:
         scalar value e.g. Matrix1x1
 
-.. c:function:: void glm_mat4_make(float * __restrict src, mat4 dest)
+.. c:function:: void glm_mat4_make(const float * __restrict src, mat4 dest)
 
     Create mat4 matrix from pointer
 
-    | NOTE: **@src** must contain at least 16 elements.
+    .. note:: **@src** must contain at least 16 elements.
 
     Parameters:
       | *[in]*  **src**  pointer to an array of floats

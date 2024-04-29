@@ -13,7 +13,7 @@ You have to install Visual Studio Build Tools and set the path to vcvarsall.bat 
 ```
 mkdir build
 cd build
-cmake .. -DCMAKE_VERBOSE_MAKEFILE=1
+cmake ..
 ```
 
 ### Compile with MSVC on x64 Windows:
@@ -48,7 +48,7 @@ Compiling:
 ```
 mkdir build
 cd build
-cmake .. -DCMAKE_VERBOSE_MAKEFILE=1
+cmake ..
 make
 ```
 
@@ -57,7 +57,7 @@ Debugging:
 ```
 mkdir build
 cd build
-cmake .. -DCMAKE_VERBOSE_MAKEFILE=1 -DCMAKE_BUILD_TYPE=Debug
+cmake .. -DCMAKE_BUILD_TYPE=Debug
 make
 cd ..
 valgrind --leak-check=full \

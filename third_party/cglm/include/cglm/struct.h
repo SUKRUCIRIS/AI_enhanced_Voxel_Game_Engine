@@ -16,6 +16,9 @@ extern "C" {
 #include "struct/vec2.h"
 #include "struct/vec3.h"
 #include "struct/vec4.h"
+#include "struct/ivec2.h"
+#include "struct/ivec3.h"
+#include "struct/ivec4.h"
 #include "struct/mat2.h"
 #include "struct/mat2x3.h"
 #include "struct/mat2x4.h"
@@ -38,6 +41,7 @@ extern "C" {
 #include "struct/sphere.h"
 #include "struct/curve.h"
 #include "struct/affine2d.h"
+#include "struct/ray.h"
 
 #ifdef __cplusplus
 }

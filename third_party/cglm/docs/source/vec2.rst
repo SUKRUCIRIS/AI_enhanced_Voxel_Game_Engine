@@ -45,6 +45,7 @@ Functions:
 #. :c:func:`glm_vec2_normalize`
 #. :c:func:`glm_vec2_normalize_to`
 #. :c:func:`glm_vec2_rotate`
+#. :c:func:`glm_vec2_center`
 #. :c:func:`glm_vec2_distance2`
 #. :c:func:`glm_vec2_distance`
 #. :c:func:`glm_vec2_maxv`
@@ -52,6 +53,8 @@ Functions:
 #. :c:func:`glm_vec2_clamp`
 #. :c:func:`glm_vec2_lerp`
 #. :c:func:`glm_vec2_make`
+#. :c:func:`glm_vec2_reflect`
+#. :c:func:`glm_vec2_refract`
 
 Functions documentation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,7 +119,7 @@ Functions documentation
     norm * norm (magnitude) of vector
 
     we can use this func instead of calling norm * norm, because it would call
-    sqrtf fuction twice but with this func we can avoid func call, maybe this is
+    sqrtf function twice but with this func we can avoid func call, maybe this is
     not good name for this func
 
     Parameters:
@@ -314,6 +317,15 @@ Functions documentation
       | *[in]*  **axis**   axis vector
       | *[out]* **dest**   destination
 
+.. c:function:: void  glm_vec2_center(vec2 v1, vec2 v2, vec2 dest)
+
+    find center point of two vector
+
+    Parameters:
+      | *[in]*  **v1**    vector1
+      | *[in]*  **v2**    vector2
+      | *[out]* **dest**  center point
+
 .. c:function:: float glm_vec2_distance2(vec2 v1, vec2 v2)
 
     squared distance between two vectors
@@ -375,11 +387,38 @@ Functions documentation
       | *[in]*  **t**      interpolant (amount) clamped between 0 and 1
       | *[out]* **dest**   destination
 
-.. c:function:: void glm_vec2_make(float * __restrict src, vec2 dest)
+.. c:function:: void glm_vec2_make(const float * __restrict src, vec2 dest)
 
     Create two dimensional vector from pointer
 
-    | NOTE: **@src** must contain at least 2 elements.
+    .. note:: **@src** must contain at least 2 elements.
+
     Parameters:
       | *[in]*  **src**  pointer to an array of floats
       | *[out]* **dest** destination vector
+
+.. c:function:: void glm_vec2_reflect(vec2 v, vec2 n, vec2 dest)
+
+    Reflection vector using an incident ray and a surface normal
+
+    Parameters:
+      | *[in]*  **v**     incident vector
+      | *[in]*  **n**     *❗️ normalized ❗️* normal vector
+      | *[out]* **dest**  destination: reflection result
+
+.. c:function:: bool glm_vec2_refract(vec2 v, vec2 n, float eta, vec2 dest)
+
+    Computes refraction vector for an incident vector and a surface normal.
+   
+    Calculates the refraction vector based on Snell's law. If total internal reflection
+    occurs (angle too great given eta), dest is set to zero and returns false.
+    Otherwise, computes refraction vector, stores it in dest, and returns true.
+
+    Parameters:
+      | *[in]*  **v**     *❗️ normalized ❗️* incident vector
+      | *[in]*  **n**     *❗️ normalized ❗️* normal vector
+      | *[in]*  **eta**   ratio of indices of refraction (incident/transmitted)
+      | *[out]* **dest**  refraction vector if refraction occurs; zero vector otherwise
+
+    Returns:
+      returns true if refraction occurs; false if total internal reflection occurs.

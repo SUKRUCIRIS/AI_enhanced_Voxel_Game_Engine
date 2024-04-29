@@ -446,7 +446,7 @@ glms_quat_(nlerp)(versors from, versors to, float t) {
  *
  * @param[in]   from  from
  * @param[in]   to    to
- * @param[in]   t     amout
+ * @param[in]   t     amount
  * @returns result quaternion
  */
 CGLM_INLINE
@@ -574,7 +574,7 @@ glms_quat_(rotate_atm)(versors q, vec3s pivot) {
  */
 CGLM_INLINE
 versors
-glms_quat_(make)(float * __restrict src) {
+glms_quat_(make)(const float * __restrict src) {
   versors dest;
   glm_quat_make(src, dest.raw);
   return dest;

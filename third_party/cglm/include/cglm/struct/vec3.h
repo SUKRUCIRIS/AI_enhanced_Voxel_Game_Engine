@@ -41,9 +41,14 @@
    CGLM_INLINE vec3s glms_vec3_muladds(vec3s a, float s, vec3s dest);
    CGLM_INLINE vec3s glms_vec3_maxadd(vec3s a, vec3s b, vec3s dest);
    CGLM_INLINE vec3s glms_vec3_minadd(vec3s a, vec3s b, vec3s dest);
+   CGLM_INLINE vec3s glms_vec3_subsub(vec3s a, vec3s b, vec3s dest);
+   CGLM_INLINE vec3s glms_vec3_addsub(vec3s a, vec3s b, vec3s dest);
+   CGLM_INLINE vec3s glms_vec3_mulsub(vec3s a, vec3s b, vec3s dest);
+   CGLM_INLINE vec3s glms_vec3_mulsubs(vec3s a, float s, vec3s dest);
+   CGLM_INLINE vec3s glms_vec3_maxsub(vec3s a, vec3s b, vec3s dest);
+   CGLM_INLINE vec3s glms_vec3_minsub(vec3s a, vec3s b, vec3s dest);
    CGLM_INLINE vec3s glms_vec3_flipsign(vec3s v);
    CGLM_INLINE vec3s glms_vec3_negate(vec3s v);
-   CGLM_INLINE vec3s glms_vec3_inv(vec3s v);
    CGLM_INLINE vec3s glms_vec3_normalize(vec3s v);
    CGLM_INLINE vec3s glms_vec3_cross(vec3s a, vec3s b);
    CGLM_INLINE vec3s glms_vec3_crossn(vec3s a, vec3s b);
@@ -71,6 +76,9 @@
    CGLM_INLINE vec3s glms_vec3_smoothinterpc(vec3s from, vec3s to, float t);
    CGLM_INLINE vec3s glms_vec3_swizzle(vec3s v, int mask);
    CGLM_INLINE vec3s glms_vec3_make(float * restrict src);
+   CGLM_INLINE vec3s glms_vec3_faceforward(vec3s n, vec3s v, vec3s nref);
+   CGLM_INLINE vec3s glms_vec3_reflect(vec3s v, vec3s n);
+   CGLM_INLINE bool  glms_vec3_refract(vec3s v, vec3s n, float eta, vec3s *dest)
 
  Convenient:
    CGLM_INLINE vec3s glms_cross(vec3s a, vec3s b);
@@ -189,7 +197,7 @@ glms_vec3_(dot)(vec3s a, vec3s b) {
  * @brief norm * norm (magnitude) of vec
  *
  * we can use this func instead of calling norm * norm, because it would call
- * sqrtf fuction twice but with this func we can avoid func call, maybe this is
+ * sqrtf function twice but with this func we can avoid func call, maybe this is
  * not good name for this func
  *
  * @param[in] v vector
@@ -486,6 +494,102 @@ glms_vec3_(minadd)(vec3s a, vec3s b, vec3s dest) {
 }
 
 /*!
+ * @brief sub two vectors and sub result to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @returns         dest -= (a - b)
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(subsub)(vec3s a, vec3s b, vec3s dest) {
+  glm_vec3_subsub(a.raw, b.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief add two vectors and sub result to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @returns         dest -= (a + b)
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(addsub)(vec3s a, vec3s b, vec3s dest) {
+  glm_vec3_addsub(a.raw, b.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief mul two vectors and sub result to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @returns         dest -= (a * b)
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(mulsub)(vec3s a, vec3s b, vec3s dest) {
+  glm_vec3_mulsub(a.raw, b.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief mul vector with scalar and sub result to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector
+ * @param[in]  s    scalar
+ * @returns         dest -= (a * b)
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(mulsubs)(vec3s a, float s, vec3s dest) {
+  glm_vec3_mulsubs(a.raw, s, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief sub max of two vectors to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @returns         dest -= max(a, b)
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(maxsub)(vec3s a, vec3s b, vec3s dest) {
+  glm_vec3_maxsub(a.raw, b.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief sub min of two vectors to dest
+ *
+ * it applies -= operator so dest must be initialized
+ *
+ * @param[in]  a    vector 1
+ * @param[in]  b    vector 2
+ * @returns         dest -= min(a, b)
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(minsub)(vec3s a, vec3s b, vec3s dest) {
+  glm_vec3_minsub(a.raw, b.raw, dest.raw);
+  return dest;
+}
+
+/*!
  * @brief negate vector components and store result in dest
  *
  * @param[in]   v     vector
@@ -555,7 +659,7 @@ glms_vec3_(crossn)(vec3s a, vec3s b) {
 }
 
 /*!
- * @brief angle betwen two vector
+ * @brief angle between two vector
  *
  * @param[in] a  vector1
  * @param[in] b  vector2
@@ -954,7 +1058,7 @@ glms_normalize(vec3s v) {
 /*!
  * @brief swizzle vector components
  *
- * you can use existin masks e.g. GLM_XXX, GLM_ZYX
+ * you can use existing masks e.g. GLM_XXX, GLM_ZYX
  *
  * @param[in]  v    source
  * @param[in]  mask mask
@@ -976,10 +1080,63 @@ glms_vec3_(swizzle)(vec3s v, int mask) {
  */
 CGLM_INLINE
 vec3s
-glms_vec3_(make)(float * __restrict src) {
+glms_vec3_(make)(const float * __restrict src) {
   vec3s dest;
   glm_vec3_make(src, dest.raw);
   return dest;
+}
+
+/*!
+ * @brief a vector pointing in the same direction as another
+ *
+ * orients a vector to point away from a surface as defined by its normal
+ *
+ * @param[in] n      vector to orient.
+ * @param[in] v      incident vector
+ * @param[in] nref   reference vector
+ * @returns oriented vector, pointing away from the surface.
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(faceforward)(vec3s n, vec3s v, vec3s nref) {
+  vec3s dest;
+  glm_vec3_faceforward(n.raw, v.raw, nref.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief reflection vector using an incident ray and a surface normal
+ *
+ * @param[in]  I    incident vector
+ * @param[in]  N    normalized normal vector
+ * @returns reflection result
+ */
+CGLM_INLINE
+vec3s
+glms_vec3_(reflect)(vec3s v, vec3s n) {
+  vec3s dest;
+  glm_vec3_reflect(v.raw, n.raw, dest.raw);
+  return dest;
+}
+
+/*!
+ * @brief computes refraction vector for an incident vector and a surface normal.
+ *
+ * calculates the refraction vector based on Snell's law. If total internal reflection
+ * occurs (angle too great given eta), dest is set to zero and returns false.
+ * Otherwise, computes refraction vector, stores it in dest, and returns true.
+ *
+ * @param[in]  v    normalized incident vector
+ * @param[in]  n    normalized normal vector
+ * @param[in]  eta  ratio of indices of refraction (incident/transmitted)
+ * @param[out] dest refraction vector if refraction occurs; zero vector otherwise
+ *
+ * @returns true if refraction occurs; false if total internal reflection occurs.
+ */
+CGLM_INLINE
+bool
+glms_vec3_(refract)(vec3s v, vec3s n, float eta, vec3s * __restrict dest) {
+  return glm_vec3_refract(v.raw, n.raw, eta, dest->raw);
 }
 
 #endif /* cglms_vec3s_h */

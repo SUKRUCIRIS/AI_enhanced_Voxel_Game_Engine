@@ -3,7 +3,7 @@
 3D Affine Transforms (pre)
 ================================================================================
 
-Pre transfrom functions which are regular transfrom functions.
+Pre transform functions which are regular transform functions.
 
 Table of contents (click to go):
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,7 +41,7 @@ Functions documentation
     translate existing transform matrix by *v* vector and store result in dest
 
     Parameters:
-      | *[in]*  **m**    affine transfrom
+      | *[in]*  **m**    affine transform
       | *[in]*  **v**    translate vector [x, y, z]
       | *[out]* **dest** translated matrix
 
@@ -51,7 +51,7 @@ Functions documentation
     and stores result in same matrix
 
     Parameters:
-      | *[in, out]* **m**  affine transfrom
+      | *[in, out]* **m**  affine transform
       | *[in]*      **v**  translate vector [x, y, z]
 
 .. c:function:: void  glm_translate_x(mat4 m, float x)
@@ -59,7 +59,7 @@ Functions documentation
     translate existing transform matrix by x factor
 
     Parameters:
-      | *[in, out]* **m**  affine transfrom
+      | *[in, out]* **m**  affine transform
       | *[in]*      **v**  x factor
 
 .. c:function:: void  glm_translate_y(mat4 m, float y)
@@ -67,7 +67,7 @@ Functions documentation
     translate existing transform matrix by *y* factor
 
     Parameters:
-      | *[in, out]* **m**  affine transfrom
+      | *[in, out]* **m**  affine transform
       | *[in]*      **v**  y factor
 
 .. c:function:: void  glm_translate_z(mat4 m, float z)
@@ -75,51 +75,8 @@ Functions documentation
     translate existing transform matrix by *z* factor
 
     Parameters:
-      | *[in, out]* **m**  affine transfrom
+      | *[in, out]* **m**  affine transform
       | *[in]*      **v**  z factor
-
-.. c:function:: void  glm_translate_make(mat4 m, vec3 v)
-
-    creates NEW translate transform matrix by *v* vector.
-
-    Parameters:
-      | *[in, out]* **m**  affine transfrom
-      | *[in]*      **v**  translate vector [x, y, z]
-
-.. c:function:: void  glm_scale_to(mat4 m, vec3 v, mat4 dest)
-
-    scale existing transform matrix by *v* vector and store result in dest
-
-    Parameters:
-      | *[in]*  **m**    affine transfrom
-      | *[in]*  **v**    scale vector [x, y, z]
-      | *[out]* **dest** scaled matrix
-
-.. c:function:: void  glm_scale_make(mat4 m, vec3 v)
-
-    creates NEW scale matrix by v vector
-
-    Parameters:
-      | *[out]* **m** affine transfrom
-      | *[in]*  **v** scale vector [x, y, z]
-
-.. c:function:: void  glm_scale(mat4 m, vec3 v)
-
-    scales existing transform matrix by v vector
-    and stores result in same matrix
-
-    Parameters:
-      | *[in, out]* **m** affine transfrom
-      | *[in]*      **v** scale vector [x, y, z]
-
-.. c:function:: void  glm_scale_uni(mat4 m, float s)
-
-    applies uniform scale to existing transform matrix v = [s, s, s]
-    and stores result in same matrix
-
-    Parameters:
-      | *[in, out]* **m** affine transfrom
-      | *[in]*      **v** scale factor
 
 .. c:function:: void  glm_rotate_x(mat4 m, float angle, mat4 dest)
 
@@ -127,7 +84,7 @@ Functions documentation
     and store result in dest
 
     Parameters:
-      | *[in]*  **m**     affine transfrom
+      | *[in]*  **m**     affine transform
       | *[in]*  **angle** angle (radians)
       | *[out]* **dest**  rotated matrix
 
@@ -137,7 +94,7 @@ Functions documentation
     and store result in dest
 
     Parameters:
-      | *[in]*  **m**     affine transfrom
+      | *[in]*  **m**     affine transform
       | *[in]*  **angle** angle (radians)
       | *[out]* **dest**  rotated matrix
 
@@ -147,26 +104,33 @@ Functions documentation
     and store result in dest
 
     Parameters:
-      | *[in]*  **m**     affine transfrom
+      | *[in]*  **m**     affine transform
       | *[in]*  **angle** angle (radians)
       | *[out]* **dest**  rotated matrix
 
-.. c:function:: void  glm_rotate_make(mat4 m, float angle, vec3 axis)
-
-    creates NEW rotation matrix by angle and axis,
-    axis will be normalized so you don't need to normalize it
-
-    Parameters:
-      | *[out]* **m**    affine transfrom
-      | *[in]*  **axis** angle (radians)
-      | *[in]*  **axis** axis
-
 .. c:function:: void  glm_rotate(mat4 m, float angle, vec3 axis)
 
-    rotate existing transform matrix around Z axis by angle and axis
+    rotate existing transform matrix around given axis by angle at ORIGIN (0,0,0)
+
+    **❗️IMPORTANT ❗️**
+    
+    If you need to rotate object around itself e.g. center of object or at
+    some point [of object] then `glm_rotate_at()` would be better choice to do so.
+    
+    Even if object's model transform is identiy, rotation may not be around
+    center of object if object does not lay out at ORIGIN perfectly.
+    
+    Using `glm_rotate_at()` with center of bounding shape ( AABB, Sphere ... )
+    would be an easy option to rotate around object if object is not at origin.
+    
+    One another option to rotate around itself at any point is `glm_spin()`
+    which is perfect if only rotating around model position is desired e.g. not
+    specific point on model for instance center of geometry or center of mass,
+    again if geometry is not perfectly centered at origin at identity transform,
+    rotation may not be around geometry.
 
     Parameters:
-      | *[in, out]* **m**     affine transfrom
+      | *[in, out]* **m**     affine transform
       | *[in]*      **angle** angle (radians)
       | *[in]*      **axis**  axis
 
@@ -175,66 +139,16 @@ Functions documentation
     rotate existing transform around given axis by angle at given pivot point (rotation center)
 
     Parameters:
-      | *[in, out]* **m**     affine transfrom
+      | *[in, out]* **m**     affine transform
       | *[in]*      **pivot** pivot, anchor point, rotation center
       | *[in]*      **angle** angle (radians)
       | *[in]*      **axis**  axis
-
-.. c:function:: void  glm_rotate_atm(mat4 m, vec3 pivot, float angle, vec3 axis)
-
-    | creates NEW rotation matrix by angle and axis at given point
-    | this creates rotation matrix, it assumes you don't have a matrix
-
-    | this should work faster than glm_rotate_at because it reduces one glm_translate.
-
-    Parameters:
-      | *[in, out]* **m**     affine transfrom
-      | *[in]*      **pivot** pivot, anchor point, rotation center
-      | *[in]*      **angle** angle (radians)
-      | *[in]*      **axis**  axis
-
-.. c:function:: void  glm_decompose_scalev(mat4 m, vec3 s)
-
-    decompose scale vector
-
-    Parameters:
-      | *[in]*  **m**  affine transform
-      | *[out]* **s**  scale vector (Sx, Sy, Sz)
-
-.. c:function:: bool  glm_uniscaled(mat4 m)
-
-    returns true if matrix is uniform scaled.
-    This is helpful for creating normal matrix.
-
-    Parameters:
-      | *[in]*  **m**   matrix
-
-.. c:function:: void  glm_decompose_rs(mat4 m, mat4 r, vec3 s)
-
-    decompose rotation matrix (mat4) and scale vector [Sx, Sy, Sz]
-    DON'T pass projected matrix here
-
-    Parameters:
-      | *[in]*  **m** affine transform
-      | *[out]* **r** rotation matrix
-      | *[out]* **s** scale matrix
-
-.. c:function:: void  glm_decompose(mat4 m, vec4 t, mat4 r, vec3 s)
-
-    decompose affine transform, TODO: extract shear factors.
-    DON'T pass projected matrix here
-
-    Parameters:
-      | *[in]*  **m** affine transfrom
-      | *[out]* **t** translation vector
-      | *[out]* **r** rotation matrix (mat4)
-      | *[out]* **s** scaling vector [X, Y, Z]
 
 .. c:function:: void  glm_spin(mat4 m, float angle, vec3 axis)
 
     | rotate existing transform matrix around given axis by angle around self (doesn't affected by position)
 
     Parameters:
-      | *[in, out]* **m**     affine transfrom
+      | *[in, out]* **m**     affine transform
       | *[in]*      **angle** angle (radians)
       | *[in]*      **axis**  axis

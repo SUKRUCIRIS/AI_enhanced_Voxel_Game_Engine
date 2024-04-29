@@ -25,7 +25,7 @@
    CGLM_INLINE mat4s   glms_mat4_zero(void);
    CGLM_INLINE mat3s   glms_mat4_pick3(mat4s mat);
    CGLM_INLINE mat3s   glms_mat4_pick3t(mat4s mat);
-   CGLM_INLINE mat4s   glms_mat4_ins3(mat3s mat);
+   CGLM_INLINE mat4s   glms_mat4_ins3(mat3s mat, mat4s dest);
    CGLM_INLINE mat4s   glms_mat4_mul(mat4s m1, mat4s m2);
    CGLM_INLINE mat4s   glms_mat4_mulN(mat4s * __restrict matrices[], uint32_t len);
    CGLM_INLINE vec4s   glms_mat4_mulv(mat4s m, vec4s v);
@@ -42,7 +42,7 @@
    CGLM_INLINE mat4s   glms_mat4_swap_col(mat4s mat, int col1, int col2);
    CGLM_INLINE mat4s   glms_mat4_swap_row(mat4s mat, int row1, int row2);
    CGLM_INLINE float   glms_mat4_rmc(vec4s r, mat4s m, vec4s c);
-   CGLM_INLINE mat4s   glms_mat4_make(float * __restrict src);
+   CGLM_INLINE mat4s   glms_mat4_make(const float * __restrict src);
  */
 
 #ifndef cglms_mat4s_h
@@ -107,7 +107,7 @@ glms_mat4_(copy)(mat4s mat) {
  * mat4 mat = GLM_MAT4_IDENTITY_INIT;
  * @endcode
  *
- * @retuns  destination
+ * @returns  destination
  */
 CGLM_INLINE
 mat4s
@@ -183,14 +183,14 @@ glms_mat4_(pick3t)(mat4s mat) {
  * @brief copy mat3 to mat4's upper-left
  *
  * @param[in]  mat  source
+ * @param[in]  dest destination
  * @returns         destination
  */
 CGLM_INLINE
 mat4s
-glms_mat4_(ins3)(mat3s mat) {
-  mat4s r;
-  glm_mat4_ins3(mat.raw, r.raw);
-  return r;
+glms_mat4_(ins3)(mat3s mat, mat4s dest) {
+  glm_mat4_ins3(mat.raw, dest.raw);
+  return dest;
 }
 
 /*!
@@ -200,12 +200,12 @@ glms_mat4_(ins3)(mat3s mat) {
  *
  * @code
  * mat4 m = GLM_MAT4_IDENTITY_INIT;
- * glm_mat4_mul(m, m, m);
+ * r = glms_mat4_mul(m, m);
  * @endcode
  *
  * @param[in]  m1   left matrix
  * @param[in]  m2   right matrix
- * @returns         destination matrix
+ * @returns destination matrix
  */
 CGLM_INLINE
 mat4s
@@ -319,7 +319,7 @@ glms_mat4_(mulv3)(mat4s m, vec3s v, float last) {
 }
 
 /*!
- * @brief tranpose mat4 and store result in same matrix
+ * @brief transpose mat4 and store result in same matrix
  *
  * @param[in] m source
  * @returns     result
@@ -468,7 +468,7 @@ glms_mat4_(rmc)(vec4s r, mat4s m, vec4s c) {
  */
 CGLM_INLINE
 mat4s
-glms_mat4_(make)(float * __restrict src) {
+glms_mat4_(make)(const float * __restrict src) {
   mat4s r;
   glm_mat4_make(src, r.raw);
   return r;

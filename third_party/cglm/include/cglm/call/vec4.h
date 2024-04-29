@@ -135,6 +135,30 @@ glmc_vec4_minadd(vec4 a, vec4 b, vec4 dest);
 
 CGLM_EXPORT
 void
+glmc_vec4_subsub(vec4 a, vec4 b, vec4 dest);
+
+CGLM_EXPORT
+void
+glmc_vec4_addsub(vec4 a, vec4 b, vec4 dest);
+
+CGLM_EXPORT
+void
+glmc_vec4_mulsub(vec4 a, vec4 b, vec4 dest);
+
+CGLM_EXPORT
+void
+glmc_vec4_mulsubs(vec4 a, float s, vec4 dest);
+
+CGLM_EXPORT
+void
+glmc_vec4_maxsub(vec4 a, vec4 b, vec4 dest);
+
+CGLM_EXPORT
+void
+glmc_vec4_minsub(vec4 a, vec4 b, vec4 dest);
+
+CGLM_EXPORT
+void
 glmc_vec4_negate(vec4 v);
 
 CGLM_EXPORT
@@ -285,7 +309,15 @@ glmc_vec4_sqrt(vec4 v, vec4 dest);
 
 CGLM_EXPORT
 void
-glmc_vec4_make(float * __restrict src, vec4 dest);
+glmc_vec4_make(const float * __restrict src, vec4 dest);
+
+CGLM_EXPORT
+void
+glmc_vec4_reflect(vec4 v, vec4 n, vec4 dest);
+
+CGLM_EXPORT
+bool
+glmc_vec4_refract(vec4 v, vec4 n, float eta, vec4 dest);
 
 #ifdef __cplusplus
 }

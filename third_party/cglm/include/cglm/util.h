@@ -87,7 +87,7 @@ glm_deg(float rad) {
 }
 
 /*!
- * @brief convert exsisting degree to radians. this will override degrees value
+ * @brief convert existing degree to radians. this will override degrees value
  *
  * @param[in, out] deg pointer to angle in degrees
  */
@@ -98,7 +98,7 @@ glm_make_rad(float *deg) {
 }
 
 /*!
- * @brief convert exsisting radians to degree. this will override radians value
+ * @brief convert existing radians to degree. this will override radians value
  *
  * @param[in, out] rad pointer to angle in radians
  */
@@ -142,6 +142,38 @@ glm_min(float a, float b) {
 CGLM_INLINE
 float
 glm_max(float a, float b) {
+  if (a > b)
+    return a;
+  return b;
+}
+
+/*!
+ * @brief find minimum of given two values
+ * 
+ * @param[in] a number 1
+ * @param[in] b number 2
+ *
+ * @return smallest of the two values
+ */
+CGLM_INLINE
+int
+glm_imin(int a, int b) {
+  if (a < b)
+    return a;
+  return b;
+}
+
+/*!
+ * @brief find maximum of given two values
+ *
+ * @param[in] a number 1
+ * @param[in] b number 2
+ *
+ * @return largest of the two values
+ */
+CGLM_INLINE
+int
+glm_imax(int a, int b) {
   if (a > b)
     return a;
   return b;
