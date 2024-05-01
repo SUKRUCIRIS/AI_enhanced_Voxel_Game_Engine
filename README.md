@@ -1,11 +1,25 @@
+## Prerequisites
+
+Windows: 
+
+You have to install Visual Studio Build Tools, MSVC, Cmake, MSbuild.
+
+Ubuntu:
+
+You have to run this command:
+```
+sudo apt install -y gcc cmake build-essential libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-common-dev libasound2-dev
+```
+
 ## Compiling with Python GUI (MSVC or GCC)
 
 ```
 python ./run.py
 ```
+
 You can change various settings of the demo game of the game engine on this menu and compile with a button.
 
-You have to install Visual Studio Build Tools and set the path to vcvarsall.bat in the GUI to be able to compile on Windows.
+You have to set the path to vcvarsall.bat in the GUI to be able to compile on Windows.
 
 ## Compiling without Python GUI on x64 Windows (MSVC)
 
@@ -17,23 +31,13 @@ cd build
 cmake ..
 ```
 
-Compile with MSVC on x64 Windows:
-
-Make sure that you use x64 native tools command prompt for vs.
+Make sure that you use x64 native tools command prompt for vs to run msbuild command.
 
 ```
 msbuild voxel_engine.sln /p:Configuration=Release /p:Platform=x64
 ```
 
-Then run the ./voxel_engine.exe
-
 ## Compiling without Python GUI on x64 Ubuntu (GCC)
-
-Prerequisites:
-
-```
-sudo apt install -y gcc cmake build-essential libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-common-dev libasound2-dev
-```
 
 Compiling:
 
@@ -44,7 +48,7 @@ cmake ..
 make
 ```
 
-Debugging:
+## Debugging on x64 Ubuntu (GCC)
 
 ```
 mkdir build
