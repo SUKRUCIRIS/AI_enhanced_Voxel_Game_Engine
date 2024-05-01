@@ -53,9 +53,19 @@ option(TRACK_BROADPHASE_STATS "Track Broadphase Stats" OFF)
 # Setting to periodically trace narrowphase stats to help determine which collision queries could be optimized
 option(TRACK_NARROWPHASE_STATS "Track Narrowphase Stats" OFF)
 
-# Setting to enable the debug renderer. The debug renderer is enabled by default with Debug and Release builds.
+# Enable the debug renderer in the Debug and Release builds. Note that DEBUG_RENDERER_IN_DISTRIBUTION will override this setting.
+option(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE "Enable debug renderer in Debug and Release builds" ON)
+
+# Setting to enable the debug renderer in all builds.
 # Note that enabling this reduces the performance of the library even if you're not drawing anything.
-option(DEBUG_RENDERER_IN_DISTRIBUTION "Enable debug renderer in Distribution builds" OFF)
+option(DEBUG_RENDERER_IN_DISTRIBUTION "Enable debug renderer in all builds" OFF)
+
+# Enable the profiler in Debug and Release builds. Note that PROFILER_IN_DISTRIBUTION will override this setting.
+option(PROFILER_IN_DEBUG_AND_RELEASE "Enable the profiler in Debug and Release builds" ON)
+
+# Enable the profiler in all builds.
+# Note that enabling this reduces the performance of the library.
+option(PROFILER_IN_DISTRIBUTION "Enable the profiler in all builds" OFF)
 
 # Setting this option will force the library to use malloc/free instead of allowing the user to override the memory allocator
 option(DISABLE_CUSTOM_ALLOCATOR "Disable support for a custom memory allocator" OFF)
@@ -67,10 +77,12 @@ include(CMakeDependentOption)
 cmake_dependent_option(USE_STATIC_MSVC_RUNTIME_LIBRARY "Use the static MSVC runtime library" ON "MSVC;NOT WINDOWS_STORE" OFF)
 
 # Determine which configurations exist
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;ReleaseASAN;ReleaseUBSAN;ReleaseCoverage;Distribution")
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR) # Only do this when we're at the top level, see: https://gitlab.kitware.com/cmake/cmake/-/issues/24181
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
+	elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+		set(CMAKE_CONFIGURATION_TYPES "Debug;Release;ReleaseASAN;ReleaseUBSAN;ReleaseCoverage;Distribution")
+	endif()
 endif()
 
 if (MSVC)
@@ -111,8 +123,8 @@ if (MSVC)
 
 	# Set compiler flags for various configurations
 	set(CMAKE_CXX_FLAGS_DEBUG "/GS /Od /Ob0 /RTC1")
-	set(CMAKE_CXX_FLAGS_RELEASE "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
-	set(CMAKE_CXX_FLAGS_DISTRIBUTION "/O2 /Ob2 /Oi /Ot /Oy /GT /GL /MT /GS- /W4 /wd4324 /MP /Gy")
+	set(CMAKE_CXX_FLAGS_RELEASE "/GS- /Gy /O2 /Oi /Ot")
+	set(CMAKE_CXX_FLAGS_DISTRIBUTION "/GS- /Gy /O2 /Oi /Ot")
 	set(CMAKE_CXX_FLAGS_RELEASEASAN "-fsanitize=address /Od")
 	set(CMAKE_CXX_FLAGS_RELEASEUBSAN "-fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
 	set(CMAKE_CXX_FLAGS_RELEASECOVERAGE "-fprofile-instr-generate -fcoverage-mapping")

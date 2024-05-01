@@ -552,7 +552,7 @@ void Ragdoll::SetPose(RVec3Arg inRootOffset, const Mat44 *inJointMatrices, bool 
 	for (int i = 0; i < (int)mBodyIDs.size(); ++i)
 	{
 		const Mat44 &joint = inJointMatrices[i];
-		bi.SetPositionAndRotation(mBodyIDs[i], inRootOffset + joint.GetTranslation(), joint.GetRotation().GetQuaternion(), EActivation::DontActivate);
+		bi.SetPositionAndRotation(mBodyIDs[i], inRootOffset + joint.GetTranslation(), joint.GetQuaternion(), EActivation::DontActivate);
 	}
 }
 
@@ -608,7 +608,7 @@ void Ragdoll::DriveToPoseUsingKinematics(RVec3Arg inRootOffset, const Mat44 *inJ
 	for (int i = 0; i < (int)mBodyIDs.size(); ++i)
 	{
 		const Mat44 &joint = inJointMatrices[i];
-		bi.MoveKinematic(mBodyIDs[i], inRootOffset + joint.GetTranslation(), joint.GetRotation().GetQuaternion(), inDeltaTime);
+		bi.MoveKinematic(mBodyIDs[i], inRootOffset + joint.GetTranslation(), joint.GetQuaternion(), inDeltaTime);
 	}
 }
 
@@ -616,7 +616,7 @@ void Ragdoll::DriveToPoseUsingMotors(const SkeletonPose &inPose)
 {
 	JPH_ASSERT(inPose.GetSkeleton() == mRagdollSettings->mSkeleton);
 
-	// Move bodies into the correct position using kinematics
+	// Move bodies into the correct position using constraints
 	for (int i = 0; i < (int)inPose.GetJointMatrices().size(); ++i)
 	{
 		int constraint_idx = mRagdollSettings->GetConstraintIndexForBodyIndex(i);

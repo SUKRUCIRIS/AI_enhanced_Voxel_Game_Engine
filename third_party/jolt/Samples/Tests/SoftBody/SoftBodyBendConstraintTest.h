@@ -6,11 +6,11 @@
 
 #include <Tests/Test.h>
 
-// This test shows the effect of LRA constraints in a soft body which can help reduce stretch of the cloth. The left cloth uses no LRA constraints and the right one does.
-class SoftBodyLRAConstraintTest : public Test
+// This test shows the effect of bend constraints in a soft body.
+class SoftBodyBendConstraintTest : public Test
 {
 public:
-	JPH_DECLARE_RTTI_VIRTUAL(JPH_NO_EXPORT, SoftBodyLRAConstraintTest)
+	JPH_DECLARE_RTTI_VIRTUAL(JPH_NO_EXPORT, SoftBodyBendConstraintTest)
 
 	// See: Test
 	virtual void			Initialize() override;
@@ -19,6 +19,6 @@ public:
 private:
 	// Size and spacing of the cloth
 	static constexpr int	cNumVerticesX = 10;
-	static constexpr int	cNumVerticesZ = 50;
+	static constexpr int	cNumVerticesZ = 10;
 	static constexpr float	cVertexSpacing = 0.5f;
 };

@@ -17,11 +17,54 @@ class JPH_EXPORT SoftBodySharedSettings : public RefTarget<SoftBodySharedSetting
 public:
 	JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(JPH_EXPORT, SoftBodySharedSettings)
 
-	/// Calculate the initial lengths of all springs of the edges of this soft body
+	/// Which type of bend constraint should be created
+	enum class EBendType
+	{
+		None,														///< No bend constraints will be created
+		Distance,													///< A simple distance constraint
+		Dihedral,													///< A dihedral bend constraint (most expensive, but also supports triangles that are initially not in the same plane)
+	};
+
+	/// The type of long range attachment constraint to create
+	enum class ELRAType
+	{
+		None,														///< Don't create a LRA constraint
+		EuclideanDistance,											///< Create a LRA constraint based on Euclidean distance between the closest kinematic vertex and this vertex
+		GeodesicDistance,											///< Create a LRA constraint based on the geodesic distance between the closest kinematic vertex and this vertex (follows the edge constraints)
+	};
+
+	/// Per vertex attributes used during the CreateConstraints function.
+	/// For an edge or shear constraint, the compliance is averaged between the two attached vertices.
+	/// For a bend constraint, the compliance is averaged between the two vertices on the shared edge.
+	struct JPH_EXPORT VertexAttributes
+	{
+		/// Constructor
+						VertexAttributes() = default;
+						VertexAttributes(float inCompliance, float inShearCompliance, float inBendCompliance, ELRAType inLRAType = ELRAType::None, float inLRAMaxDistanceMultiplier = 1.0f) : mCompliance(inCompliance), mShearCompliance(inShearCompliance), mBendCompliance(inBendCompliance), mLRAType(inLRAType), mLRAMaxDistanceMultiplier(inLRAMaxDistanceMultiplier) { }
+
+		float			mCompliance = 0.0f;							///< The compliance of the normal edges. Set to FLT_MAX to disable regular edges for any edge involving this vertex.
+		float			mShearCompliance = 0.0f;					///< The compliance of the shear edges. Set to FLT_MAX to disable shear edges for any edge involving this vertex.
+		float			mBendCompliance = FLT_MAX;					///< The compliance of the bend edges. Set to FLT_MAX to disable bend edges for any bend constraint involving this vertex.
+		ELRAType		mLRAType = ELRAType::None;					///< The type of long range attachment constraint to create.
+		float			mLRAMaxDistanceMultiplier = 1.0f;			///< Multiplier for the max distance of the LRA constraint, e.g. 1.01 means the max distance is 1% longer than the calculated distance in the rest pose.
+	};
+
+	/// Automatically create constraints based on the faces of the soft body
+	/// @param inVertexAttributes A list of attributes for each vertex (1-on-1 with mVertices, note that if the list is smaller than mVertices the last element will be repeated). This defines the properties of the constraints that are created.
+	/// @param inVertexAttributesLength The length of inVertexAttributes
+	/// @param inBendType The type of bend constraint to create
+	/// @param inAngleTolerance Shear edges are created when two connected triangles form a quad (are roughly in the same plane and form a square with roughly 90 degree angles). This defines the tolerance (in radians).
+	void				CreateConstraints(const VertexAttributes *inVertexAttributes, uint inVertexAttributesLength, EBendType inBendType = EBendType::Distance, float inAngleTolerance = DegreesToRadians(8.0f));
+
+	/// Calculate the initial lengths of all springs of the edges of this soft body (if you use CreateConstraint, this is already done)
 	void				CalculateEdgeLengths();
 
-	/// Calculate the max lengths for the long range attachment constraints
-	void				CalculateLRALengths();
+	/// Calculate the max lengths for the long range attachment constraints based on Euclidean distance (if you use CreateConstraints, this is already done)
+	/// @param inMaxDistanceMultiplier Multiplier for the max distance of the LRA constraint, e.g. 1.01 means the max distance is 1% longer than the calculated distance in the rest pose.
+	void				CalculateLRALengths(float inMaxDistanceMultiplier = 1.0f);
+
+	/// Calculate the constants for the bend constraints (if you use CreateConstraints, this is already done)
+	void				CalculateBendConstraintConstants();
 
 	/// Calculates the initial volume of all tetrahedra of this soft body
 	void				CalculateVolumeConstraintVolumes();
@@ -34,6 +77,7 @@ public:
 	{
 	public:
 		Array<uint>		mEdgeRemap;									///< Maps old edge index to new edge index
+		Array<uint>		mDihedralBendRemap;							///< Maps old dihedral bend index to new dihedral bend index
 	};
 
 	/// Optimize the soft body settings for simulation. This will reorder constraints so they can be executed in parallel.
@@ -103,9 +147,46 @@ public:
 						Edge() = default;
 						Edge(uint32 inVertex1, uint32 inVertex2, float inCompliance = 0.0f) : mVertex { inVertex1, inVertex2 }, mCompliance(inCompliance) { }
 
+		/// Return the lowest vertex index of this constraint
+		uint32			GetMinVertexIndex() const					{ return min(mVertex[0], mVertex[1]); }
+
 		uint32			mVertex[2];									///< Indices of the vertices that form the edge
 		float			mRestLength = 1.0f;							///< Rest length of the spring
 		float			mCompliance = 0.0f;							///< Inverse of the stiffness of the spring
+	};
+
+	/**
+	 * A dihedral bend constraint keeps the angle between two triangles constant along their shared edge.
+	 *
+	 *        x2
+	 *       /  \
+	 *      / t0 \
+	 *     x0----x1
+	 *      \ t1 /
+	 *       \  /
+	 *        x3
+	 *
+	 * x0..x3 are the vertices, t0 and t1 are the triangles that share the edge x0..x1
+	 *
+	 * Based on:
+	 * - "Position Based Dynamics" - Matthias Muller et al.
+	 * - "Strain Based Dynamics" - Matthias Muller et al.
+	 * - "Simulation of Clothing with Folds and Wrinkles" - R. Bridson et al.
+	 */
+	struct JPH_EXPORT DihedralBend
+	{
+		JPH_DECLARE_SERIALIZABLE_NON_VIRTUAL(JPH_EXPORT, DihedralBend)
+
+		/// Constructor
+						DihedralBend() = default;
+						DihedralBend(uint32 inVertex1, uint32 inVertex2, uint32 inVertex3, uint32 inVertex4, float inCompliance = 0.0f) : mVertex { inVertex1, inVertex2, inVertex3, inVertex4 }, mCompliance(inCompliance) { }
+
+		/// Return the lowest vertex index of this constraint
+		uint32			GetMinVertexIndex() const					{ return min(min(mVertex[0], mVertex[1]), min(mVertex[2], mVertex[3])); }
+
+		uint32			mVertex[4];									///< Indices of the vertices of the 2 triangles that share an edge (the first 2 vertices are the shared edge)
+		float			mCompliance = 0.0f;							///< Inverse of the stiffness of the constraint
+		float			mInitialAngle = 0.0f;						///< Initial angle between the normals of the triangles (pi - dihedral angle).
 	};
 
 	/// Volume constraint, keeps the volume of a tetrahedron constant
@@ -117,8 +198,11 @@ public:
 						Volume() = default;
 						Volume(uint32 inVertex1, uint32 inVertex2, uint32 inVertex3, uint32 inVertex4, float inCompliance = 0.0f) : mVertex { inVertex1, inVertex2, inVertex3, inVertex4 }, mCompliance(inCompliance) { }
 
+		/// Return the lowest vertex index of this constraint
+		uint32			GetMinVertexIndex() const					{ return min(min(mVertex[0], mVertex[1]), min(mVertex[2], mVertex[3])); }
+
 		uint32			mVertex[4];									///< Indices of the vertices that form the tetrhedron
-		float			mSixRestVolume = 1.0f;						///< 6 times the rest volume of the tetrahedron
+		float			mSixRestVolume = 1.0f;						///< 6 times the rest volume of the tetrahedron (calculated by CalculateVolumeConstraintVolumes())
 		float			mCompliance = 0.0f;							///< Inverse of the stiffness of the constraint
 	};
 
@@ -193,6 +277,9 @@ public:
 						LRA() = default;
 						LRA(uint32 inVertex1, uint32 inVertex2, float inMaxDistance) : mVertex { inVertex1, inVertex2 }, mMaxDistance(inMaxDistance) { }
 
+		/// Return the lowest vertex index of this constraint
+		uint32			GetMinVertexIndex() const					{ return min(mVertex[0], mVertex[1]); }
+
 		uint32			mVertex[2];									///< The vertices that are connected. The first vertex should be kinematic, the 2nd dynamic.
 		float			mMaxDistance = 0.0f;						///< The maximum distance between the vertices
 	};
@@ -203,6 +290,7 @@ public:
 	Array<Vertex>		mVertices;									///< The list of vertices or particles of the body
 	Array<Face>			mFaces;										///< The list of faces of the body
 	Array<Edge>			mEdgeConstraints;							///< The list of edges or springs of the body
+	Array<DihedralBend>	mDihedralBendConstraints;					///< The list of dihedral bend constraints of the body
 	Array<Volume>		mVolumeConstraints;							///< The list of volume constraints of the body that keep the volume of tetrahedra in the soft body constant
 	Array<Skinned>		mSkinnedConstraints;						///< The list of vertices that are constrained to a skinned vertex
 	Array<InvBind>		mInvBindMatrices;							///< The list of inverse bind matrices for skinning vertices
@@ -213,9 +301,20 @@ public:
 private:
 	friend class SoftBodyMotionProperties;
 
+	/// Tracks the closest kinematic vertex
+	struct ClosestKinematic
+	{
+		uint32			mVertex = 0xffffffff;						///< Vertex index of closest kinematic vertex
+		float			mDistance = FLT_MAX;						///< Distance to the closest kinematic vertex
+	};
+
+	/// Calculate the closest kinematic vertex array
+	void				CalculateClosestKinematic();
+
 	/// Get the size of an edge group (edge groups can run in parallel)
 	uint				GetEdgeGroupSize(uint inGroupIdx) const		{ return inGroupIdx == 0? mEdgeGroupEndIndices[0] : mEdgeGroupEndIndices[inGroupIdx] - mEdgeGroupEndIndices[inGroupIdx - 1]; }
 
+	Array<ClosestKinematic> mClosestKinematic;						///< The closest kinematic vertex to each vertex in mVertices
 	Array<uint>			mEdgeGroupEndIndices;						///< The start index of each group of edges that can be solved in parallel, calculated by Optimize()
 	Array<uint32>		mSkinnedConstraintNormals;					///< A list of indices in the mFaces array used by mSkinnedConstraints, calculated by CalculateSkinnedConstraintNormals()
 };

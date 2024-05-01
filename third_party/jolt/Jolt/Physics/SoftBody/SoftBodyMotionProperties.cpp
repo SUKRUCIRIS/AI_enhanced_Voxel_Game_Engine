@@ -15,6 +15,8 @@
 
 JPH_NAMESPACE_BEGIN
 
+using namespace JPH::literals;
+
 void SoftBodyMotionProperties::CalculateMassAndInertia()
 {
 	MassProperties mp;
@@ -246,6 +248,97 @@ void SoftBodyMotionProperties::IntegratePositions(const SoftBodyUpdateContext &i
 		}
 }
 
+void SoftBodyMotionProperties::ApplyBendConstraints(const SoftBodyUpdateContext &inContext)
+{
+	JPH_PROFILE_FUNCTION();
+
+	float inv_dt_sq = 1.0f / Square(inContext.mSubStepDeltaTime);
+
+	for (const DihedralBend &b : mSettings->mDihedralBendConstraints)
+	{
+		Vertex &v0 = mVertices[b.mVertex[0]];
+		Vertex &v1 = mVertices[b.mVertex[1]];
+		Vertex &v2 = mVertices[b.mVertex[2]];
+		Vertex &v3 = mVertices[b.mVertex[3]];
+
+		// Get positions
+		Vec3 x0 = v0.mPosition;
+		Vec3 x1 = v1.mPosition;
+		Vec3 x2 = v2.mPosition;
+		Vec3 x3 = v3.mPosition;
+
+		/*
+		   x2
+		e1/  \e3
+		 /    \
+		x0----x1
+		 \ e0 /
+		e2\  /e4
+		   x3
+		*/
+
+		// Calculate the shared edge of the triangles
+		Vec3 e = x1 - x0;
+		float e_len = e.Length();
+		if (e_len < 1.0e-6f)
+			continue;
+
+		// Calculate the normals of the triangles
+		Vec3 x1x2 = x2 - x1;
+		Vec3 x1x3 = x3 - x1;
+		Vec3 n1 = (x2 - x0).Cross(x1x2);
+		Vec3 n2 = x1x3.Cross(x3 - x0);
+		float n1_len_sq = n1.LengthSq();
+		float n2_len_sq = n2.LengthSq();
+		float n1_len_sq_n2_len_sq = n1_len_sq * n2_len_sq;
+		if (n1_len_sq_n2_len_sq < 1.0e-24f)
+			continue;
+
+		// Calculate constraint equation
+		// As per "Strain Based Dynamics" Appendix A we need to negate the gradients when (n1 x n2) . e > 0, instead we make sure that the sign of the constraint equation is correct
+		float sign = Sign(n2.Cross(n1).Dot(e));
+		float d = n1.Dot(n2) / sqrt(n1_len_sq_n2_len_sq);
+		float c = sign * ACos(d) - b.mInitialAngle;
+
+		// Ensure the range is -PI to PI
+		if (c > JPH_PI)
+			c -= 2.0f * JPH_PI;
+		else if (c < -JPH_PI)
+			c += 2.0f * JPH_PI;
+
+		// Calculate gradient of constraint equation
+		// Taken from "Strain Based Dynamics" - Matthias Muller et al. (Appendix A)
+		// with p1 = x2, p2 = x3, p3 = x0 and p4 = x1
+		// which in turn is based on "Simulation of Clothing with Folds and Wrinkles" - R. Bridson et al. (Section 4)
+		n1 /= n1_len_sq;
+		n2 /= n2_len_sq;
+		Vec3 d0c = (x1x2.Dot(e) * n1 + x1x3.Dot(e) * n2) / e_len;
+		Vec3 d2c = e_len * n1;
+		Vec3 d3c = e_len * n2;
+
+		// The sum of the gradients must be zero (see "Strain Based Dynamics" section 4)
+		Vec3 d1c = -d0c - d2c - d3c;
+
+		// Get masses
+		float w0 = v0.mInvMass;
+		float w1 = v1.mInvMass;
+		float w2 = v2.mInvMass;
+		float w3 = v3.mInvMass;
+
+		// Calculate -lambda
+		float denom = w0 * d0c.LengthSq() + w1 * d1c.LengthSq() + w2 * d2c.LengthSq() + w3 * d3c.LengthSq() + b.mCompliance * inv_dt_sq;
+		if (denom < 1.0e-12f)
+			continue;
+		float minus_lambda = c / denom;
+
+		// Apply correction
+		v0.mPosition = x0 - minus_lambda * w0 * d0c;
+		v1.mPosition = x1 - minus_lambda * w1 * d1c;
+		v2.mPosition = x2 - minus_lambda * w2 * d2c;
+		v3.mPosition = x3 - minus_lambda * w3 * d3c;
+	}
+}
+
 void SoftBodyMotionProperties::ApplyVolumeConstraints(const SoftBodyUpdateContext &inContext)
 {
 	JPH_PROFILE_FUNCTION();
@@ -277,25 +370,30 @@ void SoftBodyMotionProperties::ApplyVolumeConstraints(const SoftBodyUpdateContex
 		Vec3 d3c = x1x4.Cross(x1x2);
 		Vec3 d4c = x1x2.Cross(x1x3);
 
+		// Get masses
 		float w1 = v1.mInvMass;
 		float w2 = v2.mInvMass;
 		float w3 = v3.mInvMass;
 		float w4 = v4.mInvMass;
-		JPH_ASSERT(w1 > 0.0f || w2 > 0.0f || w3 > 0.0f || w4 > 0.0f);
+
+		// Calculate -lambda
+		float denom = w1 * d1c.LengthSq() + w2 * d2c.LengthSq() + w3 * d3c.LengthSq() + w4 * d4c.LengthSq() + v.mCompliance * inv_dt_sq;
+		if (denom < 1.0e-12f)
+			continue;
+		float minus_lambda = c / denom;
 
 		// Apply correction
-		float lambda = -c / (w1 * d1c.LengthSq() + w2 * d2c.LengthSq() + w3 * d3c.LengthSq() + w4 * d4c.LengthSq() + v.mCompliance * inv_dt_sq);
-		v1.mPosition += lambda * w1 * d1c;
-		v2.mPosition += lambda * w2 * d2c;
-		v3.mPosition += lambda * w3 * d3c;
-		v4.mPosition += lambda * w4 * d4c;
+		v1.mPosition = x1 - minus_lambda * w1 * d1c;
+		v2.mPosition = x2 - minus_lambda * w2 * d2c;
+		v3.mPosition = x3 - minus_lambda * w3 * d3c;
+		v4.mPosition = x4 - minus_lambda * w4 * d4c;
 	}
 }
 
 void SoftBodyMotionProperties::ApplySkinConstraints([[maybe_unused]] const SoftBodyUpdateContext &inContext)
 {
 	// Early out if nothing to do
-	if (mSettings->mSkinnedConstraints.empty())
+	if (mSettings->mSkinnedConstraints.empty() || !mEnableSkinConstraints)
 		return;
 
 	JPH_ASSERT(mSkinStateTransform == inContext.mCenterOfMassTransform, "Skinning state is stale, artifacts will show!");
@@ -307,10 +405,11 @@ void SoftBodyMotionProperties::ApplySkinConstraints([[maybe_unused]] const SoftB
 	{
 		Vertex &vertex = vertices[s.mVertex];
 		const SkinState &skin_state = skin_states[s.mVertex];
-		if (s.mMaxDistance > 0.0f)
+		float max_distance = s.mMaxDistance * mSkinnedMaxDistanceMultiplier;
+		if (max_distance > 0.0f)
 		{
 			// Move vertex if it violated the back stop
-			if (s.mBackStopDistance < s.mMaxDistance)
+			if (s.mBackStopDistance < max_distance)
 			{
 				// Center of the back stop sphere
 				Vec3 center = skin_state.mPosition - skin_state.mNormal * (s.mBackStopDistance + s.mBackStopRadius);
@@ -329,11 +428,11 @@ void SoftBodyMotionProperties::ApplySkinConstraints([[maybe_unused]] const SoftB
 			}
 
 			// Clamp vertex distance to max distance from skinned position
-			if (s.mMaxDistance < FLT_MAX)
+			if (max_distance < FLT_MAX)
 			{
 				Vec3 delta = vertex.mPosition - skin_state.mPosition;
 				float delta_len_sq = delta.LengthSq();
-				float max_distance_sq = Square(s.mMaxDistance);
+				float max_distance_sq = Square(max_distance);
 				if (delta_len_sq > max_distance_sq)
 					vertex.mPosition = skin_state.mPosition + delta * sqrt(max_distance_sq / delta_len_sq);
 			}
@@ -359,18 +458,22 @@ void SoftBodyMotionProperties::ApplyEdgeConstraints(const SoftBodyUpdateContext 
 		const Edge &e = edge_constraints[i];
 		Vertex &v0 = mVertices[e.mVertex[0]];
 		Vertex &v1 = mVertices[e.mVertex[1]];
-		JPH_ASSERT(v0.mInvMass > 0.0f || v1.mInvMass > 0.0f);
+
+		// Get positions
+		Vec3 x0 = v0.mPosition;
+		Vec3 x1 = v1.mPosition;
 
 		// Calculate current length
-		Vec3 delta = v1.mPosition - v0.mPosition;
+		Vec3 delta = x1 - x0;
 		float length = delta.Length();
-		if (length > 0.0f)
-		{
-			// Apply correction
-			Vec3 correction = delta * (length - e.mRestLength) / (length * (v0.mInvMass + v1.mInvMass + e.mCompliance * inv_dt_sq));
-			v0.mPosition += v0.mInvMass * correction;
-			v1.mPosition -= v1.mInvMass * correction;
-		}
+
+		// Apply correction
+		float denom = length * (v0.mInvMass + v1.mInvMass + e.mCompliance * inv_dt_sq);
+		if (denom < 1.0e-12f)
+			continue;
+		Vec3 correction = delta * (length - e.mRestLength) / denom;
+		v0.mPosition = x0 + v0.mInvMass * correction;
+		v1.mPosition = x1 - v1.mInvMass * correction;
 	}
 }
 
@@ -387,10 +490,11 @@ void SoftBodyMotionProperties::ApplyLRAConstraints()
 		const Vertex &vertex0 = vertices[lra.mVertex[0]];
 		Vertex &vertex1 = vertices[lra.mVertex[1]];
 
-		Vec3 delta = vertex1.mPosition - vertex0.mPosition;
+		Vec3 x0 = vertex0.mPosition;
+		Vec3 delta = vertex1.mPosition - x0;
 		float delta_len_sq = delta.LengthSq();
 		if (delta_len_sq > Square(lra.mMaxDistance))
-			vertex1.mPosition = vertex0.mPosition + delta * lra.mMaxDistance / sqrt(delta_len_sq);
+			vertex1.mPosition = x0 + delta * lra.mMaxDistance / sqrt(delta_len_sq);
 	}
 }
 
@@ -634,6 +738,8 @@ void SoftBodyMotionProperties::StartNextIteration(const SoftBodyUpdateContext &i
 
 	IntegratePositions(ioContext);
 
+	ApplyBendConstraints(ioContext);
+
 	ApplyVolumeConstraints(ioContext);
 }
 
@@ -831,6 +937,16 @@ void SoftBodyMotionProperties::SkinVertices(RMat44Arg inCenterOfMassTransform, c
 			vertex.mVelocity = Vec3::sZero();
 		}
 	}
+	else if (!mEnableSkinConstraints)
+	{
+		// Hard skin only the kinematic vertices as we will not solve the skin constraints later
+		for (const Skinned &s : mSettings->mSkinnedConstraints)
+			if (s.mMaxDistance == 0.0f)
+			{
+				Vertex &vertex = mVertices[s.mVertex];
+				vertex.mPosition = mSkinState[s.mVertex].mPosition;
+			}
+	}
 }
 
 void SoftBodyMotionProperties::CustomUpdate(float inDeltaTime, Body &ioSoftBody, PhysicsSystem &inSystem)
@@ -877,6 +993,24 @@ void SoftBodyMotionProperties::DrawEdgeConstraints(DebugRenderer *inRenderer, RM
 {
 	for (const Edge &e : mSettings->mEdgeConstraints)
 		inRenderer->DrawLine(inCenterOfMassTransform * mVertices[e.mVertex[0]].mPosition, inCenterOfMassTransform * mVertices[e.mVertex[1]].mPosition, Color::sWhite);
+}
+
+void SoftBodyMotionProperties::DrawBendConstraints(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransform) const
+{
+	for (const DihedralBend &b : mSettings->mDihedralBendConstraints)
+	{
+		RVec3 x0 = inCenterOfMassTransform * mVertices[b.mVertex[0]].mPosition;
+		RVec3 x1 = inCenterOfMassTransform * mVertices[b.mVertex[1]].mPosition;
+		RVec3 x2 = inCenterOfMassTransform * mVertices[b.mVertex[2]].mPosition;
+		RVec3 x3 = inCenterOfMassTransform * mVertices[b.mVertex[3]].mPosition;
+		RVec3 c_edge = 0.5_r * (x0 + x1);
+		RVec3 c0 = (x0 + x1 + x2) / 3.0_r;
+		RVec3 c1 = (x0 + x1 + x3) / 3.0_r;
+
+		inRenderer->DrawArrow(0.9_r * x0 + 0.1_r * x1, 0.1_r * x0 + 0.9_r * x1, Color::sDarkGreen, 0.01f);
+		inRenderer->DrawLine(c_edge, 0.1_r * c_edge + 0.9_r * c0, Color::sGreen);
+		inRenderer->DrawLine(c_edge, 0.1_r * c_edge + 0.9_r * c1, Color::sGreen);
+	}
 }
 
 void SoftBodyMotionProperties::DrawVolumeConstraints(DebugRenderer *inRenderer, RMat44Arg inCenterOfMassTransform) const

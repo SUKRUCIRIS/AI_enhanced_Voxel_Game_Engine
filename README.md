@@ -31,16 +31,7 @@ Then run the ./voxel_engine.exe
 Prerequisites:
 
 ```
-apt install gcc
-apt install cmake
-apt install build-essential
-apt install libx11-dev
-apt install libxrandr-dev
-apt install libxinerama-dev
-apt install libxcursor-dev
-apt install libxi-dev
-apt install mesa-common-dev
-apt install libasound2-dev
+sudo apt install -y gcc cmake build-essential libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-common-dev libasound2-dev
 ```
 
 Compiling:
