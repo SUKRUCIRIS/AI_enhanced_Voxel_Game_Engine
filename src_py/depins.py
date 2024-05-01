@@ -4,7 +4,7 @@ import os
 
 
 def install(package: str):
-    listx = [sys.executable, "-m", "pip", "install"]
+    listx = [sys.executable, "-m", "pip", "install", "--break-system-packages"]
     listx.extend(package.split(" "))
     subprocess.check_call(listx)
 
@@ -47,7 +47,7 @@ def install_dependencies():
         import requests
     except:
         install("requests")
-    if not os.path.exists(".\\aimodels\\hm.safetensors"):
+    if not os.path.exists("./aimodels/hm.safetensors"):
         import requests
         import shutil
 

@@ -1,14 +1,15 @@
-## Compiling with Python GUI on Windows
+## Compiling with Python GUI (MSVC or GCC)
+
 ```
 python ./run.py
 ```
 You can change various settings of the demo game of the game engine on this menu and compile with a button.
 
-You have to install Visual Studio Build Tools and set the path to vcvarsall.bat in the GUI to be able to compile.
+You have to install Visual Studio Build Tools and set the path to vcvarsall.bat in the GUI to be able to compile on Windows.
 
-## Compiling without Python GUI on Windows
+## Compiling without Python GUI on x64 Windows (MSVC)
 
-### Build project files:
+Build project files:
 
 ```
 mkdir build
@@ -16,7 +17,7 @@ cd build
 cmake ..
 ```
 
-### Compile with MSVC on x64 Windows:
+Compile with MSVC on x64 Windows:
 
 Make sure that you use x64 native tools command prompt for vs.
 
@@ -26,7 +27,7 @@ msbuild voxel_engine.sln /p:Configuration=Release /p:Platform=x64
 
 Then run the ./voxel_engine.exe
 
-## Compiling with GNU on x64 Ubuntu:
+## Compiling without Python GUI on x64 Ubuntu (GCC)
 
 Prerequisites:
 

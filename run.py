@@ -103,15 +103,21 @@ Worldsizez = Entry(
 Worldsizez.insert(0, "2048")
 Worldsizez.grid(column=1, row=6)
 
-
-lbl = Label(window, text="vcvarsall.bat location", bg="#26242f", fg="white")
-lbl.grid(column=0, row=7)
-path = Entry(window, width=150)
-path.insert(
-    0,
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat",
-)
-path.grid(column=1, row=7)
+path = None
+if os.name == "nt":
+    lbl = Label(
+        window, text="Windows MSVC vcvarsall.bat location", bg="#26242f", fg="white"
+    )
+    lbl.grid(column=0, row=7)
+    path = Entry(window, width=150)
+    path.insert(
+        0,
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat",
+    )
+    path.grid(column=1, row=7)
+else:
+    lbl = Label(window, text="Not on Windows, using GCC", bg="#26242f", fg="white")
+    lbl.grid(column=1, row=7)
 
 
 def browsefunc():
@@ -252,92 +258,92 @@ def replacing_jobs():
     replace(
         "int windoww",
         "int windoww = " + Screenwidth.get() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "int windowh",
         "int windowh = " + Screenheight.get() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "float sealevel",
         "float sealevel = " + Sealevel.get() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "int chunk_size",
         "int chunk_size = " + Chunksize.get() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "int chunk_range",
         "int chunk_range = " + Chunkrange.get() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "int dimensionx",
         "int dimensionx = " + Worldsizex.get() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "int dimensionz",
         "int dimensionz = " + Worldsizez.get() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "unsigned char vsync",
         "unsigned char vsync = " + vsyncvar.get().__str__() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "unsigned char fullscreen",
         "unsigned char fullscreen = " + fullscreenvar.get().__str__() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "unsigned char ssao",
         "unsigned char ssao = " + ssaovar.get().__str__() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "unsigned char facemerged",
         "unsigned char facemerged = " + facemergedvar.get().__str__() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     replace(
         "unsigned char chunkanimations",
         "unsigned char chunkanimations = " + chunkanimvar.get().__str__() + ";",
-        ".\\src\\main.c",
+        "./src/main.c",
     )
     if switch_variable.get() == "AI":
         replace(
             "unsigned char usetexture",
             "unsigned char usetexture = 1;",
-            ".\\src\\main.c",
+            "./src/main.c",
         )
         image = hm_generator.use(ai_entry.get("1.0", "end-1c"))
-        if os.path.exists(".\\heightmaps\\test.jpeg"):
+        if os.path.exists("./heightmaps/test.jpeg"):
             add = ""
-            while os.path.exists(".\\heightmaps\\test" + add + ".jpeg"):
+            while os.path.exists("./heightmaps/test" + add + ".jpeg"):
                 add = add + "_"
-            os.rename(".\\heightmaps\\test.jpeg", ".\\heightmaps\\test" + add + ".jpeg")
+            os.rename("./heightmaps/test.jpeg", "./heightmaps/test" + add + ".jpeg")
         image = image.convert("L", colors=8)
-        image.save(".\\heightmaps\\test.jpeg")
+        image.save("./heightmaps/test.jpeg")
     else:
         replace(
             "unsigned char usetexture",
             "unsigned char usetexture = 0;",
-            ".\\src\\main.c",
+            "./src/main.c",
         )
         replace(
             "int seedx",
             "int seedx = " + seedx.get() + ";",
-            ".\\src\\main.c",
+            "./src/main.c",
         )
         replace(
             "int seedz",
             "int seedz = " + seedz.get() + ";",
-            ".\\src\\main.c",
+            "./src/main.c",
         )
 
 
@@ -352,18 +358,27 @@ def clicked():
         print("Directory 'build' already exists")
     os.chdir("build")
     subprocess.run("cmake ..", shell=True)
-    msbuildpath = '"' + path.get() + '"'
-    compile = (
-        "call "
-        + msbuildpath
-        + " x64 & msbuild voxel_engine.sln /p:Configuration=Release /p:Platform=x64"
-    )
+    compile = ""
+    if os.name == "nt":
+        msbuildpath = '"' + path.get() + '"'
+        compile = (
+            "call "
+            + msbuildpath
+            + " x64 & msbuild voxel_engine.sln /p:Configuration=Release /p:Platform=x64"
+        )
+    else:
+        compile = "make"
     subprocess.run(compile, shell=True)
     os.chdir("..")
     lblb.configure(text="Running...")
     lblb.update()
+    executable = ""
+    if os.name == "nt":
+        executable = "./voxel_engine.exe"
+    else:
+        executable = "./voxel_engine"
     subprocess.Popen(
-        [".\\voxel_engine.exe"],
+        [executable],
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
