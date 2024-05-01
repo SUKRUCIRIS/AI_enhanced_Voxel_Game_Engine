@@ -23,6 +23,18 @@ void free_model(struct aiScene *scene)
 	aiReleaseImport(scene);
 }
 
+void replaceChar(char *str, char oldChar, char newChar)
+{
+	while (*str != '\0')
+	{
+		if (*str == oldChar)
+		{
+			*str = newChar;
+		}
+		str++;
+	}
+}
+
 br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text_manager,
 												struct aiScene *scene, float texture_start_index, unsigned char has_physics,
 												unsigned char priority, float mass, float friction, float bounce)
@@ -76,6 +88,7 @@ br_scene load_object_br(br_object_manager *obj_manager, br_texture_manager *text
 			{
 				char ext_path[1024] = {0};
 				sprintf(ext_path, "./models/%s", texturePath.data);
+				replaceChar(ext_path, '\\', '/');
 				res.textures[i] = create_br_texture(text_manager, ext_path, GL_TEXTURE_2D, GL_NEAREST, GL_NEAREST,
 																						(int)texture_start_index + (int)i, GL_REPEAT, GL_REPEAT);
 			}

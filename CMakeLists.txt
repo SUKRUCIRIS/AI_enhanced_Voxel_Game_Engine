@@ -11,7 +11,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
-message(STATUS "Setting build type to '${CMAKE_BUILD_TYPE}'")
+message(NOTICE "Setting build type to '${CMAKE_BUILD_TYPE}'")
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -94,15 +94,15 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
 
 	set(SOLOUD_BACKEND_ALSA ON CACHE BOOL "" FORCE)
 
-	set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0 -mavx2")
-	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0 -mavx2")
+	set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0 -mavx2 -mno-default")
+	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto -fno-stack-protector -D_FORTIFY_SOURCE=0 -mavx2 -mno-default")
 	if(CMAKE_BUILD_TYPE STREQUAL "Release")
 		set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -s")
 	endif()
 	set(CMAKE_BUILD_PARALLEL_LEVEL "$(nproc)")
 
-	set(CMAKE_C_FLAGS_DEBUG "-Wall -ggdb3 -mavx2")
-	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -ggdb3 -mavx2")
+	set(CMAKE_C_FLAGS_DEBUG "-Wall -ggdb3 -mavx2 -mno-default")
+	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -ggdb3 -mavx2 -mno-default")
 
 	add_subdirectory(third_party/glfw)
 	add_subdirectory(third_party/cglm)
