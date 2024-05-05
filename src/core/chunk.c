@@ -13,6 +13,31 @@ void set_gsu_model(struct aiScene *model)
   gsu_model = model;
 }
 
+void set_chunk_info_z(chunk_info *x, int **hm, unsigned int chunk_size, int dimensionx, int dimensionz, float sealevel)
+{
+  x->minz = 10000;
+  x->maxz = -10000;
+  for (int i = x->startx; i < x->startx + chunk_size && i < dimensionx; i++)
+  {
+    for (int i2 = x->startz; i2 < x->startz + chunk_size && i2 < dimensionz; i2++)
+    {
+      if (hm[i][i2] > x->maxz)
+      {
+        x->maxz = hm[i][i2];
+      }
+      if (hm[i][i2] < x->minz)
+      {
+        x->minz = hm[i][i2];
+      }
+    }
+  }
+  int sea = (int)sealevel + 1;
+  if (x->maxz < sea)
+  {
+    x->maxz = sea;
+  }
+}
+
 chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, player *p, int **hm,
                           int dimensionx, int dimensionz, vec3 lightdir, float sealevel, unsigned char facemerged)
 {
@@ -41,12 +66,13 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
       chunk_info x = {
           .startx = i * c->chunk_size,
           .startz = i2 * c->chunk_size,
-          .minz = -1000,
-          .maxz = 1000,
+          .minz = 0,
+          .maxz = 0,
           .minxy = {
               (float)(i * c->chunk_size) - (int)(dimensionx / 2),
               (float)(i2 * c->chunk_size) - (int)(dimensionz / 2)},
           .maxxy = {(float)((i + 1) * c->chunk_size) - (int)(dimensionx / 2), (float)((i2 + 1) * c->chunk_size) - (int)(dimensionz / 2)}};
+      set_chunk_info_z(&x, hm, chunk_size, dimensionx, dimensionz, sealevel);
       x.minxy[0] -= 1;
       x.minxy[1] -= 1;
       x.maxxy[0] += 1;
