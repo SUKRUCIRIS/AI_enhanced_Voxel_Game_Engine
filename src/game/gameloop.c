@@ -318,8 +318,8 @@ void loadmenu(void *window, unsigned char usetexture, float sealevel, int chunk_
   }
   else
   {
-    DA *points = create_DA(sizeof(float));
-    DA *heights = create_DA(sizeof(int));
+    DA *points = create_DA(sizeof(float), 0);
+    DA *heights = create_DA(sizeof(int), 0);
     float tmp[] = {0, 0.30f, 0.34f, 0.37f, 0.41f, 0.44f, 0.46f, 0.48f, 0.49f, 0.51f, 0.52f, 0.54f, 0.57f, 0.60f, 0.64f, 0.67f, 0.71f, 1};
     pushback_many_DA(points, tmp, 18);
     int tmpi[] = {0, 35, 36, 47, 50, 50, 50, 52, 57, 64, 75, 85, 91, 93, 94, 94, 96, 100};

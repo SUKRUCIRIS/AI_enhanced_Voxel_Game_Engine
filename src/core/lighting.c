@@ -71,8 +71,8 @@ lighting *create_lighting(GLFWwindow *window, camera *cam, GLuint shadowMapWidth
 {
 	lighting *l = 0;
 	malloc32(l, sizeof(lighting));
-	l->programs = create_DA(sizeof(GLuint));
-	l->uniforms = create_DA(sizeof(GLint));
+	l->programs = create_DA(sizeof(GLuint), 0);
+	l->uniforms = create_DA(sizeof(GLint), 0);
 
 	l->cascade0range = cascade0range;
 	l->cascade1range = cascade1range;

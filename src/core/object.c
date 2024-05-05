@@ -144,8 +144,8 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 	glm_mat4_copy(GLM_MAT4_IDENTITY, obj->model);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, obj->normal);
 	obj->copy = 0;
-	obj->programs = create_DA(sizeof(GLuint));
-	obj->uniforms = create_DA(sizeof(GLint));
+	obj->programs = create_DA(sizeof(GLuint), 0);
+	obj->uniforms = create_DA(sizeof(GLint), 0);
 	if (has_physics)
 	{
 		int x = 0;
@@ -219,7 +219,7 @@ object *create_object(GLfloat *vertices, unsigned int vertex_number, GLenum usag
 	}
 	if (objects == 0)
 	{
-		objects = create_DA(sizeof(object *));
+		objects = create_DA(sizeof(object *), 0);
 	}
 	pushback_DA(objects, &obj);
 	return obj;
@@ -310,7 +310,7 @@ object *create_object_copy(object *obj, unsigned char has_physics)
 	}
 	if (objects == 0)
 	{
-		objects = create_DA(sizeof(object *));
+		objects = create_DA(sizeof(object *), 0);
 	}
 	pushback_DA(objects, &obj_new);
 	return obj_new;

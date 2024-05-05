@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "macro.h"
 
 struct DA
 {
@@ -9,6 +10,7 @@ struct DA
 	unsigned int size;
 	unsigned int itemsize;
 	unsigned char high_memory;
+	unsigned char aligned;
 	void *items;
 };
 
@@ -20,7 +22,7 @@ void init_recycle_DA(unsigned int max_size)
 	if (max_size > 0)
 	{
 		delete_recycle_DA();
-		HIGH_MEMORY_RECYCLE_BUFFER = create_DA_HIGH_MEMORY(sizeof(DA *));
+		HIGH_MEMORY_RECYCLE_BUFFER = create_DA_HIGH_MEMORY(sizeof(DA *), 0);
 		recycle_max_size = max_size;
 	}
 }
@@ -55,7 +57,7 @@ void clear_recycle_DA(void)
 	}
 }
 
-DA *create_DA(unsigned int itemsize)
+DA *create_DA(unsigned int itemsize, unsigned char aligned)
 {
 	DA *da = calloc(1, sizeof(DA));
 	if (da == 0)
@@ -63,10 +65,11 @@ DA *create_DA(unsigned int itemsize)
 		return 0;
 	}
 	da->itemsize = itemsize;
+	da->aligned = aligned;
 	return da;
 }
 
-DA *create_DA_HIGH_MEMORY(unsigned int itemsize)
+DA *create_DA_HIGH_MEMORY(unsigned int itemsize, unsigned char aligned)
 {
 	DA *da = 0;
 	unsigned char found = 0;
@@ -99,6 +102,7 @@ DA *create_DA_HIGH_MEMORY(unsigned int itemsize)
 		da->itemsize = itemsize;
 		da->high_memory = 1;
 	}
+	da->aligned = aligned;
 	return da;
 }
 
@@ -173,7 +177,14 @@ void delete_DA(DA *da)
 	}
 	else if (da)
 	{
-		free(da->items);
+		if (da->aligned)
+		{
+			free32(da->items);
+		}
+		else
+		{
+			free(da->items);
+		}
 		free(da);
 	}
 }
@@ -224,7 +235,14 @@ void remove_DA(DA *da, unsigned int index)
 	da->size--;
 	if (da->high_memory == 0)
 	{
-		free(da->items);
+		if (da->aligned)
+		{
+			free32(da->items);
+		}
+		else
+		{
+			free(da->items);
+		}
 		da->items = newitems;
 		da->memory_size = da->size;
 	}
@@ -263,7 +281,14 @@ void remove_many_DA(DA *da, unsigned int start_index, unsigned int end_index)
 	da->size -= (end_index - start_index + 1);
 	if (da->high_memory == 0)
 	{
-		free(da->items);
+		if (da->aligned)
+		{
+			free32(da->items);
+		}
+		else
+		{
+			free(da->items);
+		}
 		da->items = newitems;
 		da->memory_size = da->size;
 	}
@@ -273,7 +298,14 @@ void clear_DA(DA *da)
 {
 	if (da && da->high_memory == 0)
 	{
-		free(da->items);
+		if (da->aligned)
+		{
+			free32(da->items);
+		}
+		else
+		{
+			free(da->items);
+		}
 		da->items = 0;
 		da->size = 0;
 		da->memory_size = 0;

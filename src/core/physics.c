@@ -28,7 +28,7 @@ physic *create_physic(vec3 minaabb, vec3 maxaabb, unsigned char priority, float 
 	ph->obj = obj;
 	if (physic_objects == 0)
 	{
-		physic_objects = create_DA(sizeof(physic *));
+		physic_objects = create_DA(sizeof(physic *), 0);
 	}
 	ph->bounce = bounce;
 	ph->is_br_object = is_br_object;

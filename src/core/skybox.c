@@ -56,8 +56,8 @@ skybox *create_skybox(const char *right_texture, const char *left_texture, const
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  s->programs = create_DA(sizeof(GLuint));
-  s->uniforms = create_DA(sizeof(GLint));
+  s->programs = create_DA(sizeof(GLuint), 0);
+  s->uniforms = create_DA(sizeof(GLint), 0);
   s->cam = cam;
   glGenTextures(1, &s->cubemap);
   glBindTexture(GL_TEXTURE_CUBE_MAP, s->cubemap);

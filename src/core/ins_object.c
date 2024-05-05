@@ -1,7 +1,7 @@
 #include "ins_object.h"
 
 ins_object_manager *create_ins_object_manager(GLfloat *vertices, unsigned int vertex_number, GLuint *indices,
-											  unsigned int indice_number)
+																							unsigned int indice_number)
 {
 	ins_object_manager *x = malloc(sizeof(ins_object_manager));
 	x->VAO = 0;
@@ -10,12 +10,12 @@ ins_object_manager *create_ins_object_manager(GLfloat *vertices, unsigned int ve
 	x->VBO_normal_matrix = 0;
 	x->VBO_texture = 0;
 	x->EBO = 0;
-	x->objects = create_DA_HIGH_MEMORY(sizeof(ins_object *));
-	x->vertices = create_DA(sizeof(GLfloat));
-	x->indices = create_DA(sizeof(GLuint));
-	x->models = create_DA_HIGH_MEMORY(sizeof(mat4));
-	x->normals = create_DA_HIGH_MEMORY(sizeof(mat4));
-	x->textures = create_DA_HIGH_MEMORY(sizeof(GLfloat));
+	x->objects = create_DA_HIGH_MEMORY(sizeof(ins_object *), 0);
+	x->vertices = create_DA(sizeof(GLfloat), 0);
+	x->indices = create_DA(sizeof(GLuint), 0);
+	x->models = create_DA_HIGH_MEMORY(sizeof(mat4), 0);
+	x->normals = create_DA_HIGH_MEMORY(sizeof(mat4), 0);
+	x->textures = create_DA_HIGH_MEMORY(sizeof(GLfloat), 0);
 	x->subdata = 0;
 	pushback_many_DA(x->vertices, vertices, vertex_number * 8);
 	pushback_many_DA(x->indices, indices, indice_number);
@@ -46,7 +46,7 @@ void delete_ins_object_manager(ins_object_manager *manager)
 }
 
 ins_object *create_ins_object(ins_object_manager *manager, GLfloat texture_index, unsigned char has_physics,
-							  unsigned char priority, float mass, float friction, float bounce)
+															unsigned char priority, float mass, float friction, float bounce)
 {
 	ins_object *x = malloc(sizeof(ins_object));
 	x->manager = manager;

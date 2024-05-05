@@ -101,10 +101,10 @@ text_manager *create_text_manager(const char *font_file, int height, int screenw
   f->VAO = 0;
   f->VBO = 0;
   f->EBO = 0;
-  f->vertices = create_DA_HIGH_MEMORY(sizeof(GLfloat));
-  f->indices = create_DA_HIGH_MEMORY(sizeof(GLuint));
-  f->programs = create_DA(sizeof(GLuint));
-  f->uniforms = create_DA(sizeof(GLint));
+  f->vertices = create_DA_HIGH_MEMORY(sizeof(GLfloat), 0);
+  f->indices = create_DA_HIGH_MEMORY(sizeof(GLuint), 0);
+  f->programs = create_DA(sizeof(GLuint), 0);
+  f->uniforms = create_DA(sizeof(GLint), 0);
   f->newdata = 0;
   return f;
 }

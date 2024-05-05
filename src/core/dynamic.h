@@ -13,9 +13,9 @@ void delete_recycle_DA(void);
 
 void clear_recycle_DA(void);
 
-DA *create_DA(unsigned int itemsize);
+DA *create_DA(unsigned int itemsize, unsigned char aligned);
 
-DA *create_DA_HIGH_MEMORY(unsigned int itemsize);
+DA *create_DA_HIGH_MEMORY(unsigned int itemsize, unsigned char aligned);
 
 void pushback_DA(DA *da, void *item);
 

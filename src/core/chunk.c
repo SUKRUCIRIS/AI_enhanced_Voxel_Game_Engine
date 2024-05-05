@@ -21,9 +21,9 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
     gsu_can_exist = 1;
   }
   chunk_op *c = malloc(sizeof(chunk_op));
-  c->batch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
-  c->allbatch = create_DA_HIGH_MEMORY(sizeof(world_batch *));
-  c->chunkinfo = create_DA_HIGH_MEMORY(sizeof(chunk_info));
+  c->batch = create_DA_HIGH_MEMORY(sizeof(world_batch *), 0);
+  c->allbatch = create_DA_HIGH_MEMORY(sizeof(world_batch *), 0);
+  c->chunkinfo = create_DA_HIGH_MEMORY(sizeof(chunk_info), 0);
   c->chunk_size = chunk_size;
   c->chunk_range = chunk_range;
   c->p = p;
@@ -138,7 +138,7 @@ chunk_op *create_chunk_op(unsigned int chunk_size, unsigned int chunk_range, pla
   trim_DA(c->allbatch);
   c->previous_ids = 0;
   c->current_ids = malloc(sizeof(int) * c->renderedchunkcount);
-  c->delete_ids = create_DA_HIGH_MEMORY(sizeof(int));
+  c->delete_ids = create_DA_HIGH_MEMORY(sizeof(int), 0);
   return c;
 }
 

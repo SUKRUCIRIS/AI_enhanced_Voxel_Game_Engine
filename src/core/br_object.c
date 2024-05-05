@@ -39,17 +39,17 @@ br_object_manager *create_br_object_manager(void)
 	x->VAO = 0;
 	x->VBO = 0;
 	x->EBO = 0;
-	x->objects = create_DA_HIGH_MEMORY(sizeof(br_object *));
-	x->vertices = create_DA_HIGH_MEMORY(sizeof(GLfloat));
-	x->indices = create_DA_HIGH_MEMORY(sizeof(GLuint));
+	x->objects = create_DA_HIGH_MEMORY(sizeof(br_object *), 0);
+	x->vertices = create_DA_HIGH_MEMORY(sizeof(GLfloat), 0);
+	x->indices = create_DA_HIGH_MEMORY(sizeof(GLuint), 0);
 	x->subdata = 0;
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->model);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->normal);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->translation);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->rotation);
 	glm_mat4_copy(GLM_MAT4_IDENTITY, x->scale);
-	x->programs = create_DA(sizeof(GLuint));
-	x->uniforms = create_DA(sizeof(GLint));
+	x->programs = create_DA(sizeof(GLuint), 0);
+	x->uniforms = create_DA(sizeof(GLint), 0);
 	x->object_number = 0;
 	x->indice_number = 0;
 	return x;
@@ -63,7 +63,7 @@ void delete_br_object_manager(br_object_manager *manager)
 		for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
 		{
 			delete_physic(objects[i]->phy);
-			free(objects[i]);
+			free32(objects[i]);
 		}
 	}
 	delete_DA(manager->objects);
@@ -341,7 +341,7 @@ void delete_cpu_memory_br_object_manager(br_object_manager *manager)
 	for (unsigned int i = 0; i < get_size_DA(manager->objects); i++)
 	{
 		delete_physic(objects[i]->phy);
-		free(objects[i]);
+		free32(objects[i]);
 	}
 	delete_DA(manager->objects);
 	delete_DA(manager->vertices);

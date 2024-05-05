@@ -4,13 +4,13 @@
 br_texture_manager *create_br_texture_manager(void)
 {
 	br_texture_manager *x = malloc(sizeof(br_texture_manager));
-	x->textures = create_DA(sizeof(br_texture *));
+	x->textures = create_DA(sizeof(br_texture *), 0);
 	for (int i = 0; i < 32; i++)
 	{
 		x->indices[i] = 0;
 	}
-	x->programs = create_DA(sizeof(GLuint));
-	x->uniforms = create_DA(sizeof(GLint));
+	x->programs = create_DA(sizeof(GLuint), 0);
+	x->uniforms = create_DA(sizeof(GLint), 0);
 	return x;
 }
 

@@ -46,8 +46,8 @@ texture *load_texture(const char *path, GLenum texType, GLenum pixelType, GLint 
 	stbi_image_free(bytes);
 	glBindTexture(texType, 0);
 	tex->type = texType;
-	tex->programs = create_DA(sizeof(GLuint));
-	tex->uniforms = create_DA(sizeof(GLint));
+	tex->programs = create_DA(sizeof(GLuint), 0);
+	tex->uniforms = create_DA(sizeof(GLint), 0);
 	tex->shininess = shininess;
 	return tex;
 }

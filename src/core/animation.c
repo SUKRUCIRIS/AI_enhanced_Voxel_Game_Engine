@@ -22,19 +22,19 @@ translate tranim;
 
 void init_animations(void)
 {
-  tranim.bro = create_DA_HIGH_MEMORY(sizeof(br_object *));
-  tranim.brm = create_DA_HIGH_MEMORY(sizeof(br_object_manager *));
-  tranim.brostartms = create_DA_HIGH_MEMORY(sizeof(double));
-  tranim.broendms = create_DA_HIGH_MEMORY(sizeof(double));
-  tranim.brmstartms = create_DA_HIGH_MEMORY(sizeof(double));
-  tranim.brmendms = create_DA_HIGH_MEMORY(sizeof(double));
-  tranim.brotargetvec = create_DA_HIGH_MEMORY(sizeof(vec3));
-  tranim.brmtargetvec = create_DA_HIGH_MEMORY(sizeof(vec3));
-  tranim.brocurrentvec = create_DA_HIGH_MEMORY(sizeof(vec3));
-  tranim.brmcurrentvec = create_DA_HIGH_MEMORY(sizeof(vec3));
-  tranim.brop = create_DA_HIGH_MEMORY(sizeof(unsigned char));
-  tranim.broduration = create_DA_HIGH_MEMORY(sizeof(double));
-  tranim.brmduration = create_DA_HIGH_MEMORY(sizeof(double));
+  tranim.bro = create_DA_HIGH_MEMORY(sizeof(br_object *), 0);
+  tranim.brm = create_DA_HIGH_MEMORY(sizeof(br_object_manager *), 0);
+  tranim.brostartms = create_DA_HIGH_MEMORY(sizeof(double), 0);
+  tranim.broendms = create_DA_HIGH_MEMORY(sizeof(double), 0);
+  tranim.brmstartms = create_DA_HIGH_MEMORY(sizeof(double), 0);
+  tranim.brmendms = create_DA_HIGH_MEMORY(sizeof(double), 0);
+  tranim.brotargetvec = create_DA_HIGH_MEMORY(sizeof(vec3), 0);
+  tranim.brmtargetvec = create_DA_HIGH_MEMORY(sizeof(vec3), 0);
+  tranim.brocurrentvec = create_DA_HIGH_MEMORY(sizeof(vec3), 0);
+  tranim.brmcurrentvec = create_DA_HIGH_MEMORY(sizeof(vec3), 0);
+  tranim.brop = create_DA_HIGH_MEMORY(sizeof(unsigned char), 0);
+  tranim.broduration = create_DA_HIGH_MEMORY(sizeof(double), 0);
+  tranim.brmduration = create_DA_HIGH_MEMORY(sizeof(double), 0);
 }
 
 void add_animation_translate_br_object(br_object *obj, vec3 v, unsigned char effect_physic, double durationms)
