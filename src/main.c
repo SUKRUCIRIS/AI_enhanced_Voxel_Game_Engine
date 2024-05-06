@@ -16,8 +16,8 @@ int main(void)
 	init_programs();
 
 	float sealevel = 25.2f;
-	int chunk_size = 16;
-	int chunk_range = 32;
+	int chunk_size = 32;
+	int chunk_range = 16;
 	int dimensionx = 2048;
 	int dimensionz = 2048;
 	int seedx = 1453;

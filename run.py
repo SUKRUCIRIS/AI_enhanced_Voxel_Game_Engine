@@ -76,7 +76,7 @@ lbl.grid(column=0, row=3)
 Chunksize = Entry(
     window, width=150, validate="all", validatecommand=(intregister, "%P")
 )
-Chunksize.insert(0, "16")
+Chunksize.insert(0, "32")
 Chunksize.grid(column=1, row=3)
 
 lbl = Label(window, text="Chunk range", bg="#26242f", fg="white")
@@ -84,7 +84,7 @@ lbl.grid(column=0, row=4)
 Chunkrange = Entry(
     window, width=150, validate="all", validatecommand=(intregister, "%P")
 )
-Chunkrange.insert(0, "32")
+Chunkrange.insert(0, "16")
 Chunkrange.grid(column=1, row=4)
 
 lbl = Label(window, text="World size x", bg="#26242f", fg="white")

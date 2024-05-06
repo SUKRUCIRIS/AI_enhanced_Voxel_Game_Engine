@@ -363,7 +363,7 @@ void use_chunk_op(chunk_op *c, GLuint program, camera *cam, unsigned char land0_
     box2[1][2] = y[x[i]->chunk_id].maxxy[1];
     glm_aabb_center(box2, center);
     if (glm_aabb_frustum(box2, planes) ||
-        glm_vec3_distance((vec3){cam->position[0], 0, cam->position[2]}, (vec3){center[0], 0, center[2]}) <= (float)c->chunk_size * 4.0f)
+        glm_vec3_distance((vec3){cam->position[0], 0, cam->position[2]}, (vec3){center[0], 0, center[2]}) <= 64.0f)
     {
       if (land0_water1 == 0)
       {
