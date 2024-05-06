@@ -4,13 +4,15 @@ import subprocess
 import threading
 import fileinput
 import sys
-from PIL import Image
+from PIL import Image as pimage
 
 depins.install_dependencies()
 
 from src_py import genhm
 from tkinter import *
 from tkinter import filedialog
+
+seed = 1453
 
 
 def intvalfunc(P):
@@ -141,6 +143,7 @@ lblb.grid(column=0, row=8)
 
 sub_frame = Frame()
 ai_entry = None
+nai_entry = None
 seedx = None
 seedz = None
 
@@ -148,15 +151,23 @@ seedz = None
 def aiclick():
     global sub_frame
     global ai_entry
+    global nai_entry
     global switch_variable
     if switch_variable.get() == "AI":
         return
     sub_frame.destroy()
-    sub_frame = Frame()
+    sub_frame = Frame(bg="#26242f")
     sub_frame.grid(column=1, row=9)
-    ai_entry = Text(sub_frame, width=100, height=3)
-    ai_entry.grid(column=1, row=9)
-    ai_entry.insert("end-1c", "Describe your world here...")
+    ai_entry = Text(sub_frame, width=100, height=2)
+    ai_entry.grid(column=1, row=0)
+    ai_entry.insert("end-1c", "")
+    nai_entry = Text(sub_frame, width=100, height=2)
+    nai_entry.grid(column=1, row=1)
+    nai_entry.insert("end-1c", "")
+    lblb = Label(sub_frame, text="Prompt", bg="#26242f", fg="white")
+    lblb.grid(column=0, row=0)
+    lblb = Label(sub_frame, text="Negative Prompt (Optional)", bg="#26242f", fg="white")
+    lblb.grid(column=0, row=1)
     switch_variable = StringVar(value="AI")
 
 
@@ -171,7 +182,7 @@ def randclick():
     if switch_variable.get() == "Random":
         return
     sub_frame.destroy()
-    sub_frame = Frame()
+    sub_frame = Frame(bg="#26242f")
     sub_frame.grid(column=1, row=9)
     seedx = Entry(
         sub_frame, width=50, validate="all", validatecommand=(intregister, "%P")
@@ -323,6 +334,9 @@ def replacing_jobs():
         )
 
         prompt = ai_entry.get("1.0", "end-1c")
+        neg_prompt = nai_entry.get("1.0", "end-1c")
+        if neg_prompt == "":
+            neg_prompt = None
 
         def rename_ai_out(out: str):
             out1 = out.split(".")[1]
@@ -333,13 +347,21 @@ def replacing_jobs():
                     add = add + "_"
                 os.rename(out, "." + out1 + add + "." + out2)
 
-        image = hm_generator.use(prompt)
+        triggerword = "height map "
+        image = hm_generator.use(triggerword + prompt, seed, neg_prompt)
         rename_ai_out("./heightmaps/test.jpeg")
         image = image.convert("L", colors=8)
         image.save("./heightmaps/test.jpeg")
 
         def ai_texture(out: str):
-            image = hm_generator.use_texture(prompt, Image.open(out))
+            global seed
+            triggerword = "seamless "
+            # image = hm_generator.use_texture(triggerword + prompt, pimage.open(out))
+            seed = seed + 10
+            image = hm_generator.use_texture_2(
+                triggerword + prompt + ", seamless", seed, neg_prompt
+            )
+            image = image.resize((32, 32))
             rename_ai_out(out)
             image.save(out)
 

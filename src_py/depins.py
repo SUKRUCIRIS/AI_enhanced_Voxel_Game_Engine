@@ -1,6 +1,8 @@
 import sys
 import subprocess
 import os
+import requests
+import shutil
 
 
 def install(package: str):
@@ -48,17 +50,29 @@ def install_dependencies():
     except:
         install("requests")
     if not os.path.exists("./aimodels/hm.safetensors"):
-        import requests
-        import shutil
 
-        print("Installing Lora model...")
+        print("Installing Lora model 1...")
         response = requests.get(
-            "https://civitai.com/api/download/models/22792?type=Model&format=SafeTensor&size=full&fp=fp16",
+            "https://civitai.com/api/download/models/22792?type=Model&format=SafeTensor&size=full",
             stream=True,
             headers={"User-agent": "Mozilla/5.0"},
         )
         os.makedirs(os.path.dirname("aimodels/hm.safetensors"), exist_ok=True)
         if response.status_code == 200:
             with open("aimodels/hm.safetensors", "wb") as f:
+                response.raw.decode_content = True
+                shutil.copyfileobj(response.raw, f)
+
+    if not os.path.exists("./aimodels/texture.safetensors"):
+
+        print("Installing Lora model 2...")
+        response = requests.get(
+            "https://civitai.com/api/download/models/426219?type=Model&format=SafeTensor",
+            stream=True,
+            headers={"User-agent": "Mozilla/5.0"},
+        )
+        os.makedirs(os.path.dirname("aimodels/texture.safetensors"), exist_ok=True)
+        if response.status_code == 200:
+            with open("aimodels/texture.safetensors", "wb") as f:
                 response.raw.decode_content = True
                 shutil.copyfileobj(response.raw, f)
