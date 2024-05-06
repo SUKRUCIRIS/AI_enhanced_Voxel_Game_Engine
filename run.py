@@ -4,6 +4,7 @@ import subprocess
 import threading
 import fileinput
 import sys
+from PIL import Image
 
 depins.install_dependencies()
 
@@ -32,7 +33,6 @@ def floatvalfunc(P):
 
 
 window = Tk()
-window.geometry("1200x600")
 window.config(bg="#26242f")
 window.resizable(width=False, height=False)
 
@@ -119,18 +119,18 @@ else:
     lbl = Label(window, text="Not on Windows, using GCC", bg="#26242f", fg="white")
     lbl.grid(column=1, row=7)
 
+if os.name == "nt":
 
-def browsefunc():
-    filename = filedialog.askopenfilename(
-        filetypes=(("bat files", "*.bat"), ("All files", "*.*"))
-    )
-    if filename.__len__() > 0:
-        path.delete(0, END)
-        path.insert(0, filename)
+    def browsefunc():
+        filename = filedialog.askopenfilename(
+            filetypes=(("bat files", "*.bat"), ("All files", "*.*"))
+        )
+        if filename.__len__() > 0:
+            path.delete(0, END)
+            path.insert(0, filename)
 
-
-btn = Button(window, text="Browse", command=browsefunc)
-btn.grid(column=2, row=7)
+    btn = Button(window, text="Browse", command=browsefunc)
+    btn.grid(column=2, row=7)
 
 switch_frame = Frame()
 switch_frame.grid(column=1, row=8, pady=10)
@@ -174,19 +174,19 @@ def randclick():
     sub_frame = Frame()
     sub_frame.grid(column=1, row=9)
     seedx = Entry(
-        sub_frame, width=100, validate="all", validatecommand=(intregister, "%P")
+        sub_frame, width=50, validate="all", validatecommand=(intregister, "%P")
     )
-    seedx.grid(column=1, row=9)
+    seedx.grid(column=1, row=0)
     seedz = Entry(
-        sub_frame, width=100, validate="all", validatecommand=(intregister, "%P")
+        sub_frame, width=50, validate="all", validatecommand=(intregister, "%P")
     )
-    seedz.grid(column=1, row=10)
+    seedz.grid(column=1, row=1)
     seedx.insert(0, "1453")
     seedz.insert(0, "1071")
     lblb = Label(sub_frame, text="Seed x", bg="#26242f", fg="white")
-    lblb.grid(column=0, row=9)
+    lblb.grid(column=0, row=0)
     lblb = Label(sub_frame, text="Seed z", bg="#26242f", fg="white")
-    lblb.grid(column=0, row=10)
+    lblb.grid(column=0, row=1)
     switch_variable = StringVar(value="Random")
 
 
@@ -321,14 +321,35 @@ def replacing_jobs():
             "unsigned char usetexture = 1;",
             "./src/main.c",
         )
-        image = hm_generator.use(ai_entry.get("1.0", "end-1c"))
-        if os.path.exists("./heightmaps/test.jpeg"):
-            add = ""
-            while os.path.exists("./heightmaps/test" + add + ".jpeg"):
-                add = add + "_"
-            os.rename("./heightmaps/test.jpeg", "./heightmaps/test" + add + ".jpeg")
+
+        prompt = ai_entry.get("1.0", "end-1c")
+
+        def rename_ai_out(out: str):
+            out1 = out.split(".")[1]
+            out2 = out.split(".")[2]
+            if os.path.exists(out):
+                add = ""
+                while os.path.exists("." + out1 + add + "." + out2):
+                    add = add + "_"
+                os.rename(out, "." + out1 + add + "." + out2)
+
+        image = hm_generator.use(prompt)
+        rename_ai_out("./heightmaps/test.jpeg")
         image = image.convert("L", colors=8)
         image.save("./heightmaps/test.jpeg")
+
+        def ai_texture(out: str):
+            image = hm_generator.use_texture(prompt, Image.open(out))
+            rename_ai_out(out)
+            image.save(out)
+
+        ai_texture("./textures/snow.png")
+        ai_texture("./textures/snow_side.png")
+        ai_texture("./textures/grass.png")
+        ai_texture("./textures/grass_side.png")
+        ai_texture("./textures/dirt.png")
+        ai_texture("./textures/dirt_side.png")
+        ai_texture("./textures/side.png")
     else:
         replace(
             "unsigned char usetexture",

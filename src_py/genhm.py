@@ -20,11 +20,16 @@ class hm_ai:
                 ).to("cuda")
             )
             self.pipeline.load_lora_weights("aimodels/", weight_name="hm.safetensors")
-        self.pipeline_text: AutoPipelineForImage2Image = (
-            AutoPipelineForImage2Image.from_pretrained(
-                "runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16
-            ).to("cuda")
-        )
+            print("Loaded model 1")
+            self.pipeline_text: AutoPipelineForImage2Image = (
+                AutoPipelineForImage2Image.from_pretrained(
+                    "runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16
+                ).to("cuda")
+            )
+            self.pipeline_text.load_lora_weights(
+                "aimodels/", weight_name="texture.safetensors"
+            )
+            print("Loaded model 2")
 
         def dummy(images: list, **kwargs):
             false_list = [False] * images.__len__()
@@ -33,6 +38,7 @@ class hm_ai:
         self.pipeline.safety_checker = dummy
         self.pipeline_text.safety_checker = dummy
         self.pipeline.to("cuda")
+        self.pipeline_text.to("cuda")
 
     def use(self, prompt: str, neg_prompt: str = None) -> PIL.Image.Image:
         return self.pipeline(
