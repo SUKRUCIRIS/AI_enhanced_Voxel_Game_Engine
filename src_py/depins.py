@@ -1,8 +1,6 @@
 import sys
 import subprocess
 import os
-import requests
-import shutil
 
 
 def install(package: str):
@@ -49,6 +47,8 @@ def install_dependencies():
         import requests
     except:
         install("requests")
+    import requests
+    import shutil
     if not os.path.exists("./aimodels/hm.safetensors"):
 
         print("Installing Lora model 1...")

@@ -4,7 +4,6 @@ import subprocess
 import threading
 import fileinput
 import sys
-from PIL import Image as pimage
 
 depins.install_dependencies()
 
