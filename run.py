@@ -334,8 +334,8 @@ def replacing_jobs():
 
         prompt = ai_entry.get("1.0", "end-1c")
         neg_prompt = nai_entry.get("1.0", "end-1c")
-        if neg_prompt == "":
-            neg_prompt = None
+
+        neg_prompt += " water, lake, river, blue"
 
         def rename_ai_out(out: str):
             out1 = out.split(".")[1]
