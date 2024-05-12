@@ -335,8 +335,6 @@ def replacing_jobs():
         prompt = ai_entry.get("1.0", "end-1c")
         neg_prompt = nai_entry.get("1.0", "end-1c")
 
-        neg_prompt += " water, lake, river, blue"
-
         def rename_ai_out(out: str):
             out1 = out.split(".")[1]
             out2 = out.split(".")[2]
@@ -352,10 +350,15 @@ def replacing_jobs():
         image = image.convert("L", colors=8)
         image.save("./heightmaps/test.jpeg")
 
+        prompt = prompt.replace("water", "")
+        prompt = prompt.replace("lake", "")
+        prompt = prompt.replace("river", "")
+
+        prompt = "surface of " + prompt + ", dirt, minecraft"
+
         def ai_texture(out: str):
             global seed
             triggerword = "seamless "
-            # image = hm_generator.use_texture(triggerword + prompt, pimage.open(out))
             seed = seed + 10
             image = hm_generator.use_texture_2(
                 triggerword + prompt + ", seamless", seed, neg_prompt
