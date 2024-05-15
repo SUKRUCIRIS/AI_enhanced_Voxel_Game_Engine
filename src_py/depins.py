@@ -53,7 +53,7 @@ def install_dependencies():
 
         print("Installing Lora model 1...")
         response = requests.get(
-            "https://civitai.com/api/download/models/22792?type=Model&format=SafeTensor&size=full",
+            "https://civitai.com/api/download/models/22792?type=Model&format=SafeTensor&size=full&token=0a2b30ee03637cb4967f12cf2f004d89",
             stream=True,
             headers={"User-agent": "Mozilla/5.0"},
         )
@@ -67,7 +67,7 @@ def install_dependencies():
 
         print("Installing Lora model 2...")
         response = requests.get(
-            "https://civitai.com/api/download/models/426219?type=Model&format=SafeTensor",
+            "https://civitai.com/api/download/models/426219?type=Model&format=SafeTensor&token=0a2b30ee03637cb4967f12cf2f004d89",
             stream=True,
             headers={"User-agent": "Mozilla/5.0"},
         )
