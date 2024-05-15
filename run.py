@@ -419,7 +419,7 @@ def clicked():
     lblb.update()
     executable = ""
     if os.name == "nt":
-        executable = "./voxel_engine.exe"
+        executable = "voxel_engine.exe"
     else:
         executable = "./voxel_engine"
     subprocess.Popen(
